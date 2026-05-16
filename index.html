@@ -1048,7 +1048,7 @@ function highlight(text,q){
   return result;
 }
 function entryText(e){
-  return ["title","company","customerQ","cause","steps","productType","lmsCat","adminSub","opsSub","caution","escalation","done","script","relatedManuals","checkQ","exceptions"].map(k=>(e[k]||"")).join(" ").toLowerCase();
+  return ["title","company","customerQ","cause","steps","productType","productName","productSection","lmsCat","adminSub","opsSub","caution","escalation","done","script","relatedManuals","checkQ","exceptions"].map(k=>(e[k]||"")).join(" ").toLowerCase();
 }
 function matchQuery(text,q){
   // 1. 공백 분리 → 각 단어가 텍스트에 모두 포함
@@ -1316,7 +1316,8 @@ function openDetail(id){
   if(!isB2B)html+=sec("query","ti-message-circle","문의 유형",e.customerQ,true);
   if(!isB2B&&e.cause)html+=sec("check","ti-alert-circle","발생 원인",e.cause);
   html+=sec("check","ti-checklist","필수 확인 질문",e.checkQ);
-  html+=sec("answer","ti-arrow-right-circle",isB2B?"답변 내용":"해결 방법",e.steps,true);
+  const answerLabel=isB2B?"답변 내용":(e.part==="상품 안내"?"답변":"해결 방법");
+  html+=sec("answer","ti-arrow-right-circle",answerLabel,e.steps,true);
   if(!isB2B&&e.exceptions)html+=sec("escalate","ti-git-branch","예외 케이스",e.exceptions);
   if(e.escalation)html+=sec("escalate","ti-send",isB2B?"운영자 이관 기준":"이관 기준",e.escalation);
   if(!isB2B&&e.done)html+=sec("answer","ti-circle-check","처리 완료 기준",e.done);
