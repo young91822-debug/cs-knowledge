@@ -529,6 +529,17 @@ body.is-admin .admin-only.block{display:block!important}
         <div class="r-list" id="coResultsList"></div>
       </div>
 
+      <!-- PRODUCTS VIEW -->
+      <div id="viewProducts" class="company-view-wrap" style="display:none">
+        <div class="list-hd">
+          <span class="list-title">상품 안내</span>
+          <span class="list-cnt" id="prCnt"></span>
+          <button class="list-add-btn admin-only inline" onclick="openAddProductForm()"><i class="ti ti-plus" style="font-size:12px"></i>상품 추가</button>
+        </div>
+        <div id="prSummary"></div>
+        <div id="prResultsList"></div>
+      </div>
+
     </div><!-- /app-body -->
   </div><!-- /app-main -->
 
@@ -617,8 +628,9 @@ let notices=[];
 
 /* ─── State ─── */
 let entries=[],selId=null,bookmarks=[],recentViewed=[],users=[],currentUser=null;
-let historyLog=[],knowledgeRequests=[],missingSearches=[],customCategories={},companyProfiles={};
+let historyLog=[],knowledgeRequests=[],missingSearches=[],customCategories={},companyProfiles={},productProfiles={};
 let selectedCompany="전체",searchQ="",filterCo="전체",filterPart="전체",filterSub="전체";
+let selectedProduct="전체",selectedProductSection=null;
 let filterMultiple=[],curView="home",sortMode="recent",showChips=false;
 const BK="csBM_v1",RK="csRV_v1",SESSION="csSession";
 const SUPABASE_URL="https://nqlenbachncjkzirvlkv.supabase.co";
@@ -643,7 +655,7 @@ let _saveTimer=null;
 function saveAll(){
   try{localStorage.setItem(BK,JSON.stringify(bookmarks));localStorage.setItem(RK,JSON.stringify(recentViewed));}catch{}
   clearTimeout(_saveTimer);
-  _saveTimer=setTimeout(()=>{sbSet("cs_shared",{entries,users,historyLog,knowledgeRequests,missingSearches,customCategories,companyProfiles,notices});},600);
+  _saveTimer=setTimeout(()=>{sbSet("cs_shared",{entries,users,historyLog,knowledgeRequests,missingSearches,customCategories,companyProfiles,productProfiles,notices});},600);
 }
 function applyCustomCategories(){customCategories={b2b:[],b2c:[],lms:[],admin:[],ops:[],...customCategories};customCategories.b2b.forEach(x=>{if(!B2B_COS.includes(x))B2B_COS.push(x)});customCategories.b2c.forEach(x=>{if(!B2C_PRODUCTS.includes(x))B2C_PRODUCTS.push(x)});customCategories.lms.forEach(x=>{if(!LMS_CATS.includes(x))LMS_CATS.push(x)});customCategories.admin.forEach(x=>{if(!ADMIN_SUBS.includes(x))ADMIN_SUBS.push(x)});customCategories.ops.forEach(x=>{if(!OPS_SUBS.includes(x))OPS_SUBS.push(x)});}
 function statusLabel(s){return{active:"사용중",draft:"작성중",review:"검토중",hidden:"숨김"}[s||"active"]||"사용중";}
@@ -661,6 +673,7 @@ async function loadData(){
       customCategories=shared.customCategories||{};
       companyProfiles=shared.companyProfiles||{};
       notices=Array.isArray(shared.notices)?shared.notices:[];
+      productProfiles=shared.productProfiles||{};
     }
   }catch(e){console.error("Load error:",e);}
   if(!Array.isArray(users)||!users.length){
@@ -701,7 +714,7 @@ function logout(){closeAdmin();currentUser=null;localStorage.removeItem(SESSION)
 function requireAdmin(){if(currentUser&&currentUser.role==="admin")return true;alert("관리자만 사용할 수 있는 기능입니다.");return false;}
 
 /* ─── View Switching ─── */
-function showView(v){["viewHome","viewList","viewCompanies"].forEach(id=>{document.getElementById(id).style.display=id===v?"block":"none";});}
+function showView(v){["viewHome","viewList","viewCompanies","viewProducts"].forEach(id=>{document.getElementById(id).style.display=id===v?"block":"none";});}
 function setSbView(v){document.querySelectorAll(".sb-item").forEach(el=>el.classList.toggle("on",el.dataset.view===v));}
 function setView(v){
   curView=v;filterMultiple=[];
@@ -717,13 +730,222 @@ function filterPart2(p){
   filterMultiple=[];filterPart=p;filterCo="전체";filterSub="전체";searchQ="";showChips=false;
   document.getElementById("mainSearch").value="";
   if(p==="B2B 상위기업"){curView="companies";showView("viewCompanies");setSbView("b2b");renderCompanyView("전체");return;}
+  if(p==="상품 안내"){curView="products";showView("viewProducts");setSbView("product");renderProductView("전체");return;}
   curView="list";showView("viewList");
   const vmap={"B2C":"b2c","상품 안내":"product","LMS 기능":"error","ADMIN/뉴어드민":"error","운영지원":"ops"};
   setSbView(vmap[p]||"");
   renderResults();closeDetailPanel();
 }
+/* ─── Supabase Storage 파일 업로드 ─── */
+async function uploadFileToStorage(file){
+  const ext=file.name.split('.').pop();
+  const path=`proposals/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const res=await fetch(`${SUPABASE_URL}/storage/v1/object/cs-files/${path}`,{
+    method:"POST",
+    headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":file.type,"x-upsert":"true"},
+    body:file
+  });
+  if(!res.ok)throw new Error("파일 업로드 실패");
+  return `${SUPABASE_URL}/storage/v1/object/public/cs-files/${path}`;
+}
+
+/* ─── 상품 안내 뷰 ─── */
+function getProductList(){return Object.keys(productProfiles||{}).sort((a,b)=>a.localeCompare(b,"ko"));}
+
+function renderProductView(product="전체",section=null){
+  curView="products";selectedProduct=product;selectedProductSection=section;
+  showView("viewProducts");setSbView("product");
+  const isAdmin=currentUser&&currentUser.role==="admin";
+  const all=entries.filter(e=>e.part==="상품 안내");
+  const products=getProductList();
+
+  if(product==="전체"){
+    document.getElementById("prCnt").textContent=`등록 상품 ${products.length}개`;
+    const addCard=isAdmin?`<div class="co-empty-add" onclick="openAddProductForm()"><i class="ti ti-plus"></i><span>상품 추가</span></div>`:"";
+    const cards=products.map(p=>{
+      const cnt=all.filter(e=>e.productName===p).length;
+      return`<div class="co-card" onclick="renderProductView('${esc(p)}')">
+        <div class="co-card-icon" style="background:#F5F3FF"><i class="ti ti-package" style="color:#7C3AED"></i></div>
+        <div class="co-card-name">${esc(p)}</div>
+        <div class="co-card-code" style="min-height:16px">${esc(productProfiles[p]?.desc||"")}</div>
+        <div class="co-card-foot">
+          <span class="co-card-cnt"><i class="ti ti-files"></i>${cnt}건</span>
+          <i class="ti ti-chevron-right co-card-arr"></i>
+        </div>
+      </div>`;}).join("");
+    document.getElementById("prSummary").innerHTML="";
+    document.getElementById("prResultsList").innerHTML=`<div class="co-card-grid">${cards}${addCard}</div>`
+      +(products.length===0?`<div class="empty-state" style="margin-top:32px"><i class="ti ti-package-off"></i><p>등록된 상품이 없습니다</p></div>`:"");
+
+  } else if(!section){
+    const proposalCnt=all.filter(e=>e.productName===product&&e.productSection==="제안서").length;
+    const faqCnt=all.filter(e=>e.productName===product&&e.productSection==="FAQ").length;
+    document.getElementById("prCnt").textContent=`${product}`;
+    document.getElementById("prSummary").innerHTML=`
+      <button class="co-back-btn" onclick="renderProductView('전체')"><i class="ti ti-arrow-left" style="font-size:14px"></i>상품 목록</button>
+      <div class="co-summary-card">
+        <div class="co-summary-hd">
+          <div class="co-card-icon" style="width:40px;height:40px;font-size:18px;flex-shrink:0;background:#F5F3FF"><i class="ti ti-package" style="color:#7C3AED"></i></div>
+          <h3>${esc(product)}</h3>
+          ${isAdmin?`<button class="co-edit-btn admin-only inline" style="margin-left:auto" onclick="openAddProductForm('${esc(product)}')"><i class="ti ti-edit" style="font-size:12px"></i>수정</button>`:""}
+        </div>
+      </div>`;
+    document.getElementById("prResultsList").innerHTML=`<div class="cat-card-grid">
+      <div class="cat-card" onclick="renderProductView('${esc(product)}','제안서')">
+        <div class="cat-card-icon" style="background:#EFF6FF"><i class="ti ti-file-description" style="color:#2563EB"></i></div>
+        <div class="cat-card-name">제안서</div>
+        <div class="cat-card-cnt"><i class="ti ti-files"></i>${proposalCnt}건</div>
+      </div>
+      <div class="cat-card" onclick="renderProductView('${esc(product)}','FAQ')">
+        <div class="cat-card-icon" style="background:#ECFDF5"><i class="ti ti-help-circle" style="color:#059669"></i></div>
+        <div class="cat-card-name">FAQ</div>
+        <div class="cat-card-cnt"><i class="ti ti-files"></i>${faqCnt}건</div>
+      </div>
+    </div>`;
+    closeDetailPanel();
+
+  } else {
+    const target=all.filter(e=>e.productName===product&&e.productSection===section);
+    document.getElementById("prCnt").textContent=`${product} › ${section} · ${target.length}건`;
+    document.getElementById("prSummary").innerHTML=`
+      <div class="breadcrumb">
+        <span class="bc-link" onclick="renderProductView('전체')">상품 목록</span>
+        <i class="ti ti-chevron-right"></i>
+        <span class="bc-link" onclick="renderProductView('${esc(product)}')">${esc(product)}</span>
+        <i class="ti ti-chevron-right"></i>
+        <span style="color:var(--t1);font-weight:600">${esc(section)}</span>
+      </div>
+      <div class="co-summary-card" style="margin-bottom:12px">
+        <div class="co-summary-hd">
+          <div class="co-card-icon" style="width:36px;height:36px;font-size:17px;flex-shrink:0;background:${section==="제안서"?"#EFF6FF":"#ECFDF5"}">
+            <i class="ti ${section==="제안서"?"ti-file-description":"ti-help-circle"}" style="color:${section==="제안서"?"#2563EB":"#059669"}"></i>
+          </div>
+          <span style="font-size:15px;font-weight:700;color:var(--t1)">${esc(section)}</span>
+          <span class="co-code" style="margin-left:4px">${target.length}건</span>
+          ${isAdmin?`<button class="co-edit-btn admin-only inline" style="margin-left:auto" onclick="openProductEntryForm('','${esc(product)}','${esc(section)}')"><i class="ti ti-plus" style="font-size:12px"></i>추가</button>`:""}
+        </div>
+      </div>`;
+    if(section==="제안서"){
+      document.getElementById("prResultsList").innerHTML=target.length?`<div style="display:flex;flex-direction:column;gap:8px">`+target.map(e=>`
+        <div class="r-card" onclick="${isAdmin?`openProductEntryForm('${e.id}','${esc(product)}','제안서')`:`openProductFile('${esc(e.fileUrl||"")}')`}">
+          <div class="r-card-top">
+            <span class="r-card-title"><i class="ti ti-file-text" style="font-size:14px;margin-right:4px;color:var(--p)"></i>${esc(e.title)}</span>
+            ${e.fileUrl?`<a href="${esc(e.fileUrl)}" target="_blank" onclick="event.stopPropagation()" class="tb-btn" style="height:28px;padding:0 10px;font-size:11.5px;white-space:nowrap"><i class="ti ti-download" style="font-size:12px"></i>다운로드</a>`:""}
+          </div>
+          ${e.customerQ?`<div class="r-card-prev">${esc(e.customerQ)}</div>`:""}
+          <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${e.updatedAt||""}</span><span><i class="ti ti-user"></i>${esc(e.updatedBy||"")}</span></div>
+        </div>`).join("")+`</div>`
+        :`<div class="empty-state"><i class="ti ti-file-off"></i><p>등록된 제안서가 없습니다</p></div>`;
+    } else {
+      document.getElementById("prResultsList").innerHTML=target.length?`<div style="display:flex;flex-direction:column;gap:8px">`+target.map(e=>`
+        <div class="r-card${selId===e.id?" sel":""}" id="ri-${e.id}" onclick="openDetail('${e.id}')">
+          <div class="r-card-top"><span class="r-card-title">${esc(e.title)}</span></div>
+          <div class="r-card-prev">${esc((e.steps||"").split("\n")[0])}</div>
+          ${e.caution?`<div class="r-card-tags"><span class="r-tag caution"><i class="ti ti-alert-triangle" style="font-size:10px"></i>주의</span></div>`:""}
+          <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${e.updatedAt||""}</span></div>
+        </div>`).join("")+`</div>`
+        :`<div class="empty-state"><i class="ti ti-help-off"></i><p>등록된 FAQ가 없습니다</p></div>`;
+    }
+    closeDetailPanel();
+  }
+}
+
+/* ─── 상품 추가/수정 폼 ─── */
+function openAddProductForm(product=""){
+  if(!requireAdmin())return;
+  const p=productProfiles[product]||{};
+  const ov=document.getElementById("modalOv");
+  ov.innerHTML=`<div class="modal" style="max-width:420px">
+    <div class="modal-hd"><h2>${product?"상품 수정":"상품 추가"}</h2><button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="mrow"><label class="mlbl">상품명 *</label><input id="prName" value="${esc(product)}" placeholder="예: 패키지과정, MBA, FLEX"></div>
+      <div class="mrow"><label class="mlbl">설명</label><input id="prDesc" value="${esc(p.desc||"")}" placeholder="간단한 상품 설명"></div>
+    </div>
+    <div class="modal-foot"><div></div><div style="display:flex;gap:8px"><button class="btn-cancel" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveProduct('${esc(product)}')">저장</button></div></div>
+  </div>`;
+  ov.style.display="flex";
+}
+function saveProduct(oldName){
+  const name=document.getElementById("prName").value.trim();
+  if(!name){alert("상품명을 입력해주세요.");return;}
+  if(name!==oldName&&oldName){
+    const prev=productProfiles[oldName]||{};
+    delete productProfiles[oldName];
+    entries=entries.map(e=>e.productName===oldName?{...e,productName:name}:e);
+    productProfiles[name]=prev;
+  }
+  productProfiles[name]={...(productProfiles[name]||{}),desc:document.getElementById("prDesc").value.trim()};
+  saveAll();closeModal();renderProductView("전체");
+}
+
+/* ─── 제안서/FAQ 항목 폼 ─── */
+function openProductEntryForm(id,product,section){
+  if(!requireAdmin())return;
+  const e=id?entries.find(x=>x.id===id):null;
+  const isProposal=section==="제안서";
+  const ov=document.getElementById("modalOv");
+  ov.innerHTML=`<div class="modal" style="max-width:560px">
+    <div class="modal-hd">
+      <h2>${e?"수정":"추가"} · ${esc(product)} ${esc(section)}</h2>
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="mrow"><label class="mlbl">제목 *</label><input id="pe_title" value="${esc(e?.title||"")}" placeholder="${isProposal?"예: 2024년 법인 제안서":"예: 수강기간은 얼마나 되나요?"}"></div>
+      ${isProposal?`
+        <div class="mrow"><label class="mlbl">설명</label><textarea id="pe_desc" placeholder="제안서에 대한 간단한 설명">${esc(e?.customerQ||"")}</textarea></div>
+        <div class="mrow">
+          <label class="mlbl">파일 업로드</label>
+          ${e?.fileUrl?`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:8px 10px;background:#F3F5F9;border-radius:7px;font-size:12px"><i class="ti ti-paperclip" style="color:var(--p)"></i><span style="flex:1">${esc(e.fileName||"파일")}</span><a href="${esc(e.fileUrl)}" target="_blank" class="tb-btn" style="height:26px;padding:0 9px;font-size:11px">보기</a></div>`:""}
+          <div class="img-upload-area" onclick="document.getElementById('prFileInput').click()" id="prDropZone">
+            <i class="ti ti-cloud-upload" style="font-size:22px;color:var(--t3);display:block;margin-bottom:6px"></i>
+            <div style="font-size:12px;color:var(--t2)" id="prFileLabel">클릭하여 파일 선택 (PDF, PPT, Word, 이미지)</div>
+            <input type="file" id="prFileInput" accept=".pdf,.ppt,.pptx,.doc,.docx,.png,.jpg,.jpeg" onchange="onProductFileSelect(this)">
+          </div>
+        </div>`:`
+        <div class="mrow"><label class="mlbl">답변 *</label><textarea id="pe_steps" style="min-height:90px" placeholder="답변 내용을 입력하세요">${esc(e?.steps||"")}</textarea></div>
+        <div class="mrow warn"><label class="mlbl">주의사항</label><textarea id="pe_caution" placeholder="주의해야 할 사항">${esc(e?.caution||"")}</textarea></div>`}
+    </div>
+    <div class="modal-foot">
+      <div>${e?`<button class="btn-cancel" style="color:var(--red);border-color:#FECACA" onclick="deleteProductEntry('${e.id}','${esc(product)}','${esc(section)}')"><i class="ti ti-trash" style="font-size:11px"></i>삭제</button>`:""}</div>
+      <div style="display:flex;gap:8px"><button class="btn-cancel" onclick="closeModal()">취소</button><button class="btn-save" id="pe_saveBtn" onclick="saveProductEntry('${id||""}','${esc(product)}','${esc(section)}')">저장</button></div>
+    </div>
+  </div>`;
+  ov.style.display="flex";
+}
+let _prFile=null;
+function onProductFileSelect(input){
+  _prFile=input.files[0];
+  if(_prFile)document.getElementById("prFileLabel").textContent=`✓ ${_prFile.name} (${(_prFile.size/1024/1024).toFixed(1)}MB)`;
+}
+async function saveProductEntry(eid,product,section){
+  const btn=document.getElementById("pe_saveBtn");
+  btn.textContent="저장 중...";btn.disabled=true;
+  const isProposal=section==="제안서";
+  const title=(document.getElementById("pe_title")||{value:""}).value.trim();
+  if(!title){alert("제목을 입력해주세요.");btn.textContent="저장";btn.disabled=false;return;}
+  const ex=eid?entries.find(e=>e.id===eid):null;
+  let fileUrl=ex?.fileUrl||"",fileName=ex?.fileName||"";
+  if(_prFile){
+    try{fileUrl=await uploadFileToStorage(_prFile);fileName=_prFile.name;_prFile=null;}
+    catch(err){alert("파일 업로드 실패: "+err.message);btn.textContent="저장";btn.disabled=false;return;}
+  }
+  const g=id=>(document.getElementById(id)||{value:""}).value.trim();
+  const entry={...(ex||{}),id:ex?ex.id:uid(),part:"상품 안내",productName:product,productSection:section,
+    title,customerQ:isProposal?g("pe_desc"):"",steps:isProposal?"":g("pe_steps"),
+    caution:isProposal?"":g("pe_caution"),fileUrl,fileName,
+    status:"active",updatedBy:currentUser?.id||"",updatedAt:today(),createdAt:ex?.createdAt||today(),views:ex?.views||0,history:ex?.history||[]};
+  if(ex)entries=entries.map(e=>e.id===entry.id?entry:e);else entries=[entry,...entries];
+  saveAll();closeModal();renderProductView(product,section);
+}
+function deleteProductEntry(id,product,section){
+  if(!requireAdmin())return;
+  if(!confirm("삭제할까요?"))return;
+  entries=entries.filter(e=>e.id!==id);
+  saveAll();closeModal();renderProductView(product,section);
+}
+function openProductFile(url){if(url)window.open(url,"_blank");}
+
 function filterMultiPart(parts){
-  filterMultiple=parts;filterPart="전체";filterCo="전체";filterSub="전체";searchQ="";showChips=false;
   document.getElementById("mainSearch").value="";
   curView="list";showView("viewList");setSbView("error");
   renderResults();closeDetailPanel();
