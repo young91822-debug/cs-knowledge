@@ -640,7 +640,7 @@ let _sb=null;
 function getSB(){if(!_sb)_sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);return _sb;}
 
 async function sbGet(key){
-  try{const{data,error}=await getSB().from("kv_store").select("value").eq("key",key).single();if(error)throw error;return data?.value||null;}catch{return null;}
+  try{const{data,error}=await getSB().from("kv_store").select("value").eq("key",key).maybeSingle();if(error)throw error;return data?.value||null;}catch{return null;}
 }
 async function sbSet(key,value){
   try{const{error}=await getSB().from("kv_store").upsert({key,value,updated_at:new Date().toISOString()},{onConflict:"key"});if(error)throw error;}catch(e){console.error("Supabase save error:",e);}
