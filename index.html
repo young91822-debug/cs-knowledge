@@ -433,8 +433,7 @@ body.is-admin .admin-only.block{display:block!important}
         <div class="sb-item" data-view="b2c" onclick="filterPart2('B2C')"><i class="ti ti-users"></i><span>B2C</span></div>
         <div class="sb-item" data-view="b2b" onclick="filterPart2('B2B 상위기업')"><i class="ti ti-building-skyscraper"></i><span>B2B</span></div>
         <div class="sb-item" data-view="product" onclick="filterPart2('상품 안내')"><i class="ti ti-package"></i><span>상품 안내</span></div>
-        <div class="sb-item" data-view="error" onclick="filterMultiPart(['LMS 기능','ADMIN/뉴어드민'])"><i class="ti ti-bug"></i><span>오류 해결방법</span></div>
-        <div class="sb-item" data-view="ops" onclick="filterPart2('운영지원')"><i class="ti ti-clipboard-check"></i><span>업무 요청</span></div>
+        <div class="sb-item" data-view="error" onclick="openErrorView()"><i class="ti ti-bug"></i><span>오류 해결방법</span></div>
         <div class="sb-divider"></div>
         <div class="sb-item" data-view="notices" onclick="setView('notices')"><i class="ti ti-bell"></i><span>공지사항</span><span class="sb-badge-new" id="noticeBadge" style="display:none">N</span></div>
       </div>
@@ -513,7 +512,7 @@ body.is-admin .admin-only.block{display:block!important}
           <span class="list-title" id="listTitle">검색 결과</span>
           <span class="list-cnt" id="listCnt"></span>
           <select class="list-sort" id="sortSel" onchange="renderResults()"><option value="recent">최신순</option><option value="views">조회 많은순</option><option value="alpha">가나다순</option></select>
-          <button class="list-add-btn admin-only inline" onclick="openAdd()"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
+          <button class="list-add-btn admin-only inline" id="listAddBtn" onclick="openNoticeForm('')"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
         </div>
         <div class="filter-chips" id="filterChips"></div>
         <div class="r-list" id="resultsList"></div>
@@ -528,6 +527,16 @@ body.is-admin .admin-only.block{display:block!important}
         <div class="co-chips-bar" id="coChipsBar"></div>
         <div id="coSummary"></div>
         <div class="r-list" id="coResultsList"></div>
+      </div>
+
+      <!-- ERRORS VIEW -->
+      <div id="viewErrors" class="list-view" style="display:none">
+        <div class="list-hd">
+          <span class="list-title">오류 해결방법</span>
+          <span class="list-cnt" id="errCnt"></span>
+          <button class="list-add-btn admin-only inline" onclick="openErrorForm('')"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
+        </div>
+        <div class="r-list" id="errList"></div>
       </div>
 
       <!-- PRODUCTS VIEW -->
@@ -716,7 +725,7 @@ function logout(){closeAdmin();currentUser=null;localStorage.removeItem(SESSION)
 function requireAdmin(){if(currentUser&&currentUser.role==="admin")return true;alert("관리자만 사용할 수 있는 기능입니다.");return false;}
 
 /* ─── View Switching ─── */
-function showView(v){["viewHome","viewList","viewCompanies","viewProducts"].forEach(id=>{document.getElementById(id).style.display=id===v?"block":"none";});}
+function showView(v){["viewHome","viewList","viewCompanies","viewProducts","viewErrors"].forEach(id=>{document.getElementById(id).style.display=id===v?"block":"none";});}
 function setSbView(v){document.querySelectorAll(".sb-item").forEach(el=>el.classList.toggle("on",el.dataset.view===v));}
 function setView(v){
   curView=v;filterMultiple=[];
@@ -944,6 +953,67 @@ function deleteProductEntry(id,product,section){
 }
 function openProductFile(url){if(url)window.open(url,"_blank");}
 
+function openErrorView(){
+  curView="errors";showView("viewErrors");setSbView("error");renderErrorList();
+}
+function renderErrorList(){
+  const isAdmin=currentUser&&currentUser.role==="admin";
+  const list=entries.filter(e=>e.part==="오류 해결방법").sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
+  document.getElementById("errCnt").textContent=`총 ${list.length}건`;
+  document.getElementById("errList").innerHTML=list.length?list.map(e=>`
+    <div class="r-card${selId===e.id?" sel":""}" id="ri-${e.id}" onclick="openErrorDetail('${e.id}')">
+      <div class="r-card-top"><span class="r-card-title">${esc(e.title)}</span></div>
+      <div class="r-card-prev">${esc((e.steps||"").split("\n")[0])}</div>
+      ${e.caution?`<div class="r-card-tags"><span class="r-tag caution"><i class="ti ti-alert-triangle" style="font-size:10px"></i>주의</span></div>`:""}
+      <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${e.updatedAt||""}</span></div>
+    </div>`).join(""):`<div class="empty-state"><i class="ti ti-bug-off"></i><p>등록된 오류 해결방법이 없습니다</p></div>`;
+}
+function openErrorDetail(id){
+  selId=id;
+  const e=entries.find(x=>x.id===id);if(!e)return;
+  e.views=(e.views||0)+1;saveAll();
+  const isAdmin=currentUser&&currentUser.role==="admin";
+  document.getElementById("drawerActs").innerHTML=`<div style="margin-left:auto;display:flex;gap:6px">${isAdmin?`<button class="d-act" onclick="openErrorForm('${id}')"><i class="ti ti-edit" style="font-size:12px"></i>수정</button>`:""} ${isAdmin?`<button class="d-act del" onclick="deleteError('${id}')"><i class="ti ti-trash" style="font-size:12px"></i></button>`:""}</div>`;
+  document.getElementById("drawerContent").innerHTML=`
+    <div class="d-meta-row"><span class="d-tag part">오류 해결방법</span><span class="d-date">${e.updatedAt||""}</span></div>
+    <div class="d-title">${esc(e.title)}</div>
+    <div class="ds query full"><div class="ds-hd"><i class="ti ti-bug" style="font-size:12px"></i> 오류 내용</div><div class="ds-body">${esc(e.customerQ||"")}</div></div>
+    <div class="ds answer full"><div class="ds-hd"><i class="ti ti-arrow-right-circle" style="font-size:12px"></i> 해결 방법</div><div class="ds-body">${esc(e.steps||"")}</div></div>
+    ${e.caution?`<div class="ds caution full"><div class="ds-hd"><i class="ti ti-alert-triangle" style="font-size:12px"></i> 주의사항</div><div class="ds-body">${esc(e.caution)}</div></div>`:""}`;
+  openDetailPanel();
+}
+function openErrorForm(id){
+  if(!requireAdmin())return;
+  const e=id?entries.find(x=>x.id===id):null;
+  const ov=document.getElementById("modalOv");
+  ov.innerHTML=`<div class="modal" style="max-width:560px">
+    <div class="modal-hd"><h2>${e?"오류 항목 수정":"오류 항목 추가"}</h2><button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="mrow"><label class="mlbl">오류 제목 *</label><input id="er_title" value="${esc(e?.title||"")}" placeholder="예: 결제창이 뜨지 않아요"></div>
+      <div class="mrow"><label class="mlbl">오류 내용 *</label><textarea id="er_q" style="min-height:70px" placeholder="예: 결제 버튼을 눌러도 아무 반응이 없어요">${esc(e?.customerQ||"")}</textarea></div>
+      <div class="mrow"><label class="mlbl">해결 방법 *</label><textarea id="er_steps" style="min-height:100px" placeholder="예:&#10;1. 브라우저 팝업 차단 해제&#10;2. 다른 브라우저 시도">${esc(e?.steps||"")}</textarea></div>
+      <div class="mrow warn"><label class="mlbl">주의사항</label><textarea id="er_caution">${esc(e?.caution||"")}</textarea></div>
+    </div>
+    <div class="modal-foot">
+      <div>${e?`<button class="btn-cancel" style="color:var(--red);border-color:#FECACA" onclick="deleteError('${e.id}')"><i class="ti ti-trash" style="font-size:11px"></i>삭제</button>`:""}</div>
+      <div style="display:flex;gap:8px"><button class="btn-cancel" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveError('${id||""}')">저장</button></div>
+    </div>
+  </div>`;ov.style.display="flex";
+}
+function saveError(eid){
+  const g=id=>(document.getElementById(id)||{value:""}).value.trim();
+  const title=g("er_title"),q=g("er_q"),steps=g("er_steps");
+  if(!title||!q||!steps){alert("제목, 오류 내용, 해결 방법은 필수입니다.");return;}
+  const ex=eid?entries.find(e=>e.id===eid):null;
+  const entry={...(ex||{}),id:ex?ex.id:uid(),part:"오류 해결방법",title,customerQ:q,steps,caution:g("er_caution"),status:"active",updatedBy:currentUser?.id||"",updatedAt:today(),createdAt:ex?.createdAt||today(),views:ex?.views||0,history:ex?.history||[]};
+  if(ex)entries=entries.map(e=>e.id===entry.id?entry:e);else entries=[entry,...entries];
+  saveAll();closeModal();renderErrorList();closeDetailPanel();
+}
+function deleteError(id){
+  if(!requireAdmin())return;if(!confirm("삭제할까요?"))return;
+  entries=entries.filter(e=>e.id!==id);
+  saveAll();closeModal();closeDetailPanel();renderErrorList();
+}
 function filterMultiPart(parts){
   document.getElementById("mainSearch").value="";
   curView="list";showView("viewList");setSbView("error");
@@ -1176,13 +1246,17 @@ function filterByIds(ids,title,cnt){
 function renderNoticeList(){
   setSbView("notices");
   document.getElementById("filterChips").innerHTML="";
+  const isAdmin=currentUser&&currentUser.role==="admin";
   document.getElementById("listTitle").textContent="공지사항";
   document.getElementById("listCnt").textContent=`총 ${notices.length}건`;
   document.getElementById("resultsList").innerHTML=notices.length?notices.map(n=>`
     <div class="r-card" onclick="openNotice('${n.id}')">
       <div class="r-card-top"><span class="r-card-title">${esc(n.title)}</span>${n.isNew?`<span class="r-tag" style="background:#FEF2F2;color:#991B1B;border-color:#FECACA">NEW</span>`:""}</div>
-      <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${n.date||""}</span><span><i class="ti ti-bell"></i>공지사항</span></div>
+      ${n.body?`<div class="r-card-prev">${esc(n.body.split("\n")[0])}</div>`:""}
+      <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${n.date||""}</span></div>
     </div>`).join(""):`<div class="empty-state"><i class="ti ti-bell-off"></i><p>등록된 공지사항이 없습니다</p></div>`;
+  const addBtn=document.getElementById("listAddBtn");
+  if(addBtn)addBtn.style.display=isAdmin?"flex":"none";
 }
 function openNotice(id){
   const n=notices.find(x=>x.id===id);if(!n)return;
