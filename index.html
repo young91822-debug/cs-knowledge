@@ -1291,11 +1291,14 @@ function openDetail(id){
   const isAdmin=currentUser&&currentUser.role==="admin";
   const isB2B=e.part==="B2B 상위기업";
   const sub=e.company||e.productType||e.lmsCat||e.adminSub||e.opsSub||"";
+  const editAction=e.part==="상품 안내"?`openProductEntryForm('${id}','${esc(e.productName||"")}','${esc(e.productSection||"")}')`
+    :e.part==="오류 해결방법"?`openErrorForm('${id}')`
+    :`openEdit('${id}')`;
   document.getElementById("drawerActs").innerHTML=`
     <span style="font-size:12px;font-weight:600;color:var(--t2);max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.title)}</span>
     <div style="margin-left:auto;display:flex;gap:6px">
       <button class="d-star${bm?" on":""}" onclick="toggleBM(null,'${id}')" title="즐겨찾기">${bm?"★":"☆"}</button>
-      ${isAdmin?`<button class="d-act" onclick="openEdit('${id}')"><i class="ti ti-edit" style="font-size:12px"></i>수정</button>`:""}
+      ${isAdmin?`<button class="d-act" onclick="${editAction}"><i class="ti ti-edit" style="font-size:12px"></i>수정</button>`:""}
       ${isAdmin?`<button class="d-act del" onclick="doDelete('${id}')"><i class="ti ti-trash" style="font-size:12px"></i></button>`:""}
     </div>`;
   function sec(cls,icon,label,body,full=false){
