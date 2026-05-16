@@ -395,6 +395,7 @@ body.is-admin .admin-only.block{display:block!important}
 .history-row{border-left:3px solid var(--p);background:#F8FAFC;padding:8px 11px;font-size:12px;color:var(--t2);border-radius:0 7px 7px 0}
 .history-row small{display:block;color:var(--t3);margin-top:3px;font-size:11px}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body class="locked">
 
@@ -635,13 +636,14 @@ let filterMultiple=[],curView="home",sortMode="recent",showChips=false;
 const BK="csBM_v1",RK="csRV_v1",SESSION="csSession";
 const SUPABASE_URL="https://nqlenbachncjkzirvlkv.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xbGVuYmFjaG5jamt6aXJ2bGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NzMyNDQsImV4cCI6MjA5NDQ0OTI0NH0.UHnT0043zrmpQX02nV2Ut1q1RFuwHES7RPr93shhLYI";
-const SB_HDR={"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json"};
+let _sb=null;
+function getSB(){if(!_sb)_sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);return _sb;}
 
 async function sbGet(key){
-  try{const r=await fetch(`${SUPABASE_URL}/rest/v1/kv_store?key=eq.${encodeURIComponent(key)}&select=value`,{headers:SB_HDR});const d=await r.json();return d.length>0?d[0].value:null;}catch{return null;}
+  try{const{data,error}=await getSB().from("kv_store").select("value").eq("key",key).single();if(error)throw error;return data?.value||null;}catch{return null;}
 }
 async function sbSet(key,value){
-  try{await fetch(`${SUPABASE_URL}/rest/v1/kv_store`,{method:"POST",headers:{...SB_HDR,"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({key,value,updated_at:new Date().toISOString()})});}catch(e){console.error("Supabase save error:",e);}
+  try{const{error}=await getSB().from("kv_store").upsert({key,value,updated_at:new Date().toISOString()},{onConflict:"key"});if(error)throw error;}catch(e){console.error("Supabase save error:",e);}
 }
 
 /* ─── Utils ─── */
@@ -740,13 +742,10 @@ function filterPart2(p){
 async function uploadFileToStorage(file){
   const ext=file.name.split('.').pop();
   const path=`proposals/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-  const res=await fetch(`${SUPABASE_URL}/storage/v1/object/cs-files/${path}`,{
-    method:"POST",
-    headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":file.type,"x-upsert":"true"},
-    body:file
-  });
-  if(!res.ok)throw new Error("파일 업로드 실패");
-  return `${SUPABASE_URL}/storage/v1/object/public/cs-files/${path}`;
+  const{data,error}=await getSB().storage.from("cs-files").upload(path,file,{upsert:true});
+  if(error)throw new Error("파일 업로드 실패: "+error.message);
+  const{data:pub}=getSB().storage.from("cs-files").getPublicUrl(path);
+  return pub.publicUrl;
 }
 
 /* ─── 상품 안내 뷰 ─── */
