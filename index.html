@@ -887,17 +887,7 @@ function openJiraModal(){
   document.getElementById("jiraModal").style.display="flex";
 }
 function openQuickModal(file,title,icon){
-  const modal=document.getElementById("onboardingModal");
-  const frame=document.getElementById("onboardingFrame");
-  if(!modal||!frame){alert("팝업을 로드할 수 없어요. 페이지를 새로고침 후 다시 시도해주세요.");return;}
-  const hd=modal.querySelector("div>div:first-child");
-  if(hd){
-    hd.innerHTML=`<i class="ti ${icon}" style="font-size:18px;color:#A78BFA"></i>
-      <span style="font-size:14px;font-weight:700;color:#fff">${title}</span>
-      <button onclick="closeOnboarding()" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;border-radius:7px;width:30px;height:30px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-x"></i></button>`;
-  }
-  frame.src=`https://young91822-debug.github.io/cs-knowledge/${file}`;
-  modal.style.display="flex";
+  window.open(`https://young91822-debug.github.io/cs-knowledge/${file}`,"_blank");
 }
 function closeOnboarding(){
   document.getElementById("onboardingModal").style.display="none";
