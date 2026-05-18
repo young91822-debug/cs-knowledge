@@ -1009,7 +1009,7 @@ function renderProductView(product="전체",section=null){
     const target=all.filter(e=>e.productName===product&&e.productSection===section);
     document.getElementById("prCnt").textContent=`${product} › ${section} · ${target.length}건`;
     document.getElementById("prSummary").innerHTML=`
-      <button class="co-back-btn" onclick="renderProductView('${esc(product)}')"><i class="ti ti-arrow-left" style="font-size:14px"></i>카테고리 목록</button>
+      <button class="co-back-btn" onclick="renderProductView('전체')"><i class="ti ti-arrow-left" style="font-size:14px"></i>상품 안내 홈으로</button>
       <div class="breadcrumb">
         <span class="bc-link" onclick="renderProductView('전체')">상품 목록</span>
         <i class="ti ti-chevron-right"></i>
@@ -1610,7 +1610,7 @@ function openDetail(id){
   </div>`;
   document.getElementById("drawerContent").innerHTML=html;
   openDetailPanel();
-  if(curView==="home"||curView==="companies"){}
+  if(curView==="home"||curView==="companies"||curView==="products"||curView==="errors"){}
   else{if(curView!=="list"){curView="list";showView("viewList");renderResults();}
     const ri2=document.getElementById("ri-"+id);if(ri2){ri2.classList.add("sel");ri2.scrollIntoView({block:"nearest"});}}
 }
