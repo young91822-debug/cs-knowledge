@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고객상담팀 온보딩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  --p:#4F7CFF;--pl:#7DA3FF;--ps:#EEF3FF;
+  --ok:#00C896;--oks:#E6FAF5;
+  --warn:#FF9500;--warns:#FFF4E6;
+  --red:#FF4F6A;--reds:#FFF0F2;
+  --bg:#F7F8FC;--white:#FFFFFF;
+  --t1:#1A1D2E;--t2:#6B7280;--t3:#B0B8CC;--bd:#E8EBF4;
+  --c1:#4F7CFF;--c2:#7B5CF5;--c3:#FF4F6A;--c4:#FF7A2F;
+  --c5:#00C896;--c6:#F5A623;--c7:#18B4E8;--c8:#9B4DFF;
+  --r:20px;
+}
+body{font-family:'Noto Sans KR',sans-serif;font-weight:400;background:var(--bg);color:var(--t1);min-height:100vh}
+.page{display:none;min-height:100vh}
+.page.active{display:flex}
+
+/* ───── ROLE SELECT ───── */
+#rs{
+  background:linear-gradient(145deg,#0F1224 0%,#1A1F3A 100%);
+  align-items:center;justify-content:center;flex-direction:column;
+  padding:60px 20px;position:relative;overflow:hidden;
+}
+.rs-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(80px)}
+.o1{width:560px;height:560px;background:rgba(79,124,255,.18);top:-180px;right:-80px}
+.o2{width:400px;height:400px;background:rgba(123,92,245,.15);bottom:-120px;left:-60px}
+.o3{width:280px;height:280px;background:rgba(0,200,150,.1);top:55%;left:40%;transform:translate(-50%,-50%)}
+.rs-brand{text-align:center;margin-bottom:56px;z-index:1}
+.rs-icon{
+  width:64px;height:64px;border-radius:20px;margin:0 auto 16px;
+  background:linear-gradient(135deg,#4F7CFF,#9B4DFF);
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+  box-shadow:0 12px 40px rgba(79,124,255,.4)
+}
+.rs-logo-txt{font-size:30px;font-weight:900;color:#fff;letter-spacing:-.5px}
+.rs-logo-txt b{color:#7DA3FF}
+.rs-tag{font-size:13px;color:rgba(255,255,255,.4);margin-top:6px}
+.rs-cards{display:flex;gap:18px;z-index:1}
+.rs-card{
+  background:rgba(255,255,255,.07);backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,.12);border-radius:24px;
+  padding:40px 32px;width:240px;cursor:pointer;text-align:center;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1)
+}
+.rs-card:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22);transform:translateY(-8px) scale(1.02);box-shadow:0 28px 60px rgba(0,0,0,.3)}
+.rs-ci{width:68px;height:68px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 20px}
+.rs-card.emp .rs-ci{background:rgba(79,124,255,.2);border:1.5px solid rgba(79,124,255,.35)}
+.rs-card.adm .rs-ci{background:rgba(155,77,255,.2);border:1.5px solid rgba(155,77,255,.35)}
+.rs-ct{font-size:17px;font-weight:800;color:#fff;margin-bottom:8px}
+.rs-cd{font-size:12px;color:rgba(255,255,255,.42);line-height:1.7}
+.rs-cta{
+  margin-top:24px;display:inline-block;padding:8px 20px;
+  border-radius:100px;font-size:12px;font-weight:700
+}
+.rs-card.emp .rs-cta{background:rgba(79,124,255,.2);color:#93B8FF;border:1px solid rgba(79,124,255,.3)}
+.rs-card.adm .rs-cta{background:rgba(155,77,255,.2);color:#C4A0FF;border:1px solid rgba(155,77,255,.3)}
+
+/* ───── HEADER ───── */
+.hdr{
+  height:64px;background:var(--white);
+  border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;padding:0 28px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 16px rgba(79,124,255,.07)
+}
+.hdr-logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:900;color:var(--p)}
+.hdr-logo-dot{
+  width:28px;height:28px;border-radius:8px;
+  background:linear-gradient(135deg,var(--p),var(--c8));
+  display:flex;align-items:center;justify-content:center;font-size:13px
+}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:9px}
+.btn-back{
+  display:flex;align-items:center;gap:5px;padding:6px 14px;
+  border:1.5px solid var(--bd);border-radius:100px;
+  font-size:11px;font-weight:700;color:var(--t2);
+  cursor:pointer;background:#fff;font-family:inherit;transition:all .2s
+}
+.btn-back:hover{border-color:var(--p);color:var(--p)}
+.hdr-av{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff}
+.hdr-nm{font-size:13px;font-weight:700}
+.badge{padding:4px 10px;border-radius:100px;font-size:10px;font-weight:700}
+.b-emp{background:var(--ps);color:var(--p)}
+.b-adm{background:#F3EEFF;color:#7B5CF5}
+
+/* ───── EMP LAYOUT ───── */
+#ev{flex-direction:column}
+.ev-body{display:flex;flex:1;overflow:hidden}
+.ev-sb{
+  width:272px;background:var(--white);border-right:1px solid var(--bd);
+  padding:22px 14px;height:calc(100vh - 64px);
+  overflow-y:auto;flex-shrink:0;
+  scrollbar-width:thin;scrollbar-color:#ddd transparent
+}
+
+/* ring */
+.ring-card{
+  background:linear-gradient(145deg,#4F7CFF,#7B5CF5);
+  border-radius:16px;padding:20px 16px;margin-bottom:20px;
+  display:flex;flex-direction:column;align-items:center;color:#fff;
+  box-shadow:0 8px 28px rgba(79,124,255,.3)
+}
+.ring-wrap{position:relative;width:86px;height:86px;margin-bottom:10px}
+.ring-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.r-bg{fill:none;stroke:rgba(255,255,255,.18);stroke-width:7}
+.r-fg{fill:none;stroke:#fff;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+.ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.rp{font-size:19px;font-weight:900}
+.rl{font-size:9px;opacity:.6;margin-top:1px}
+.ring-ttl{font-size:12px;font-weight:700;opacity:.9}
+.ring-sub{font-size:11px;opacity:.55;margin-top:3px}
+
+/* nav */
+.nav-lbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px;padding:0 8px;margin-bottom:8px}
+.dni{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:12px;cursor:pointer;transition:all .2s;margin-bottom:2px}
+.dni:hover{background:var(--bg)}
+.dni.active{background:var(--ps)}
+.dni-dot{
+  width:30px;height:30px;border-radius:9px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff
+}
+.dni-inf{flex:1;min-width:0}
+.dni-nm{font-size:11px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dni.active .dni-nm{color:var(--p)}
+.mbar{height:3px;background:var(--bd);border-radius:3px;margin-top:4px;overflow:hidden}
+.mbar-f{height:100%;border-radius:3px;transition:width .3s}
+.dni-s{font-size:10px;color:var(--t3);margin-top:2px}
+
+/* main */
+.ev-main{flex:1;padding:28px 32px;overflow-y:auto;background:var(--bg)}
+
+/* progress banner */
+.prog-banner{
+  background:var(--white);border-radius:16px;padding:16px 20px;
+  margin-bottom:22px;border:1px solid var(--bd);
+  display:flex;align-items:center;gap:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,.04)
+}
+.pb-label{font-size:12px;font-weight:700;color:var(--t2);white-space:nowrap}
+.pb-track{flex:1;height:8px;background:var(--bg);border-radius:100px;overflow:hidden}
+.pb-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--p),var(--pl));transition:width .8s ease}
+.pb-pct{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--p);white-space:nowrap}
+.ddots{display:flex;gap:4px;margin-left:4px}
+.ddot{width:8px;height:8px;border-radius:50%;background:var(--bd);transition:all .3s;flex-shrink:0}
+.ddot.active{background:var(--p);transform:scale(1.2)}
+.ddot.done{background:var(--ok)}
+
+/* day hero */
+.day-hero{
+  border-radius:20px;padding:26px 28px;margin-bottom:20px;
+  position:relative;overflow:hidden;
+  background:var(--white);border:1px solid var(--bd);
+  box-shadow:0 4px 20px rgba(0,0,0,.05)
+}
+.day-hero::before{
+  content:'';position:absolute;top:-30px;right:-30px;
+  width:160px;height:160px;border-radius:50%;
+  background:var(--hero-c,rgba(79,124,255,.06));pointer-events:none
+}
+.day-num-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:100px;
+  font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+  margin-bottom:10px
+}
+.day-hero-title{font-size:20px;font-weight:900;letter-spacing:-.4px;margin-bottom:6px}
+.day-hero-desc{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:16px}
+.hero-progress-row{display:flex;align-items:center;gap:14px}
+.hp-bar{flex:1;height:7px;background:var(--bg);border-radius:100px;overflow:hidden}
+.hp-fill{height:100%;border-radius:100px;transition:width .4s}
+.hp-nums{font-size:12px;font-weight:800;white-space:nowrap}
+.sign-summary{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:10px;white-space:nowrap;font-size:11px;font-weight:700
+}
+
+/* session card */
+.sess-wrap{margin-bottom:18px}
+.sec-lbl{
+  display:flex;align-items:center;gap:8px;
+  font-size:10px;font-weight:800;color:var(--t3);
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:12px
+}
+.sec-lbl::before{content:'';flex:none;width:3px;height:14px;border-radius:2px;background:var(--p)}
+.sess-card{
+  background:var(--white);border-radius:16px;
+  margin-bottom:12px;overflow:hidden;
+  border:1.5px solid var(--bd);
+  transition:all .22s;
+  box-shadow:0 2px 10px rgba(0,0,0,.04)
+}
+.sess-card:hover{box-shadow:0 6px 22px rgba(0,0,0,.09);transform:translateY(-1px)}
+.sess-top{
+  display:grid;grid-template-columns:100px 1fr;
+  padding:16px 18px 14px;
+  border-left:4px solid var(--cc,var(--p))
+}
+.sc-time{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--cc,var(--p));padding-top:2px}
+.sc-cat{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:3px}
+.sc-title{font-size:13px;font-weight:800;margin-bottom:6px;color:var(--t1)}
+.sc-list{list-style:none}
+.sc-list li{font-size:12px;color:var(--t2);line-height:1.8;padding-left:13px;position:relative}
+.sc-list li::before{content:'·';position:absolute;left:0;color:var(--t3);font-size:14px;line-height:1.5}
+
+/* trainer panel */
+.tp{
+  border-top:1px solid var(--bd);padding:12px 18px;
+  background:linear-gradient(135deg,#FAFBFF,#F5F7FF);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap
+}
+.tp-lbl{
+  font-size:10px;font-weight:800;color:var(--t3);
+  text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;
+  display:flex;align-items:center;gap:5px
+}
+.tp-lbl::before{content:'👩‍🏫';font-size:11px}
+.tp-chips{display:flex;gap:7px;flex-wrap:wrap;flex:1}
+.tc{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:100px;
+  font-size:12px;font-weight:600;cursor:pointer;
+  border:1.5px solid var(--bd);background:#fff;color:var(--t2);
+  transition:all .2s;user-select:none;position:relative
+}
+.tc:hover{border-color:var(--cc,var(--p));color:var(--cc,var(--p));background:var(--ps)}
+.tc.signed{
+  background:var(--cc,var(--p));color:#fff;
+  border-color:var(--cc,var(--p));
+  box-shadow:0 4px 12px rgba(0,0,0,.15)
+}
+.tc-av{
+  width:17px;height:17px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:800;flex-shrink:0;
+  background:rgba(255,255,255,.25)
+}
+.tc:not(.signed) .tc-av{background:var(--bd)}
+.tc-chk{
+  position:absolute;top:-5px;right:-5px;
+  width:14px;height:14px;border-radius:50%;
+  background:#fff;display:none;
+  align-items:center;justify-content:center;
+  font-size:8px;font-weight:900;
+  box-shadow:0 2px 6px rgba(0,0,0,.15)
+}
+.tc.signed .tc-chk{display:flex;color:var(--cc,var(--p))}
+.tp-status{
+  font-size:11px;color:var(--t3);white-space:nowrap;
+  display:flex;align-items:center;gap:5px;margin-left:auto
+}
+.tp-dot{width:6px;height:6px;border-radius:50%;background:var(--bd)}
+.tp-dot.ok{background:var(--ok)}
+
+/* checklist */
+.cl-card{
+  background:var(--white);border:1.5px solid var(--bd);
+  border-radius:16px;padding:18px 20px;margin-bottom:14px;
+  box-shadow:0 2px 10px rgba(0,0,0,.04)
+}
+.cl-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cl-ttl{font-size:13px;font-weight:800;display:flex;align-items:center;gap:7px}
+.cl-cnt{font-size:11px;color:var(--t2);background:var(--bg);padding:3px 10px;border-radius:100px;font-weight:700}
+.cl-grid{display:flex;flex-direction:column;gap:6px}
+.cli{
+  display:flex;align-items:center;gap:10px;padding:10px 13px;
+  border-radius:11px;border:1.5px solid var(--bd);
+  background:#fff;cursor:pointer;transition:all .18s
+}
+.cli:hover{border-color:var(--pl);background:var(--ps)}
+.cli.done{background:var(--oks);border-color:rgba(0,200,150,.3)}
+.cli-box{
+  width:20px;height:20px;border-radius:6px;
+  border:2px solid var(--bd);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s;font-size:11px;font-weight:900
+}
+.cli.done .cli-box{background:var(--ok);border-color:var(--ok);color:#fff}
+.cli-txt{font-size:12px;font-weight:600;transition:all .18s}
+.cli.done .cli-txt{text-decoration:line-through;color:var(--t3)}
+.tools-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px dashed var(--bd)}
+.tt{font-size:10px;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:6px;background:var(--ps);color:var(--p);border:1px solid rgba(79,124,255,.18)}
+.tt.slack{background:#F5EEFF;color:#7B5CF5;border-color:rgba(123,92,245,.2)}
+.tt.jira{background:#EFF4FF;color:#2563EB;border-color:rgba(37,99,235,.18)}
+
+/* ───── ADMIN ───── */
+#av{flex-direction:column}
+.adm-body{padding:28px 36px;flex:1;overflow-y:auto;background:var(--bg)}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px}
+.sc{
+  background:var(--white);border:1.5px solid var(--bd);
+  border-radius:16px;padding:20px 18px;
+  box-shadow:0 2px 10px rgba(0,0,0,.04);transition:all .2s
+}
+.sc:hover{box-shadow:0 6px 22px rgba(0,0,0,.09);transform:translateY(-2px)}
+.sc-ico{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+.sc-val{font-size:28px;font-weight:900;letter-spacing:-1px}
+.sc-lbl{font-size:11px;color:var(--t2);margin-top:3px}
+
+/* trainer overview */
+.t-ov{
+  background:var(--white);border:1.5px solid var(--bd);
+  border-radius:16px;padding:22px;margin-bottom:24px;
+  box-shadow:0 2px 10px rgba(0,0,0,.04)
+}
+.t-ov-ttl{font-size:14px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.t-ov-ttl span{font-size:12px;color:var(--t2);font-weight:500}
+.t-ov-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.tov-card{
+  border:1.5px solid var(--bd);border-radius:14px;padding:14px 10px;
+  text-align:center;background:var(--bg);transition:all .2s;cursor:default
+}
+.tov-card:hover{background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.07);transform:translateY(-2px)}
+.tov-av{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;margin:0 auto 8px}
+.tov-nm{font-size:12px;font-weight:700;margin-bottom:4px}
+.tov-sess{font-size:10px;color:var(--t3)}
+.tov-bar{height:4px;background:var(--bd);border-radius:4px;margin:7px 0 5px;overflow:hidden}
+.tov-bf{height:100%;border-radius:4px;transition:width .4s}
+.tov-ok{font-size:12px;font-weight:800}
+
+/* members */
+.mem-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mem-ttl{font-size:16px;font-weight:800}
+.mem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mc{
+  background:var(--white);border:1.5px solid var(--bd);
+  border-radius:18px;padding:20px;cursor:pointer;transition:all .22s
+}
+.mc:hover{border-color:var(--pl);box-shadow:0 8px 28px rgba(79,124,255,.12);transform:translateY(-3px)}
+.mc-hd{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.mc-av{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0}
+.mc-nm{font-size:14px;font-weight:800}
+.mc-role{font-size:10px;color:var(--t3);margin-top:2px}
+.mc-st{margin-left:auto;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:700;flex-shrink:0}
+.st-g{background:var(--oks);color:#059669}
+.st-w{background:var(--warns);color:#D97706}
+.st-r{background:var(--reds);color:#DC2626}
+.mc-pr{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px}
+.mc-pl{color:var(--t2)}
+.mc-pv{font-weight:800}
+.pbar{height:5px;background:var(--bg);border-radius:5px;overflow:hidden;margin-bottom:12px}
+.pbf{height:100%;border-radius:5px;transition:width .4s}
+.pf-b{background:linear-gradient(90deg,#4F7CFF,#7DA3FF)}
+.pf-w{background:linear-gradient(90deg,#FF9500,#FFB84D)}
+.pf-r{background:linear-gradient(90deg,#FF4F6A,#FF8096)}
+.dchips{display:flex;gap:3px}
+.dchip{flex:1;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.dc-d{background:var(--oks);color:#059669}
+.dc-p{background:var(--ps);color:var(--p)}
+.dc-n{background:var(--bg);color:var(--t3)}
+
+/* ───── MODALS ───── */
+.mov{display:none;position:fixed;inset:0;background:rgba(10,14,30,.45);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center}
+.mov.open{display:flex;animation:fi .2s ease}
+.modal{background:#fff;border-radius:22px;padding:28px;width:580px;max-height:84vh;overflow-y:auto;box-shadow:0 28px 80px rgba(0,0,0,.18);animation:su .22s ease}
+.modal-hd{display:flex;align-items:center;gap:13px;margin-bottom:22px}
+.modal-x{margin-left:auto;width:30px;height:30px;border:1.5px solid var(--bd);border-radius:9px;cursor:pointer;background:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--t2);transition:all .2s}
+.modal-x:hover{border-color:var(--red);color:var(--red)}
+.mdr{margin-bottom:12px}
+.mdr-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.mdr-t{font-size:12px;font-weight:700}
+.mdr-p{font-size:12px;font-weight:800}
+
+/* trainer pick modal */
+.tpm{display:none;position:fixed;inset:0;background:rgba(10,14,30,.4);backdrop-filter:blur(5px);z-index:2000;align-items:center;justify-content:center}
+.tpm.open{display:flex;animation:fi .15s ease}
+.tpm-box{background:#fff;border-radius:20px;padding:26px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.18);animation:su .2s ease}
+.tpm-ttl{font-size:15px;font-weight:800;margin-bottom:4px}
+.tpm-sub{font-size:12px;color:var(--t2);margin-bottom:18px;line-height:1.5}
+.tpm-list{display:flex;flex-direction:column;gap:7px}
+.tpm-item{
+  display:flex;align-items:center;gap:11px;padding:11px 14px;
+  border-radius:12px;border:1.5px solid var(--bd);background:#fff;
+  cursor:pointer;transition:all .18s
+}
+.tpm-item:hover{border-color:var(--p);background:var(--ps)}
+.tpm-item.sel{border-color:var(--p);background:var(--ps)}
+.tpm-av{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
+.tpm-nm{font-size:13px;font-weight:700;flex:1}
+.tpm-ck{font-size:14px;color:var(--p);font-weight:900;opacity:0}
+.tpm-item.sel .tpm-ck{opacity:1}
+.tpm-foot{display:flex;gap:8px;margin-top:18px}
+.tpm-btn{flex:1;padding:10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;border:none;transition:all .2s}
+.tpm-cancel{background:var(--bg);color:var(--t2)}
+.tpm-cancel:hover{background:var(--bd)}
+.tpm-ok{background:var(--p);color:#fff}
+.tpm-ok:hover{background:var(--pl)}
+
+@keyframes fi{from{opacity:0}to{opacity:1}}
+@keyframes su{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+@media(max-width:900px){.rs-cards{flex-direction:column}.stats-row{grid-template-columns:repeat(2,1fr)}.mem-grid{grid-template-columns:1fr}.ev-sb{width:240px}.t-ov-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.ev-sb{display:none}.ev-main{padding:16px}.adm-body{padding:16px}.t-ov-grid{grid-template-columns:repeat(2,1fr)}}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#ddd;border-radius:10px}
+</style>
+</head>
+<body>
+
+<!-- ══ ROLE SELECT ══ -->
+<div id="rs" class="page active">
+  <div class="rs-orb o1"></div><div class="rs-orb o2"></div><div class="rs-orb o3"></div>
+  <div class="rs-brand">
+    <div class="rs-icon">💬</div>
+    <div class="rs-logo-txt">CS<b>On</b></div>
+    <div class="rs-tag">고객상담팀 신규 입사자 온보딩 플랫폼</div>
+  </div>
+  <div class="rs-cards">
+    <div class="rs-card emp" onclick="goEmp()">
+      <div class="rs-ci">🌱</div>
+      <div class="rs-ct">신규 입사자</div>
+      <div class="rs-cd">8일 온보딩 여정을 단계별로 따라가며 팀의 일원이 되어보세요</div>
+      <div class="rs-cta">온보딩 시작하기 →</div>
+    </div>
+    <div class="rs-card adm" onclick="goAdm()">
+      <div class="rs-ci">🎯</div>
+      <div class="rs-ct">관리자</div>
+      <div class="rs-cd">팀원들의 온보딩 진행 현황을 한눈에 확인하고 관리하세요</div>
+      <div class="rs-cta">대시보드 보기 →</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EMPLOYEE VIEW ══ -->
+<div id="ev" class="page">
+  <header class="hdr">
+    <div class="hdr-logo"><div class="hdr-logo-dot">💬</div>CSOn</div>
+    <div class="hdr-r">
+      <button class="btn-back" onclick="goBack()">← 처음으로</button>
+      <div class="hdr-av" style="background:linear-gradient(135deg,#4F7CFF,#7B5CF5)">신</div>
+      <span class="hdr-nm">신입사원</span>
+      <span class="badge b-emp">신규 입사자</span>
+    </div>
+  </header>
+  <div class="ev-body">
+    <aside class="ev-sb">
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 86 86">
+            <circle class="r-bg" cx="43" cy="43" r="36"/>
+            <circle class="r-fg" id="rfg" cx="43" cy="43" r="36" stroke-dasharray="226.2" stroke-dashoffset="226.2"/>
+          </svg>
+          <div class="ring-c"><div class="rp" id="rpct">0%</div><div class="rl">완료</div></div>
+        </div>
+        <div class="ring-ttl">전체 진행률</div>
+        <div class="ring-sub" id="rsub">0 / 0 항목</div>
+      </div>
+      <div class="nav-lbl">일별 과정</div>
+      <div id="dnav"></div>
+    </aside>
+    <main class="ev-main" id="emain">
+      <div class="prog-banner" id="pb">
+        <span class="pb-label">전체 진행</span>
+        <div class="pb-track"><div class="pb-fill" id="pbf" style="width:0%"></div></div>
+        <span class="pb-pct" id="pbp">0%</span>
+        <div class="ddots" id="ddots"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ══ ADMIN VIEW ══ -->
+<div id="av" class="page">
+  <header class="hdr">
+    <div class="hdr-logo"><div class="hdr-logo-dot">💬</div>CSOn<span style="font-weight:400;color:var(--t2);font-size:11px;margin-left:6px">관리자 대시보드</span></div>
+    <div class="hdr-r">
+      <button class="btn-back" onclick="goBack()">← 처음으로</button>
+      <div class="hdr-av" style="background:linear-gradient(135deg,#9B4DFF,#FF4F6A)">관</div>
+      <span class="hdr-nm">관리자</span>
+      <span class="badge b-adm">관리자</span>
+    </div>
+  </header>
+  <div class="adm-body">
+    <div class="stats-row">
+      <div class="sc"><div class="sc-ico" style="background:#EEF3FF">👥</div><div class="sc-val" id="s1">-</div><div class="sc-lbl">온보딩 중인 팀원</div></div>
+      <div class="sc"><div class="sc-ico" style="background:#E6FAF5">📊</div><div class="sc-val" id="s2">-</div><div class="sc-lbl">평균 진행률</div></div>
+      <div class="sc"><div class="sc-ico" style="background:#E6FAF5">✅</div><div class="sc-val" id="s3">-</div><div class="sc-lbl">정상 진행 중</div></div>
+      <div class="sc"><div class="sc-ico" style="background:#FFF4E6">⚠️</div><div class="sc-val" id="s4">-</div><div class="sc-lbl">지연 주의 필요</div></div>
+    </div>
+    <div class="t-ov">
+      <div class="t-ov-ttl">👩‍🏫 교육 담당자별 현황 <span>세션 확인 진행률</span></div>
+      <div class="t-ov-grid" id="tovg"></div>
+    </div>
+    <div class="mem-hdr"><div class="mem-ttl">팀원 온보딩 현황</div></div>
+    <div class="mem-grid" id="memg"></div>
+  </div>
+</div>
+
+<!-- Member modal -->
+<div class="mov" id="memov" onclick="closeMov(event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div id="mod-av" class="mc-av" style="width:48px;height:48px;border-radius:13px;font-size:17px;font-weight:800"></div>
+      <div><div id="mod-nm" style="font-size:16px;font-weight:800"></div><div id="mod-inf" style="font-size:11px;color:var(--t3);margin-top:2px"></div></div>
+      <button class="modal-x" onclick="hideMov()">×</button>
+    </div>
+    <div id="mod-body"></div>
+  </div>
+</div>
+
+<!-- Trainer pick modal -->
+<div class="tpm" id="tpm">
+  <div class="tpm-box">
+    <div class="tpm-ttl" id="tpm-t">담당자 확인</div>
+    <div class="tpm-sub" id="tpm-s">세션을 진행한 담당자를 선택해주세요.</div>
+    <div class="tpm-list" id="tpm-l"></div>
+    <div class="tpm-foot">
+      <button class="tpm-btn tpm-cancel" onclick="closeTpm()">취소</button>
+      <button class="tpm-btn tpm-ok" onclick="confirmTpm()">✓ 확인 완료</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════ TRAINERS ═══════════════ */
+const TR = [
+  {id:'t1',name:'김미정',ini:'김',color:'#4F7CFF'},
+  {id:'t2',name:'양하영',ini:'양',color:'#FF4F6A'},
+  {id:'t3',name:'박빛나',ini:'박',color:'#00C896'},
+  {id:'t4',name:'김다영',ini:'김',color:'#FF7A2F'},
+  {id:'t5',name:'최태준',ini:'최',color:'#9B4DFF'},
+];
+
+/* ═══════════════ DATA ═══════════════ */
+const DAYS = [
+  {
+    c:'#4F7CFF', n:'DAY 01', title:'사내 시스템 안내 및 업무 프로세스 이해',
+    sessions:[
+      {id:'s00',time:'09:00–12:00',cat:'사내 시스템 · 권한설정',title:'그룹웨어 & 협업 툴 세팅',
+       items:['그룹웨어(hug), 구글닥스, 공용폴더 안내','계정 생성 및 권한 부여','Slack 채널 가입 및 사용법','Jira 계정 생성 및 온보딩 보드 소개'],
+       tids:['t1','t2','t3','t4','t5']},
+      {id:'s01',time:'13:00–17:00',cat:'회사소개 · 업무 프로세스',title:'회사·서비스 전반 이해',
+       items:['회사/사업부/팀 소개 및 운영 프로세스 (B2B 이해)','B2C 업무소개: 행경, CEO, 월간 휴넷 등','B2B 업무소개: 상거기업','복습'],
+       tids:['t1','t2','t3','t4','t5']},
+    ],
+    checks:['그룹웨어(hug) 계정 확인','공용폴더 접속 확인','계정 생성 및 권한 부여 요청','구글닥스 권한 확인','Slack 채널 구독','Jira 접근 권한 확인','B2B/B2C 서비스 개요 파악'],
+    tools:['Slack','Jira','그룹웨어(hug)','구글닥스'],
+  },
+  {
+    c:'#7B5CF5', n:'DAY 02', title:'업무관련시스템 1 — CTI · LMS · edumanager',
+    sessions:[
+      {id:'s10',time:'10:00–11:00',cat:'업무관련시스템 1',title:'CTI · Tera 시스템 소개',
+       items:['CTI 전화상담 시스템 접속 및 기본 기능 학습','Tera 시스템 소개 및 실습'],
+       tids:['t1','t2','t3','t4','t5']},
+      {id:'s11',time:'13:00–15:00',cat:'업무관련시스템 1',title:'LMS 학습관리시스템',
+       items:['LMS 기본 기능 및 수강 관리 방법','고객 수강 현황 조회 및 처리 실습'],
+       tids:['t1','t2','t3','t4','t5']},
+      {id:'s12',time:'15:00–17:00',cat:'업무관련시스템 1',title:'edumanager · 구독권 · 전화외국어',
+       items:['edumanager 사용법','구독권 처리 프로세스','전화외국어(말랑톡, 튜터링, 짓챗 등) 안내','복습 · 녹취 확인'],
+       tids:['t1','t2','t3','t4','t5']},
+    ],
+    checks:['CTI/Tera 계정 접속 확인','LMS 기본 기능 이해','edumanager 사용법 숙지','전화외국어 서비스 구조 파악','녹취 확인'],
+    tools:['CTI','Tera','LMS','edumanager','Slack'],
+  },
+  {
+    c:'#FF4F6A', n:'DAY 03', title:'업무관련시스템 2 — admin · LABS · 그룹웨어',
+    sessions:[
+      {id:'s20',time:'09:00–12:00',cat:'업무관련시스템 2',title:'admin · LABS 시스템',
+       items:['admin 시스템 접속 및 권한 안내','LABS 시스템 소개 및 기본 기능'],
+       tids:['t1','t2','t3','t4','t5']},
+      {id:'s21',time:'13:00–16:00',cat:'업무관련시스템 2',title:'통합 업무 툴 안내',
+       items:['모바일테스트 / 원격 접속 방법','Jira 업무요청 티켓 생성 실습','그룹웨어 / Slack 업무 채널 활용','해피콜 시스템 소개','복습 · 녹취 · 질문정리 · 고객의소리 답변 작성'],
+       tids:['t1','t2','t3','t4','t5']},
+    ],
+    checks:['admin 접속 권한 확인','LABS 기본 기능 이해','Jira 업무요청 티켓 실습','Slack 업무 채널','해피콜 시스템 파악'],
+    tools:['admin','LABS','Jira','Slack','해피콜'],
+  },
+  {
+    c:'#FF7A2F', n:'DAY 04', title:'고객상담 실무 기초 및 VOC 처리 프로세스',
+    sessions:[
+      {id:'s30',time:'09:00–12:00',cat:'고객상담 실무',title:'기본 상담 스크립트 & CTI 실습',
+       items:['고객상담 기본 스크립트 학습','상담 유형별 응대 방법 (전화·채팅·이메일)','CTI 시스템 실전 활용 연습'],
+       tids:['t1','t2','t3','t4','t5']},
+      {id:'s31',time:'13:00–17:00',cat:'VOC 처리',title:'민원 케이스 & VOC 실습',
+       items:['주요 민원 유형 케이스 스터디','고객의 소리(VOC) 처리 프로세스 실습','Slack을 통한 내부 에스컬레이션 절차','복습 및 Q&A'],
+       tids:['t1','t2','t3','t4','t5']},
+    ],
+    checks:['기본 상담 스크립트 숙지','CTI 전화 수신·발신 실습','VOC 처리 프로세스 이해','에스컬레이션 기준 파악'],
+    tools:['CTI','LMS','Slack','Jira'],
+  },
+  {
+    c:'#00C896', n:'DAY 05', title:'B2C 서비스 상담 심화 및 Jira 업무요청 실습',
+    sessions:[
+      {id:'s40',time:'09:00–12:00',cat:'B2C 상담 심화',title:'B2C 주요 서비스 민원 처리',
+       items:['행복한경영자 / CEO 과정 관련 문의 대응','월간 휴넷 구독 관련 문의 처리','LMS 수강 관련 민원 처리 실습'],
+       tids:['t1','t2','t3','t4','t5']},
+      {id:'s41',time:'13:00–17:00',cat:'B2C 심화 + Jira',title:'전화외국어 & Jira',
+       items:['전화외국어(말랑톡, 튜터링, 짓챗) 민원 처리','환불 / 결제 관련 상담 프로세스','Jira 업무요청 티켓 생성 실습','복습 및 케이스 리뷰'],
+       tids:['t1','t2','t3','t4','t5']},
+    ],
+    checks:['B2C 서비스별 FAQ 숙지','환불·결제 프로세스 이해','Jira 업무요청 티켓 실습 완료','전화외국어 민원 처리 파악'],
+    tools:['Jira','Slack','LMS','edumanager','CTI'],
+  },
+  {
+    c:'#F5A623', n:'DAY 06', title:'B2B 서비스 상담 심화 및 기업 계정 관리',
+    sessions:[
+      {id:'s50',time:'09:00–12:00',cat:'B2B 상담 심화',title:'B2B 기업 서비스 구조 이해',
+       items:['B2B 상거기업 서비스 구조 이해','기업 계정 관리 및 수강 관리 프로세스'],
+       tids:['t1','t2','t3','t4','t5']},
+      {id:'s51',time:'13:00–17:00',cat:'B2B 실습',title:'B2B 민원 케이스 & 영업팀 협업',
+       items:['B2B 주요 민원 케이스 스터디','기업 계약·청구 관련 문의 처리 프로세스','Slack을 통한 영업팀 협업 절차','복습 및 롤플레이 실습'],
+       tids:['t1','t2','t3','t4','t5']},
+    ],
+    checks:['B2B 서비스 구조 파악','B2B 민원 처리 프로세스 숙지','영업팀 Slack 협업 채널 파악'],
+    tools:['Slack','Jira','admin','LMS'],
+  },
+  {
+    c:'#18B4E8', n:'DAY 07', title:'실전 상담 OJT — 선배 모니터링 및 시범 실습',
+    sessions:[
+      {id:'s60',time:'09:00–12:00',cat:'실전 OJT',title:'선배 상담사 모니터링',
+       items:['선배 상담사 실전 상담 청취 (모니터링)','실시간 녹취 분석 및 피드백','상담 품질 평가 기준 이해'],
+       tids:['t1','t2','t3','t4','t5']},
+      {id:'s61',time:'13:00–17:00',cat:'시범 상담',title:'직접 상담 시범 실습',
+       items:['직접 상담 시범 실습 (supervisor 동석)','고객의 소리(VOC) 실시간 답변 작성','Jira/Slack을 통한 이슈 보고 실습','일일 피드백 세션'],
+       tids:['t1','t2','t3','t4','t5']},
+    ],
+    checks:['선배 상담 모니터링 1시간 이상','상담 품질 평가 기준 숙지','직접 상담 시범 1건 이상','VOC 답변 1건 이상 작성'],
+    tools:['CTI','LMS','Slack','Jira'],
+  },
+  {
+    c:'#9B4DFF', n:'DAY 08', title:'온보딩 총복습 및 독립 상담 준비 완료',
+    sessions:[
+      {id:'s70',time:'09:00–12:00',cat:'총복습',title:'8일 전체 내용 총복습 및 시스템 점검',
+       items:['CTI/Tera, LMS, edumanager, admin, LABS 최종 점검','Slack, Jira, 그룹웨어, 해피콜 접속 확인','미숙한 부분 집중 보완'],
+       tids:['t1','t2','t3','t4','t5']},
+      {id:'s71',time:'13:00–17:00',cat:'온보딩 마무리',title:'독립 상담 평가 및 수료',
+       items:['독립 상담 사전 평가 (시뮬레이션)','온보딩 피드백 작성 및 공유','팀 인사 및 업무 시작 준비','Jira 온보딩 이슈 완료(Done) 처리'],
+       tids:['t1','t2','t3','t4','t5']},
+    ],
+    checks:['전체 시스템 접속 최종 확인','독립 상담 평가 통과','온보딩 피드백 제출','Slack 팀 채널 전체 가입','Jira 온보딩 이슈 Done 처리'],
+    tools:['Slack','Jira','CTI','LMS','admin','LABS'],
+  },
+];
+
+const MEMBERS=[
+  {id:'m1',name:'김서연',ini:'김',color:'#4F7CFF',joined:'2026-03-10',dp:[100,100,100,80,40,0,0,0]},
+  {id:'m2',name:'박준혁',ini:'박',color:'#FF4F6A',joined:'2026-04-01',dp:[100,100,60,0,0,0,0,0]},
+  {id:'m3',name:'이수민',ini:'이',color:'#00C896',joined:'2026-04-07',dp:[100,40,0,0,0,0,0,0]},
+  {id:'m4',name:'정다은',ini:'정',color:'#FF7A2F',joined:'2026-04-14',dp:[60,0,0,0,0,0,0,0]},
+  {id:'m5',name:'최민준',ini:'최',color:'#9B4DFF',joined:'2026-04-20',dp:[20,0,0,0,0,0,0,0]},
+  {id:'m6',name:'한지우',ini:'한',color:'#18B4E8',joined:'2026-04-21',dp:[0,0,0,0,0,0,0,0]},
+];
+
+/* ═══════════════ STATE ═══════════════ */
+let ST = JSON.parse(localStorage.getItem('cson3')||'{"ch":{},"sg":{}}');
+if(!ST.ch) ST.ch={};
+if(!ST.sg) ST.sg={};
+let curDay=0;
+const CIRC=226.2;
+let tpmSid=null, tpmSel=null, tpmColor='';
+
+function save(){ localStorage.setItem('cson3',JSON.stringify(ST)); }
+function totItems(){ return DAYS.reduce((s,d)=>s+d.checks.length,0); }
+function doneItems(){ return DAYS.reduce((s,d)=>s+d.checks.filter((_,i)=>ST.ch[d.n+'-'+i]).length,0); }
+function dayDone(di){ return DAYS[di].checks.filter((_,i)=>ST.ch[DAYS[di].n+'-'+i]).length; }
+function mprog(m){ const t=DAYS.reduce((s,d)=>s+d.checks.length,0); return Math.round(m.dp.reduce((s,p,i)=>s+Math.round(p/100*DAYS[i].checks.length),0)/t*100); }
+function trSigned(tid){ return Object.values(ST.sg).filter(v=>v===tid).length; }
+function trTotal(tid){ return DAYS.reduce((s,d)=>s+d.sessions.filter(ss=>ss.tids.includes(tid)).length,0); }
+
+/* ═══════════════ NAV ═══════════════ */
+function showP(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function goEmp(){ showP('ev'); renderEmp(); }
+function goAdm(){ showP('av'); renderAdm(); }
+function goBack(){ showP('rs'); }
+
+/* ═══════════════ EMPLOYEE ═══════════════ */
+function renderEmp(){ renderRing(); renderDots(); renderDNav(); renderDay(curDay); }
+
+function renderRing(){
+  const t=totItems(),d=doneItems(),pct=t?Math.round(d/t*100):0;
+  document.getElementById('rpct').textContent=pct+'%';
+  document.getElementById('rsub').textContent=d+' / '+t+' 항목';
+  document.getElementById('rfg').style.strokeDashoffset=CIRC-CIRC*pct/100;
+  document.getElementById('pbp').textContent=pct+'%';
+  document.getElementById('pbf').style.width=pct+'%';
+}
+
+function renderDots(){
+  const w=document.getElementById('ddots');
+  if(!w.children.length) DAYS.forEach((_,i)=>{ const d=document.createElement('div'); d.className='ddot'; d.id='dd'+i; w.appendChild(d); });
+  DAYS.forEach((_,i)=>{
+    const el=document.getElementById('dd'+i);
+    const dn=dayDone(i),t=DAYS[i].checks.length;
+    el.className='ddot'+(dn===t&&t>0?' done':dn>0?' active':'');
+    el.title='DAY 0'+(i+1)+': '+dn+'/'+t;
+  });
+}
+
+function renderDNav(){
+  document.getElementById('dnav').innerHTML=DAYS.map((d,i)=>{
+    const dn=dayDone(i),t=d.checks.length,pct=Math.round(dn/t*100);
+    const done=pct===100,act=i===curDay;
+    return `<div class="dni ${act?'active':''}" onclick="selDay(${i})">
+      <div class="dni-dot" style="background:${done?'var(--ok)':d.c}">${done?'✓':i+1}</div>
+      <div class="dni-inf">
+        <div class="dni-nm">${d.n} · ${d.title.replace(/—.*/,'').replace(/및.*/,'').trim()}</div>
+        <div class="mbar"><div class="mbar-f" style="width:${pct}%;background:${done?'var(--ok)':d.c}"></div></div>
+        <div class="dni-s">${dn}/${t} 완료</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selDay(i){ curDay=i; renderDNav(); renderDay(i); }
+
+function renderDay(idx){
+  const day=DAYS[idx];
+  const dn=dayDone(idx),t=day.checks.length,pct=Math.round(dn/t*100);
+  const allS=day.sessions.length, signedS=day.sessions.filter(s=>ST.sg[s.id]).length;
+  const sc=signedS===allS?'var(--ok)':signedS>0?'var(--warn)':'var(--t3)';
+
+  /* sessions */
+  const sessH=day.sessions.map(s=>{
+    const sig=ST.sg[s.id], sigTr=sig?TR.find(r=>r.id===sig):null;
+    const chips=s.tids.map(tid=>{
+      const tr=TR.find(r=>r.id===tid), isSig=ST.sg[s.id]===tid;
+      return `<div class="tc ${isSig?'signed':''}" onclick="openTpm('${s.id}','${day.c}')" style="--cc:${day.c}">
+        <div class="tc-av" style="${isSig?'background:rgba(255,255,255,.25)':'background:'+tr.color}">${tr.ini}</div>
+        ${tr.name}
+        <div class="tc-chk">✓</div>
+      </div>`;
+    }).join('');
+    const stH=sig
+      ? `<div class="tp-status"><div class="tp-dot ok"></div>${sigTr.name} 확인 완료</div>`
+      : `<div class="tp-status"><div class="tp-dot"></div>미확인</div>`;
+    return `<div class="sess-card">
+      <div class="sess-top" style="--cc:${day.c}">
+        <div class="sc-time" style="color:${day.c}">${s.time}</div>
+        <div>
+          <div class="sc-cat">${s.cat}</div>
+          <div class="sc-title">${s.title}</div>
+          <ul class="sc-list">${s.items.map(it=>`<li>${it}</li>`).join('')}</ul>
+        </div>
+      </div>
+      <div class="tp">
+        <span class="tp-lbl">담당자</span>
+        <div class="tp-chips">${chips}</div>
+        ${stH}
+      </div>
+    </div>`;
+  }).join('');
+
+  /* checks */
+  const clH=day.checks.map((c,ci)=>{
+    const key=day.n+'-'+ci, done=!!ST.ch[key];
+    return `<div class="cli ${done?'done':''}" onclick="toggleCl('${key}')">
+      <div class="cli-box">${done?'✓':''}</div>
+      <span class="cli-txt">${c}</span>
+    </div>`;
+  }).join('');
+
+  const toolH=day.tools.map(t=>`<span class="tt${t==='Slack'?' slack':t==='Jira'?' jira':''}">${t}</span>`).join('');
+
+  const main=document.getElementById('emain');
+  const pb=main.querySelector('#pb');
+  main.innerHTML='';
+  if(pb) main.appendChild(pb);
+
+  const div=document.createElement('div');
+  div.innerHTML=`
+    <div class="day-hero" style="--hero-c:${day.c}18">
+      <div class="day-num-badge" style="background:${day.c}16;color:${day.c}">${day.n}</div>
+      <div class="day-hero-title">${day.title}</div>
+      <div class="day-hero-desc">오늘의 세션을 확인하고 담당자 사인 후 체크리스트를 완료하세요 ✨</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-bottom:5px"><span>체크리스트</span><span style="font-weight:800;color:${day.c}">${pct}%</span></div>
+          <div class="hp-bar"><div class="hp-fill" style="width:${pct}%;background:linear-gradient(90deg,${day.c},${day.c}99)"></div></div>
+        </div>
+        <div class="sign-summary" style="background:${sc}14;color:${sc};border:1.5px solid ${sc}30">
+          <span style="font-size:16px;font-weight:900">${signedS}/${allS}</span>
+          <span>담당자 확인</span>
+        </div>
+      </div>
+    </div>
+    <div class="sess-wrap">
+      <div class="sec-lbl">오늘의 세션 &amp; 담당자 확인</div>
+      ${sessH}
+    </div>
+    <div class="cl-card">
+      <div class="cl-head">
+        <div class="cl-ttl">✅ 체크리스트</div>
+        <div class="cl-cnt">${dn} / ${t}</div>
+      </div>
+      <div class="cl-grid">${clH}</div>
+      <div class="tools-row">${toolH}</div>
+    </div>`;
+  main.appendChild(div);
+}
+
+function toggleCl(key){
+  ST.ch[key]?delete ST.ch[key]:(ST.ch[key]=true);
+  save(); renderRing(); renderDots(); renderDNav(); renderDay(curDay);
+}
+
+/* ═══════════════ TRAINER MODAL ═══════════════ */
+function openTpm(sid, color){
+  let sess=null;
+  for(const d of DAYS){ const f=d.sessions.find(s=>s.id===sid); if(f){sess=f;break;} }
+  if(!sess) return;
+  tpmSid=sid; tpmColor=color; tpmSel=ST.sg[sid]||null;
+  document.getElementById('tpm-t').textContent='담당자 확인 — '+sess.title;
+  document.getElementById('tpm-s').textContent=sess.time+' 세션을 진행한 담당자를 선택해주세요.';
+  document.getElementById('tpm-l').innerHTML=sess.tids.map(tid=>{
+    const tr=TR.find(r=>r.id===tid), sel=tpmSel===tid;
+    return `<div class="tpm-item ${sel?'sel':''}" onclick="selTr('${tid}')" id="tpi-${tid}">
+      <div class="tpm-av" style="background:${tr.color}">${tr.ini}</div>
+      <span class="tpm-nm">${tr.name}</span>
+      <span class="tpm-ck">✓</span>
+    </div>`;
+  }).join('');
+  document.getElementById('tpm').classList.add('open');
+}
+function selTr(tid){
+  tpmSel=tid;
+  document.querySelectorAll('.tpm-item').forEach(el=>el.classList.toggle('sel',el.id==='tpi-'+tid));
+}
+function confirmTpm(){
+  if(!tpmSel){ alert('담당자를 선택해주세요.'); return; }
+  ST.sg[tpmSid]=tpmSel; save(); closeTpm(); renderDay(curDay); renderDNav();
+}
+function closeTpm(){ document.getElementById('tpm').classList.remove('open'); tpmSid=null; tpmSel=null; }
+
+/* ═══════════════ ADMIN ═══════════════ */
+function renderAdm(){
+  const progs=MEMBERS.map(m=>mprog(m));
+  const avg=Math.round(progs.reduce((a,b)=>a+b,0)/progs.length);
+  const good=progs.filter(p=>p>=50).length, warn=progs.filter(p=>p<50).length;
+  document.getElementById('s1').textContent=MEMBERS.length+'명';
+  document.getElementById('s2').textContent=avg+'%';
+  document.getElementById('s3').textContent=good+'명';
+  document.getElementById('s4').textContent=warn+'명';
+
+  /* trainer overview */
+  document.getElementById('tovg').innerHTML=TR.map(tr=>{
+    const tot=trTotal(tr.id), sig=trSigned(tr.id), pct=tot?Math.round(sig/tot*100):0;
+    const c=pct===100?'var(--ok)':pct>0?'var(--warn)':'var(--t3)';
+    return `<div class="tov-card">
+      <div class="tov-av" style="background:${tr.color}">${tr.ini}</div>
+      <div class="tov-nm">${tr.name}</div>
+      <div class="tov-sess">${tot}개 세션</div>
+      <div class="tov-bar"><div class="tov-bf" style="width:${pct}%;background:${tr.color}"></div></div>
+      <div class="tov-ok" style="color:${c}">${sig}/${tot} 확인</div>
+    </div>`;
+  }).join('');
+
+  /* members */
+  document.getElementById('memg').innerHTML=MEMBERS.map((m,mi)=>{
+    const p=progs[mi];
+    const [sc,st]=p>=60?['st-g','정상 진행']:p>=25?['st-w','주의 필요']:['st-r','지연 위험'];
+    const pfc=p>=60?'pf-b':p>=25?'pf-w':'pf-r';
+    const chips=m.dp.map((dp,i)=>{
+      const [cls,lb]=dp===100?['dc-d','✓']:dp>0?['dc-p',dp+'%']:['dc-n','D'+(i+1)];
+      return `<div class="dchip ${cls}">${lb}</div>`;
+    }).join('');
+    return `<div class="mc" onclick="openMem('${m.id}')">
+      <div class="mc-hd">
+        <div class="mc-av" style="background:${m.color}">${m.ini}</div>
+        <div><div class="mc-nm">${m.name}</div><div class="mc-role">고객상담팀 · ${m.joined}</div></div>
+        <div class="mc-st ${sc}">${st}</div>
+      </div>
+      <div class="mc-pr"><span class="mc-pl">전체 진행률</span><span class="mc-pv">${p}%</span></div>
+      <div class="pbar"><div class="pbf ${pfc}" style="width:${p}%"></div></div>
+      <div class="dchips">${chips}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════ MEMBER MODAL ═══════════════ */
+function openMem(mid){
+  const m=MEMBERS.find(x=>x.id===mid), p=mprog(m);
+  document.getElementById('mod-av').style.background=m.color;
+  document.getElementById('mod-av').textContent=m.ini;
+  document.getElementById('mod-nm').textContent=m.name;
+  document.getElementById('mod-inf').textContent='고객상담팀 · 입사일 '+m.joined;
+  const done=m.dp.filter(x=>x===100).length, inprog=m.dp.filter(x=>x>0&&x<100).length, none=m.dp.filter(x=>x===0).length;
+  document.getElementById('mod-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px">
+      ${[['전체',p+'%',m.color],['완료',done+'일','var(--ok)'],['진행중',inprog+'일','var(--warn)'],['미시작',none+'일','var(--t3)']].map(([l,v,c])=>`
+        <div style="text-align:center;background:var(--bg);border-radius:12px;padding:12px 6px">
+          <div style="font-size:20px;font-weight:900;color:${c}">${v}</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px">${l}</div>
+        </div>`).join('')}
+    </div>
+    ${DAYS.map((day,i)=>{
+      const dp=m.dp[i];
+      const pfc=dp===100?'pf-b':dp>0?'pf-w':'pf-r';
+      const [b,bs]=dp===100?['완료','background:var(--oks);color:#059669']:dp>0?['진행중','background:var(--ps);color:var(--p)']:['미시작','background:var(--bg);color:var(--t3)'];
+      const tNames=[...new Set(day.sessions.flatMap(s=>s.tids))].map(tid=>{
+        const tr=TR.find(x=>x.id===tid);
+        return `<span style="background:${tr.color}14;color:${tr.color};border:1px solid ${tr.color}25;padding:2px 7px;border-radius:100px;font-size:10px;font-weight:700">${tr.name}</span>`;
+      }).join('');
+      return `<div class="mdr">
+        <div class="mdr-hd">
+          <div class="mdr-t" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+            <span style="font-size:10px;padding:3px 8px;border-radius:100px;font-weight:700;${bs}">${b}</span>
+            <span>${day.n} · ${day.title.replace(/—.*/,'').replace(/및.*/,'').trim()}</span>
+          </div>
+          <div class="mdr-p" style="color:${dp===100?'var(--ok)':dp>0?'var(--p)':'var(--t3)'}">${dp}%</div>
+        </div>
+        <div class="pbar" style="margin-bottom:7px"><div class="pbf ${pfc}" style="width:${dp}%"></div></div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">${tNames}</div>
+      </div>`;
+    }).join('')}`;
+  document.getElementById('memov').classList.add('open');
+}
+function hideMov(){ document.getElementById('memov').classList.remove('open'); }
+function closeMov(e){ if(e.target.id==='memov') hideMov(); }
+</script>
+</body>
+</html>
