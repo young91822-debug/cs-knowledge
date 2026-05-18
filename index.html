@@ -401,8 +401,8 @@ body.is-admin .admin-only.block{display:block!important}
 .mob-menu.open{transform:translateX(0)}
 .mob-ham{display:none;width:36px;height:36px;background:none;border:none;color:var(--t2);font-size:22px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0}
 @media(max-width:768px){
-  body,html{overflow-x:hidden}
-  .app{flex-direction:column;height:auto;min-height:100vh}
+  html{overflow-x:hidden}body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .app{flex-direction:column;height:auto;min-height:100dvh}
   .sb{display:none}
   .app-main{width:100%;min-width:0}
   .topbar{padding:0 12px;gap:8px;height:54px}
@@ -412,7 +412,7 @@ body.is-admin .admin-only.block{display:block!important}
   .topbar-acts .tb-btn:not(.primary){display:none}
   .tb-icon{display:none}
   .tb-btn.primary{height:36px;padding:0 12px;font-size:12px}
-  .app-body{height:calc(100vh - 54px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .app-body{height:auto;overflow-y:visible;overflow:visible}
   .home-view{padding:14px}
   .home-cats{grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
   .home-cat{padding:14px 8px 10px}
