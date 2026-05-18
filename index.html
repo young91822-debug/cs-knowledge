@@ -568,6 +568,7 @@ body.is-admin .admin-only.block{display:block!important}
           <input id="listSearch" type="text" placeholder="이 목록에서 검색..." style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:12px;font-family:var(--font);outline:none;width:180px;margin-left:8px" oninput="filterListSearch(this.value)">
           <select class="list-sort" id="sortSel" onchange="renderResults()"><option value="recent">최신순</option><option value="views">조회 많은순</option><option value="alpha">가나다순</option></select>
           <button class="list-add-btn admin-only inline" id="listAddBtn" onclick="onListAdd()"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
+          <button class="admin-only inline" onclick="openBulkUpload('list')" style="height:32px;padding:0 12px;background:#F5F3FF;border:1px solid #C4B5FD;border-radius:8px;color:#6D28D9;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
           <button class="co-back-btn" style="margin-left:4px" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div class="filter-chips" id="filterChips"></div>
@@ -579,6 +580,7 @@ body.is-admin .admin-only.block{display:block!important}
         <div class="list-hd">
           <span class="list-title">기업별 정책</span>
           <span class="list-cnt" id="coCnt"></span>
+          <button class="admin-only inline" onclick="openBulkUpload('b2b')" style="height:32px;padding:0 12px;background:#F5F3FF;border:1px solid #C4B5FD;border-radius:8px;color:#6D28D9;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px;margin-left:auto"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
         </div>
         <div class="co-chips-bar" id="coChipsBar"></div>
         <div id="coSummary"></div>
@@ -591,6 +593,7 @@ body.is-admin .admin-only.block{display:block!important}
           <span class="list-title">오류 해결방법</span>
           <span class="list-cnt" id="errCnt"></span>
           <button class="list-add-btn admin-only inline" onclick="openErrorForm('')"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
+          <button class="admin-only inline" onclick="openBulkUpload('error')" style="height:32px;padding:0 12px;background:#F5F3FF;border:1px solid #C4B5FD;border-radius:8px;color:#6D28D9;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
           <button class="co-back-btn" style="margin-left:auto" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div class="r-list" id="errList"></div>
@@ -602,6 +605,7 @@ body.is-admin .admin-only.block{display:block!important}
           <span class="list-title">상품 안내</span>
           <span class="list-cnt" id="prCnt"></span>
           <button class="list-add-btn admin-only inline" onclick="openAddProductForm()"><i class="ti ti-plus" style="font-size:12px"></i>상품 추가</button>
+          <button class="admin-only inline" onclick="openBulkUpload('product')" style="height:32px;padding:0 12px;background:#F5F3FF;border:1px solid #C4B5FD;border-radius:8px;color:#6D28D9;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
           <button class="co-back-btn" style="margin-left:auto" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div id="prSummary"></div>
@@ -625,6 +629,30 @@ body.is-admin .admin-only.block{display:block!important}
   </div>
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDetailPanel()"></div>
 
+<!-- Bulk Upload Modal -->
+<div id="bulkUploadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:580px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div id="bulkUploadHeader" style="padding:16px 20px;background:linear-gradient(135deg,#1E1B4B,#4C1D95);display:flex;align-items:center;gap:10px">
+      <i class="ti ti-table-import" style="font-size:18px;color:#A78BFA"></i>
+      <span id="bulkUploadTitle" style="font-size:15px;font-weight:700;color:#fff">일괄 업로드</span>
+      <button onclick="closeBulkUpload()" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;border-radius:7px;width:30px;height:30px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="padding:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <span style="font-size:13px;color:var(--t2)">샘플 양식을 먼저 다운받아 작성 후 업로드하세요</span>
+        <button id="bulkSampleBtn" onclick="downloadBulkSample()" style="height:32px;padding:0 12px;background:#EDE9FE;border:1px solid #C4B5FD;border-radius:8px;color:#6D28D9;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px"><i class="ti ti-download" style="font-size:13px"></i>샘플 다운로드</button>
+      </div>
+      <div style="background:#F8F7FF;border:2px dashed #C4B5FD;border-radius:12px;padding:24px;text-align:center;cursor:pointer;margin-bottom:14px" onclick="document.getElementById('bulkFileInput').click()">
+        <i class="ti ti-file-spreadsheet" style="font-size:32px;color:#7C3AED;display:block;margin-bottom:8px"></i>
+        <div style="font-size:13px;font-weight:600;color:#1E1B4B;margin-bottom:3px">엑셀 파일 클릭 또는 드래그</div>
+        <div style="font-size:11.5px;color:#A78BFA">.xlsx, .xls 파일 지원</div>
+        <input type="file" id="bulkFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleBulkFile(this)">
+      </div>
+      <div id="bulkPreview"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Jira Modal -->
 <div id="jiraModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;padding:20px">
   <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)">
@@ -638,17 +666,6 @@ body.is-admin .admin-only.block{display:block!important}
 </div>
 
 <!-- Onboarding Modal -->
-<div id="onboardingModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:600;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#fff;border-radius:14px;width:100%;max-width:1000px;height:90vh;display:flex;flex-direction:column;overflow:hidden">
-    <div style="padding:14px 18px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#1E1B4B,#4C1D95);border-radius:14px 14px 0 0">
-      <i class="ti ti-rocket" style="font-size:18px;color:#A78BFA"></i>
-      <span style="font-size:14px;font-weight:700;color:#fff">신규입사자 온보딩</span>
-      <button onclick="closeOnboarding()" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;border-radius:7px;width:30px;height:30px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-x"></i></button>
-    </div>
-    <iframe id="onboardingFrame" src="" style="flex:1;border:none;width:100%"></iframe>
-  </div>
-</div>
-
 </div><!-- /app --><div class="mob-overlay" id="mobOverlay" onclick="toggleMobMenu()"></div>
 <div class="mob-menu" id="mobMenu">
   <div class="sb-brand" style="cursor:pointer" onclick="goHome();toggleMobMenu()">
@@ -863,6 +880,78 @@ function setView(v){
   else if(v==="newguide"){showView("viewList");setSbView("");const ng=entries.filter(e=>e.newGuide&&e.status!=="hidden");renderList(ng,"신규 상담사 가이드",`총 ${ng.length}건`);}
   closeDetailPanel();
 }
+/* ─── 메뉴별 일괄 업로드 ─── */
+let _bulkType="";
+const BULK_CONFIG={
+  b2b:{title:"B2B 일괄 업로드",headers:["기업명*","카테고리","문의제목*","고객문의유형*","필수확인질문","답변내용*","이관기준","주의사항"],sample:[["LH중앙공동주택관리지원센터","회원가입","회원가입은 어떻게 하나요?","회원가입 하고 싶어요","1. 본인명의 휴대폰 확인","사이트 우측 상단 회원가입 클릭","해당없음",""],["지방공기업평가원","수강관리","수강기간은 얼마나 되나요?","수강기간이 얼마인지 궁금해요","","수강신청일로부터 30일","",""]],parse:(row)=>({part:"B2B 상위기업",company:row[0],companyCat:row[1],title:row[2],customerQ:row[3],checkQ:row[4],steps:row[5],escalation:row[6],caution:row[7]})},
+  b2c:{title:"B2C 일괄 업로드",headers:["제목*","고객문의유형*","원인","필수확인질문","해결방법*","예외케이스","이관기준","주의사항"],sample:[["수료증은 어디서 출력하나요?","수료증 출력하고 싶어요","수강 미완료","수강 완료 여부 확인","마이페이지 > 수료증 > 출력","","해당없음",""],["로그인이 안돼요","비밀번호를 잊어버렸어요","","가입 이메일 확인","비밀번호 찾기 클릭","SNS가입은 소셜로그인","해당없음",""]],parse:(row)=>({part:"B2C",title:row[0],customerQ:row[1],cause:row[2],checkQ:row[3],steps:row[4],exceptions:row[5],escalation:row[6],caution:row[7]})},
+  product:{title:"상품 안내 일괄 업로드",headers:["상품명*","구분(FAQ/제안서)*","제목*","답변내용*","주의사항"],sample:[["휴넷CEO","FAQ","Business Review란?","휴넷CEO 비즈니스 인사이트 서비스입니다",""],["리더십저니","FAQ","수강기간은 얼마나 되나요?","수강신청일로부터 30일입니다",""]],parse:(row)=>({part:"상품 안내",productName:row[0],productSection:row[1]||"FAQ",title:row[2],steps:row[3],caution:row[4]})},
+  error:{title:"오류 해결방법 일괄 업로드",headers:["오류제목*","오류내용(고객표현)*","해결방법*","주의사항"],sample:[["결제창이 뜨지 않아요","결제 버튼 눌러도 반응없어요","1. 팝업 차단 해제\n2. 다른 브라우저 시도","Chrome 권장"],["수료증 출력이 안돼요","수료증 버튼 눌러도 아무것도 안 나와요","1. 팝업 차단 해제\n2. 수강완료 확인",""]],parse:(row)=>({part:"오류 해결방법",title:row[0],customerQ:row[1],steps:row[2],caution:row[3]})},
+  list:{title:"B2C 일괄 업로드",headers:["제목*","고객문의유형*","원인","필수확인질문","해결방법*","이관기준","주의사항"],sample:[["수료증 출력 방법","수료증 출력하고 싶어요","수강 미완료","수강 완료 여부 확인","마이페이지 > 수료증 출력","해당없음",""]],parse:(row)=>({part:"B2C",title:row[0],customerQ:row[1],cause:row[2],checkQ:row[3],steps:row[4],escalation:row[5],caution:row[6]})}
+};
+function openBulkUpload(type){
+  if(!requireAdmin())return;
+  _bulkType=type;
+  const cfg=BULK_CONFIG[type]||BULK_CONFIG.list;
+  document.getElementById("bulkUploadTitle").textContent=cfg.title;
+  document.getElementById("bulkPreview").innerHTML="";
+  document.getElementById("bulkFileInput").value="";
+  document.getElementById("bulkUploadModal").style.display="flex";
+}
+function closeBulkUpload(){document.getElementById("bulkUploadModal").style.display="none";_bulkType="";}
+function downloadBulkSample(){
+  if(!window.XLSX){alert("라이브러리 로딩 중입니다.");return;}
+  const cfg=BULK_CONFIG[_bulkType]||BULK_CONFIG.list;
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([cfg.headers,...cfg.sample]);
+  ws["!cols"]=cfg.headers.map(()=>({wch:24}));
+  XLSX.utils.book_append_sheet(wb,ws,"업로드양식");
+  XLSX.writeFile(wb,`지식창고_${cfg.title}_샘플.xlsx`);
+}
+function handleBulkFile(input){
+  const file=input.files[0];if(!file)return;
+  if(!window.XLSX){alert("라이브러리 로딩 중입니다.");return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:"binary"});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+      const dataRows=rows.slice(1).filter(r=>r[0]&&r[1]);
+      if(!dataRows.length){alert("데이터가 없습니다. 샘플 양식을 확인해주세요.");return;}
+      window._bulkRows=dataRows;
+      document.getElementById("bulkPreview").innerHTML=`
+        <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--t1)">${dataRows.length}건 확인됨</div>
+          <div style="display:flex;flex-direction:column;gap:4px;max-height:150px;overflow-y:auto">
+            ${dataRows.slice(0,5).map(r=>`<div style="font-size:12px;color:var(--t2);padding:4px 0;border-bottom:1px solid #F3F5F9"><span style="font-weight:500">${esc(String(r[0]||""))}</span> — ${esc(String(r[1]||"").slice(0,40))}</div>`).join("")}
+            ${dataRows.length>5?`<div style="font-size:11px;color:var(--t3);padding:4px 0">... 외 ${dataRows.length-5}건</div>`:""}
+          </div>
+        </div>
+        <button class="btn-save" onclick="confirmBulkImport()" style="display:flex;align-items:center;gap:6px;width:100%;justify-content:center"><i class="ti ti-check" style="font-size:13px"></i>${dataRows.length}건 추가하기</button>`;
+    }catch(err){alert("파일을 읽는 중 오류가 발생했습니다.");}
+  };
+  reader.readAsBinaryString(file);input.value="";
+}
+function confirmBulkImport(){
+  const rows=window._bulkRows;if(!rows||!rows.length)return;
+  if(!confirm(`${rows.length}건을 추가할까요?`))return;
+  const cfg=BULK_CONFIG[_bulkType]||BULK_CONFIG.list;
+  let added=0;
+  rows.forEach(r=>{
+    const base=cfg.parse(r.map(v=>String(v||"").trim()));
+    if(!base.title)return;
+    entries=[{...base,id:uid(),status:"active",updatedBy:currentUser?.id||"",updatedAt:today(),createdAt:today(),views:0,history:[],viewers:[],version:"1.0"},...entries];
+    added++;
+  });
+  saveAll();closeBulkUpload();
+  alert(`✅ ${added}건이 추가됐어요!`);
+  if(_bulkType==="b2b")renderCompanyView("전체");
+  else if(_bulkType==="product")renderProductView("전체");
+  else if(_bulkType==="error")openErrorView();
+  else renderResults();
+  window._bulkRows=null;
+}
 function openJiraModal(){
   const links=[
     {label:"교육운영팀 업무요청",url:"https://ihunet.atlassian.net/jira/core/projects/FIWQ/board?filter=reporter+%3D+%225bd12032d0f01e7162be68be%22&groupBy=status"},
@@ -888,10 +977,6 @@ function openJiraModal(){
 }
 function openQuickModal(file,title,icon){
   window.open(`https://young91822-debug.github.io/cs-knowledge/${file}`,"_blank");
-}
-function closeOnboarding(){
-  document.getElementById("onboardingModal").style.display="none";
-  document.getElementById("onboardingFrame").src="";
 }
 function downloadEntry(id){
   const e=entries.find(x=>x.id===id);if(!e)return;
