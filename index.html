@@ -147,6 +147,13 @@ html,body{background:var(--sb);font-family:var(--font);font-size:13px;color:var(
 /* ─── List View ─── */
 .list-view{padding:20px;max-width:820px}
 .list-hd{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.hd-btn-add{height:32px;padding:0 12px;background:var(--p);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:5px}
+.hd-btn-bulk{height:32px;padding:0 12px;background:#F5F3FF;border:1px solid #C4B5FD;border-radius:8px;color:#6D28D9;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:5px}
+.hd-btn-bulk:hover{background:#EDE9FE}
+.hd-btn-home{height:32px;padding:0 12px;background:#fff;border:1.5px solid var(--border);border-radius:8px;color:var(--t2);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:5px}
+.hd-btn-home:hover{border-color:var(--p);color:var(--p)}
+.hd-search{flex:1;height:32px;border:1.5px solid var(--border2);border-radius:8px;padding:0 12px;font-size:12.5px;font-family:var(--font);outline:none;min-width:0}
+.hd-search:focus{border-color:var(--p)}
 .list-hd .list-title{font-size:15px;font-weight:700;color:var(--t1);white-space:nowrap}
 .list-hd .list-cnt{font-size:12px;color:var(--t3);white-space:nowrap}
 .list-hd #listSearch{flex:1;max-width:none;min-width:0;border:1.5px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:12.5px;font-family:var(--font);outline:none;width:auto}
@@ -227,7 +234,8 @@ html,body{background:var(--sb);font-family:var(--font);font-size:13px;color:var(
 .co-empty-add:hover{background:var(--p100);border-color:var(--p)}
 .co-empty-add i{font-size:26px;color:var(--p)}
 .co-empty-add span{font-size:13px;font-weight:500;color:var(--p)}
-.co-back-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border:1.5px solid var(--border);border-radius:8px;background:#fff;color:var(--t2);font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--font);margin-bottom:16px;transition:all .12s}
+.co-back-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;border:1.5px solid var(--border);border-radius:8px;background:#fff;color:var(--t2);font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .12s;flex-shrink:0}
+.co-back-btn:hover{border-color:var(--p);color:var(--p)}
 .co-back-btn:hover{border-color:var(--p);color:var(--p)}
 
 /* ─── Detail Modal (Center Popup) ─── */
@@ -569,23 +577,24 @@ body.is-admin .admin-only.block{display:block!important}
         <div class="list-hd">
           <span class="list-title" id="listTitle">검색 결과</span>
           <span class="list-cnt" id="listCnt"></span>
-          <button class="list-add-btn admin-only inline" id="listAddBtn" onclick="onListAdd()"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
-          <button class="admin-only inline" onclick="openBulkUpload('list')" style="height:32px;padding:0 12px;background:#F5F3FF;border:1px solid #C4B5FD;border-radius:8px;color:#6D28D9;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
-          <button class="co-back-btn" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
-          <input id="listSearch" type="text" placeholder="이 목록에서 검색..." oninput="filterListSearch(this.value)">
-          <select class="list-sort" id="sortSel" onchange="renderResults()"><option value="recent">최신순</option><option value="views">조회 많은순</option><option value="alpha">가나다순</option></select>
+          <input class="hd-search" id="listSearch" type="text" placeholder="목록에서 검색..." oninput="filterListSearch(this.value)">
+          <button class="hd-btn-add admin-only inline" id="listAddBtn" onclick="onListAdd()"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
+          <button class="hd-btn-bulk admin-only inline" onclick="openBulkUpload('list')"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
+          <button class="hd-btn-home" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div class="filter-chips" id="filterChips"></div>
         <div class="r-list" id="resultsList"></div>
       </div>
 
+      <!-- COMPANY VIEW -->
       <div id="viewCompanies" class="company-view-wrap" style="display:none">
         <div class="list-hd">
           <span class="list-title">기업별 정책</span>
           <span class="list-cnt" id="coCnt"></span>
-          <button class="admin-only inline" onclick="openBulkUpload('b2b')" style="height:32px;padding:0 12px;background:#F5F3FF;border:1px solid #C4B5FD;border-radius:8px;color:#6D28D9;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
-          <button class="co-back-btn" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
-          <input type="text" placeholder="기업명 검색..." id="coSearch" style="flex:1;border:1.5px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:12.5px;font-family:var(--font);outline:none" oninput="filterCoSearch(this.value)">
+          <input class="hd-search" type="text" placeholder="기업명 검색..." id="coSearch" oninput="filterCoSearch(this.value)">
+          <button class="hd-btn-add admin-only inline" onclick="openCompanyProfileForm('')"><i class="ti ti-plus" style="font-size:12px"></i>기업 추가</button>
+          <button class="hd-btn-bulk admin-only inline" onclick="openBulkUpload('b2b')"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
+          <button class="hd-btn-home" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div class="co-chips-bar" id="coChipsBar"></div>
         <div id="coSummary"></div>
@@ -597,10 +606,10 @@ body.is-admin .admin-only.block{display:block!important}
         <div class="list-hd">
           <span class="list-title">오류 해결방법</span>
           <span class="list-cnt" id="errCnt"></span>
-          <button class="list-add-btn admin-only inline" onclick="openErrorForm('')"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
-          <button class="admin-only inline" onclick="openBulkUpload('error')" style="height:32px;padding:0 12px;background:#F5F3FF;border:1px solid #C4B5FD;border-radius:8px;color:#6D28D9;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
-          <button class="co-back-btn" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
-          <input type="text" placeholder="오류 목록에서 검색..." style="flex:1;border:1.5px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:12.5px;font-family:var(--font);outline:none" oninput="filterErrSearch(this.value)">
+          <input class="hd-search" type="text" placeholder="목록에서 검색..." oninput="filterErrSearch(this.value)">
+          <button class="hd-btn-add admin-only inline" onclick="openErrorForm('')"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
+          <button class="hd-btn-bulk admin-only inline" onclick="openBulkUpload('error')"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
+          <button class="hd-btn-home" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div class="r-list" id="errList"></div>
       </div>
@@ -610,10 +619,10 @@ body.is-admin .admin-only.block{display:block!important}
         <div class="list-hd">
           <span class="list-title">상품 안내</span>
           <span class="list-cnt" id="prCnt"></span>
-          <button class="list-add-btn admin-only inline" onclick="openAddProductForm()"><i class="ti ti-plus" style="font-size:12px"></i>상품 추가</button>
-          <button class="admin-only inline" onclick="openBulkUpload('product')" style="height:32px;padding:0 12px;background:#F5F3FF;border:1px solid #C4B5FD;border-radius:8px;color:#6D28D9;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
-          <button class="co-back-btn" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
-          <input type="text" placeholder="상품 목록에서 검색..." style="flex:1;border:1.5px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:12.5px;font-family:var(--font);outline:none" oninput="filterPrSearch(this.value)">
+          <input class="hd-search" type="text" placeholder="목록에서 검색..." oninput="filterPrSearch(this.value)">
+          <button class="hd-btn-add admin-only inline" onclick="openAddProductForm()"><i class="ti ti-plus" style="font-size:12px"></i>상품 추가</button>
+          <button class="hd-btn-bulk admin-only inline" onclick="openBulkUpload('product')"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
+          <button class="hd-btn-home" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div id="prSummary"></div>
         <div id="prResultsList"></div>
