@@ -18,7 +18,7 @@
   --font:'Pretendard',-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--sb);font-family:var(--font);font-size:13px;color:var(--t1);overflow:hidden}
+html,body{background:var(--sb);font-family:var(--font);font-size:13px;color:var(--t1)}body{overflow:hidden}html{overflow:hidden}
 
 /* ─── App Shell ─── */
 .app{display:flex;height:100vh;overflow:hidden}
@@ -401,10 +401,10 @@ body.is-admin .admin-only.block{display:block!important}
 .mob-menu.open{transform:translateX(0)}
 .mob-ham{display:none;width:36px;height:36px;background:none;border:none;color:var(--t2);font-size:22px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0}
 @media(max-width:768px){
-  html{overflow-x:hidden}body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
-  .app{flex-direction:column;height:auto;min-height:100dvh}
+  html,body{overflow:auto!important;height:auto!important}
+  .app{flex-direction:column;height:auto!important;min-height:100vh;overflow:visible!important}
+  .app-main{width:100%;min-width:0;overflow:visible!important}
   .sb{display:none}
-  .app-main{width:100%;min-width:0}
   .topbar{padding:0 12px;gap:8px;height:54px}
   .mob-ham{display:flex!important}
   .topbar-search{max-width:none;flex:1}
@@ -412,7 +412,7 @@ body.is-admin .admin-only.block{display:block!important}
   .topbar-acts .tb-btn:not(.primary){display:none}
   .tb-icon{display:none}
   .tb-btn.primary{height:36px;padding:0 12px;font-size:12px}
-  .app-body{height:auto;overflow-y:visible;overflow:visible}
+  .app-body{height:auto!important;overflow:visible!important;position:static}
   .home-view{padding:14px}
   .home-cats{grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
   .home-cat{padding:14px 8px 10px}
