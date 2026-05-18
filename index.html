@@ -1341,14 +1341,45 @@ function renderNoticeList(){
   const isAdmin=currentUser&&currentUser.role==="admin";
   document.getElementById("listTitle").textContent="공지사항";
   document.getElementById("listCnt").textContent=`총 ${notices.length}건`;
-  document.getElementById("resultsList").innerHTML=notices.length?notices.map(n=>`
-    <div class="r-card" onclick="openNotice('${n.id}')">
-      <div class="r-card-top"><span class="r-card-title">${esc(n.title)}</span>${n.isNew?`<span class="r-tag" style="background:#FEF2F2;color:#991B1B;border-color:#FECACA">NEW</span>`:""}</div>
-      ${n.body?`<div class="r-card-prev">${esc(n.body.split("\n")[0])}</div>`:""}
-      <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${n.date||""}</span></div>
-    </div>`).join(""):`<div class="empty-state"><i class="ti ti-bell-off"></i><p>등록된 공지사항이 없습니다</p></div>`;
   const addBtn=document.getElementById("listAddBtn");
   if(addBtn)addBtn.style.display=isAdmin?"flex":"none";
+  if(!notices.length){
+    document.getElementById("resultsList").innerHTML=`<div class="empty-state"><i class="ti ti-bell-off"></i><p>등록된 공지사항이 없습니다</p></div>`;
+    return;
+  }
+  const bulkBar=isAdmin?`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer">
+      <input type="checkbox" id="noticeSelectAll" onchange="noticeSelectAll(this.checked)" style="width:15px;height:15px;cursor:pointer"> 전체 선택
+    </label>
+    <button class="list-add-btn" style="background:#EF4444;margin-left:auto" onclick="deleteSelectedNotices()"><i class="ti ti-trash" style="font-size:12px"></i>선택 삭제</button>
+  </div>`:"";
+  document.getElementById("resultsList").innerHTML=bulkBar+notices.map(n=>`
+    <div class="r-card" style="display:flex;align-items:flex-start;gap:10px" onclick="openNotice('${n.id}')">
+      ${isAdmin?`<input type="checkbox" class="notice-chk" value="${n.id}" style="width:15px;height:15px;margin-top:3px;flex-shrink:0;cursor:pointer" onclick="event.stopPropagation()">`:""}
+      <div style="flex:1;min-width:0">
+        <div class="r-card-top"><span class="r-card-title">${esc(n.title)}</span>${n.isNew?`<span class="r-tag" style="background:#FEF2F2;color:#991B1B;border-color:#FECACA">NEW</span>`:""}</div>
+        ${n.body?`<div class="r-card-prev">${esc(n.body.split("\n")[0])}</div>`:""}
+        <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${n.date||""}</span></div>
+      </div>
+      ${isAdmin?`<button class="d-act del" style="flex-shrink:0;height:28px;padding:0 8px" onclick="event.stopPropagation();deleteSingleNotice('${n.id}')"><i class="ti ti-trash" style="font-size:12px"></i></button>`:""}
+    </div>`).join("");
+}
+function noticeSelectAll(checked){
+  document.querySelectorAll(".notice-chk").forEach(cb=>cb.checked=checked);
+}
+function deleteSingleNotice(id){
+  if(!requireAdmin())return;
+  if(!confirm("이 공지를 삭제할까요?"))return;
+  notices=notices.filter(n=>n.id!==id);
+  saveAll();renderNoticeList();
+}
+function deleteSelectedNotices(){
+  if(!requireAdmin())return;
+  const selected=[...document.querySelectorAll(".notice-chk:checked")].map(cb=>cb.value);
+  if(!selected.length){alert("삭제할 항목을 선택해주세요.");return;}
+  if(!confirm(`선택한 ${selected.length}개를 삭제할까요?`))return;
+  notices=notices.filter(n=>!selected.includes(n.id));
+  saveAll();renderNoticeList();
 }
 function openNotice(id){
   const n=notices.find(x=>x.id===id);if(!n)return;
