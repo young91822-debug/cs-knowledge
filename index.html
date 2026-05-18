@@ -1227,7 +1227,7 @@ function renderHome(){
     {label:"B2C",icon:"ti-users",cls:"cat-green",cnt:()=>entries.filter(e=>e.part==="B2C").length,action:"filterPart2('B2C')"},
     {label:"B2B",icon:"ti-building-skyscraper",cls:"cat-blue",cnt:()=>entries.filter(e=>e.part==="B2B 상위기업").length,action:"filterPart2('B2B 상위기업')"},
     {label:"상품 안내",icon:"ti-package",cls:"cat-amber",cnt:()=>entries.filter(e=>e.part==="상품 안내").length,action:"filterPart2('상품 안내')"},
-    {label:"오류 해결방법",icon:"ti-bug",cls:"cat-purple",cnt:()=>entries.filter(e=>["LMS 기능","ADMIN/뉴어드민"].includes(e.part)).length,action:"filterMultiPart(['LMS 기능','ADMIN/뉴어드민'])"},
+    {label:"오류 해결방법",icon:"ti-bug",cls:"cat-purple",cnt:()=>entries.filter(e=>e.part==="오류 해결방법").length,action:"openErrorView()"},
     {label:"업무 요청",icon:"ti-clipboard-check",cls:"cat-pink",cnt:()=>entries.filter(e=>e.part==="운영지원").length,action:"filterPart2('운영지원')"},
     {label:"공지사항",icon:"ti-bell",cls:"cat-red",cnt:()=>notices.length,action:"setView('notices')"},
   ];
