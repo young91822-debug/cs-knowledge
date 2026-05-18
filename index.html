@@ -496,6 +496,7 @@ body.is-admin .admin-only.block{display:block!important}
         <div class="sb-item" data-view="error" onclick="openErrorView()"><i class="ti ti-bug"></i><span>오류 해결방법</span></div>
         <div class="sb-divider"></div>
         <div class="sb-item" data-view="notices" onclick="setView('notices')"><i class="ti ti-bell"></i><span>공지사항</span><span class="sb-badge-new" id="noticeBadge" style="display:none">N</span></div>
+        <div class="sb-item" data-view="myspace" onclick="openMySpace()"><i class="ti ti-user-circle"></i><span>마이스페이스</span></div>
       </div>
     </div>
     <div class="sb-bottom">
@@ -628,6 +629,24 @@ body.is-admin .admin-only.block{display:block!important}
         <div id="prResultsList"></div>
       </div>
 
+      <!-- MYSPACE VIEW -->
+      <div id="viewMySpace" class="list-view" style="display:none">
+        <div class="list-hd">
+          <span class="list-title">마이스페이스</span>
+          <button class="hd-btn-home" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:10px;display:flex;align-items:center;gap:5px"><i class="ti ti-star" style="font-size:14px"></i>즐겨찾기 <span id="bmCnt" style="font-weight:400;color:var(--t3)"></span></div>
+            <div id="myBmList" class="r-list"></div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:5px"><i class="ti ti-history" style="font-size:14px"></i>최근 본 문서 <span id="rvCnt" style="font-weight:400;color:var(--t3)"></span></div>
+            <div id="myRvList" class="r-list"></div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /app-body -->
   </div><!-- /app-main -->
 
@@ -669,6 +688,18 @@ body.is-admin .admin-only.block{display:block!important}
   </div>
 </div>
 
+<!-- Confluence Modal -->
+<div id="confluenceModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div style="padding:16px 20px;background:linear-gradient(135deg,#0052CC,#0065FF);display:flex;align-items:center;gap:10px">
+      <i class="ti ti-books" style="font-size:20px;color:#fff"></i>
+      <span style="font-size:15px;font-weight:700;color:#fff">Confluence 바로가기</span>
+      <button onclick="document.getElementById('confluenceModal').style.display='none'" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;border-radius:7px;width:30px;height:30px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:8px" id="confluenceLinkList"></div>
+  </div>
+</div>
+
 <!-- Jira Modal -->
 <div id="jiraModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;padding:20px">
   <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)">
@@ -697,6 +728,7 @@ body.is-admin .admin-only.block{display:block!important}
     <div class="sb-item" onclick="openErrorView();toggleMobMenu()"><i class="ti ti-bug"></i><span>오류 해결방법</span></div>
     <div class="sb-divider"></div>
     <div class="sb-item" onclick="setView('notices');toggleMobMenu()"><i class="ti ti-bell"></i><span>공지사항</span></div>
+    <div class="sb-item" onclick="openMySpace();toggleMobMenu()"><i class="ti ti-user-circle"></i><span>마이스페이스</span></div>
     <div class="sb-item" onclick="setView('bookmarks');toggleMobMenu()"><i class="ti ti-bookmark"></i><span>즐겨찾기</span></div>
   </div>
   <div class="sb-bottom">
@@ -885,7 +917,7 @@ function logout(){closeAdmin();currentUser=null;localStorage.removeItem(SESSION)
 function requireAdmin(){if(currentUser&&currentUser.role==="admin")return true;alert("관리자만 사용할 수 있는 기능입니다.");return false;}
 
 /* ─── View Switching ─── */
-function showView(v){["viewHome","viewList","viewCompanies","viewProducts","viewErrors"].forEach(id=>{document.getElementById(id).style.display=id===v?"block":"none";});}
+function showView(v){["viewHome","viewList","viewCompanies","viewProducts","viewErrors","viewMySpace"].forEach(id=>{document.getElementById(id).style.display=id===v?"block":"none";});}
 function setSbView(v){document.querySelectorAll(".sb-item").forEach(el=>el.classList.toggle("on",el.dataset.view===v));}
 function setView(v){
   curView=v;filterMultiple=[];
@@ -967,6 +999,44 @@ function confirmBulkImport(){
   else if(_bulkType==="error")openErrorView();
   else renderResults();
   window._bulkRows=null;
+}
+function openMySpace(){
+  curView="myspace";showView("viewMySpace");setSbView("myspace");
+  const bmItems=bookmarks.map(id=>entries.find(e=>e.id===id)).filter(Boolean);
+  const rvItems=recentViewed.map(id=>entries.find(e=>e.id===id)).filter(Boolean);
+  document.getElementById("bmCnt").textContent=`${bmItems.length}건`;
+  document.getElementById("rvCnt").textContent=`${rvItems.length}건`;
+  const cardHtml=(list)=>list.length?list.map(e=>`
+    <div class="r-card" onclick="openDetail('${e.id}')">
+      <div class="r-card-top"><span class="r-card-title">${esc(e.title)}</span><button class="r-star on" onclick="toggleBM(event,'${e.id}')">★</button></div>
+      <div class="r-card-tags"><span class="r-tag">${esc(e.part)}</span>${e.company?`<span class="r-tag co">${esc(e.company)}</span>`:""}</div>
+      <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${e.updatedAt||""}</span><span><i class="ti ti-eye"></i>${e.views||0}회</span></div>
+    </div>`).join(""):`<div class="empty-state" style="padding:32px 0"><i class="ti ti-star-off"></i><p style="font-size:12px">없습니다</p></div>`;
+  document.getElementById("myBmList").innerHTML=cardHtml(bmItems);
+  document.getElementById("myRvList").innerHTML=cardHtml(rvItems);
+}
+function openConfluenceModal(){
+  const links=[
+    {label:"전사",url:"https://ihunet.atlassian.net/wiki/x/i4Tb6"},
+    {label:"교육서비스본부",url:"https://ihunet.atlassian.net/wiki/x/-gGYMQE"},
+    {label:"고객행복팀",url:"https://ihunet.atlassian.net/wiki/x/sQNO6w"},
+    {label:"교육운영1팀",url:"https://ihunet.atlassian.net/wiki/x/VYJJ-/"},
+    {label:"교육운영2팀",url:"https://ihunet.atlassian.net/wiki/x/5gJI-/"},
+    {label:"교육운영3팀",url:"https://ihunet.atlassian.net/wiki/x/hAME-Q"},
+  ];
+  document.getElementById("confluenceLinkList").innerHTML=links.map(l=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F0F4FF;border:1px solid #BFDBFE;border-radius:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;background:#EFF6FF;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="ti ti-books" style="font-size:17px;color:#1D4ED8"></i>
+        </div>
+        <span style="font-size:13px;font-weight:600;color:#1E293B">${l.label}</span>
+      </div>
+      <a href="${l.url}" target="_blank" style="display:flex;align-items:center;gap:5px;height:32px;padding:0 14px;background:#1D4ED8;border-radius:8px;color:#fff;font-size:12px;font-weight:600;text-decoration:none;font-family:var(--font)">
+        <i class="ti ti-external-link" style="font-size:13px"></i>바로가기
+      </a>
+    </div>`).join("");
+  document.getElementById("confluenceModal").style.display="flex";
 }
 function openJiraModal(){
   const links=[
@@ -1458,7 +1528,7 @@ function renderHome(){
     {label:"시험 사이트",icon:"ti-clipboard-check",color:"#059669",bg:"#D1FAE5",action:`openQuickModal('quiz.html','시험 사이트','ti-clipboard-check')`},
     {label:"팀 캘린더",icon:"ti-calendar",color:"#0284C7",bg:"#E0F2FE",action:`openQuickModal('calendar.html','팀 캘린더','ti-calendar')`},
     {label:"Jira",icon:"ti-brand-jira",color:"#0052CC",bg:"#DBEAFE",action:`openJiraModal()`},
-    {label:"Confluence",icon:"ti-books",color:"#1D4ED8",bg:"#EFF6FF",action:`alert('링크 준비 중이에요!')`},
+    {label:"Confluence",icon:"ti-books",color:"#1D4ED8",bg:"#EFF6FF",action:`openConfluenceModal()`},
   ];
   document.getElementById("quickMenu").innerHTML=quickItems.map(q=>`
     <div style="position:relative">
