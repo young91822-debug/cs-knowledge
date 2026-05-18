@@ -395,6 +395,51 @@ body.is-admin .admin-only.block{display:block!important}
 .history-list{display:flex;flex-direction:column;gap:6px}
 .history-row{border-left:3px solid var(--p);background:#F8FAFC;padding:8px 11px;font-size:12px;color:var(--t2);border-radius:0 7px 7px 0}
 .history-row small{display:block;color:var(--t3);margin-top:3px;font-size:11px}
+.mob-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;opacity:0;pointer-events:none;transition:opacity .25s}
+.mob-overlay.show{opacity:1;pointer-events:all}
+.mob-menu{position:fixed;top:0;left:0;bottom:0;width:260px;background:var(--sb);z-index:401;transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow-y:auto}
+.mob-menu.open{transform:translateX(0)}
+.mob-ham{display:none;width:36px;height:36px;background:none;border:none;color:var(--t2);font-size:22px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0}
+@media(max-width:768px){
+  body,html{overflow-x:hidden}
+  .app{flex-direction:column;height:auto;min-height:100vh}
+  .sb{display:none}
+  .app-main{width:100%;min-width:0}
+  .topbar{padding:0 12px;gap:8px;height:54px}
+  .mob-ham{display:flex!important}
+  .topbar-search{max-width:none;flex:1}
+  .topbar-search input{height:38px;font-size:13px}
+  .topbar-acts .tb-btn:not(.primary){display:none}
+  .tb-icon{display:none}
+  .tb-btn.primary{height:36px;padding:0 12px;font-size:12px}
+  .app-body{height:calc(100vh - 54px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .home-view{padding:14px}
+  .home-cats{grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+  .home-cat{padding:14px 8px 10px}
+  .home-cat-icon{width:36px;height:36px;font-size:18px}
+  .home-cat-label{font-size:11px}
+  .home-cat-cnt{font-size:10px}
+  .home-grid{grid-template-columns:1fr;gap:12px}
+  .home-greeting h1{font-size:17px}
+  .co-card-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .cat-card-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .list-view,.company-view-wrap{padding:14px}
+  .detail-drawer{width:100%;max-width:100%!important;max-height:92vh;top:auto;bottom:0;left:0;transform:translateY(100%)!important;border-radius:16px 16px 0 0;border-bottom:none}
+  .detail-drawer.open{transform:translateY(0)!important;opacity:1}
+  #drawerContent{grid-template-columns:1fr}
+  .drawer-body .ds{grid-column:1/-1}
+  .modal-ov{padding:0;align-items:flex-end}
+  .modal{max-width:100%!important;border-radius:16px 16px 0 0!important;margin:0}
+  .modal-body{max-height:65vh}
+  .filter-chips{gap:5px}
+  .chip{height:28px;padding:0 10px;font-size:11.5px}
+  .ops-grid{grid-template-columns:1fr}
+  .user-form{grid-template-columns:1fr}
+  .admin-top{flex-wrap:wrap;height:auto;padding:10px;gap:6px}
+  .admin-tabs{flex-wrap:wrap;gap:4px}
+  .newguide-banner{flex-wrap:wrap}
+  .co-summary-hd{flex-wrap:wrap}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -455,6 +500,7 @@ body.is-admin .admin-only.block{display:block!important}
   <div class="app-main">
     <!-- Topbar -->
     <header class="topbar">
+      <button class="mob-ham" onclick="toggleMobMenu()" aria-label="메뉴"><i class="ti ti-menu-2"></i></button>
       <div class="topbar-search">
         <i class="ti ti-search"></i>
         <input id="mainSearch" type="text" placeholder="검색어를 입력하세요  (예: 수료증 출력, 기간 연장, 로그인 오류…)" oninput="onSearchInput(this.value)" onkeydown="onSearchKey(event)" autocomplete="off">
@@ -567,6 +613,36 @@ body.is-admin .admin-only.block{display:block!important}
     </div>
   </div>
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDetailPanel()"></div>
+
+<!-- Mobile Menu -->
+<div class="mob-overlay" id="mobOverlay" onclick="toggleMobMenu()"></div>
+<div class="mob-menu" id="mobMenu">
+  <div class="sb-brand" style="cursor:pointer" onclick="goHome();toggleMobMenu()">
+    <div class="sb-badge">CS</div>
+    <div><div class="sb-name">지식창고</div><div class="sb-sub">Knowledge Base</div></div>
+  </div>
+  <div class="sb-scroll">
+    <div class="sb-item" onclick="goHome();toggleMobMenu()"><i class="ti ti-home-2"></i><span>홈</span></div>
+    <div class="sb-divider"></div>
+    <div class="sb-item" onclick="filterPart2('B2C');toggleMobMenu()"><i class="ti ti-users"></i><span>B2C</span></div>
+    <div class="sb-item" onclick="filterPart2('B2B 상위기업');toggleMobMenu()"><i class="ti ti-building-skyscraper"></i><span>B2B</span></div>
+    <div class="sb-item" onclick="filterPart2('상품 안내');toggleMobMenu()"><i class="ti ti-package"></i><span>상품 안내</span></div>
+    <div class="sb-item" onclick="openErrorView();toggleMobMenu()"><i class="ti ti-bug"></i><span>오류 해결방법</span></div>
+    <div class="sb-divider"></div>
+    <div class="sb-item" onclick="setView('notices');toggleMobMenu()"><i class="ti ti-bell"></i><span>공지사항</span></div>
+    <div class="sb-item" onclick="setView('bookmarks');toggleMobMenu()"><i class="ti ti-bookmark"></i><span>즐겨찾기</span></div>
+  </div>
+  <div class="sb-bottom">
+    <div class="sb-user" id="mobSbUser">
+      <div class="sb-avatar" id="mobSbAvatar">?</div>
+      <div><div class="sb-uname" id="mobSbUname">로그인 전</div><div class="sb-urole" id="mobSbUrole"></div></div>
+    </div>
+    <div class="sb-btns">
+      <button class="sb-btn admin-only" onclick="openAdmin();toggleMobMenu()"><i class="ti ti-settings" style="font-size:14px"></i>관리자</button>
+      <button class="sb-btn" onclick="logout();toggleMobMenu()"><i class="ti ti-logout" style="font-size:14px"></i>로그아웃</button>
+    </div>
+  </div>
+</div>
 
 </div><!-- /app -->
 
@@ -717,6 +793,12 @@ function applyRoleUI(){
     av.textContent=currentUser.id.slice(0,2).toUpperCase();
     un.textContent=currentUser.id;
     ur.textContent=isAdmin?"관리자":"상담원";
+    const ma=document.getElementById("mobSbAvatar");
+    const mu=document.getElementById("mobSbUname");
+    const mr=document.getElementById("mobSbUrole");
+    if(ma)ma.textContent=currentUser.id.slice(0,2).toUpperCase();
+    if(mu)mu.textContent=currentUser.id;
+    if(mr)mr.textContent=isAdmin?"관리자":"상담원";
   }else{av.textContent="?";un.textContent="로그인 전";ur.textContent="";}
   if(currentUser){
     renderHome();
@@ -738,6 +820,13 @@ function setView(v){
   else if(v==="notices"){showView("viewList");setSbView("notices");renderNoticeList();}
   else if(v==="newguide"){showView("viewList");setSbView("");const ng=entries.filter(e=>e.newGuide&&e.status!=="hidden");renderList(ng,"신규 상담사 가이드",`총 ${ng.length}건`);}
   closeDetailPanel();
+}
+function toggleMobMenu(){
+  const menu=document.getElementById("mobMenu");
+  const overlay=document.getElementById("mobOverlay");
+  const isOpen=menu.classList.toggle("open");
+  overlay.classList.toggle("show",isOpen);
+  document.body.style.overflow=isOpen?"hidden":"";
 }
 function goHome(){curView="home";filterMultiple=[];showView("viewHome");setSbView("home");renderHome();}
 function filterPart2(p){
