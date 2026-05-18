@@ -449,7 +449,6 @@ body.is-admin .admin-only.block{display:block!important}
   .co-summary-hd{flex-wrap:wrap}
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body class="locked">
@@ -464,13 +463,6 @@ body.is-admin .admin-only.block{display:block!important}
     <div class="login-msg" id="loginMsg"></div>
   </form>
 </div>
-
-<!-- Loading Overlay -->
-<div id="loadingOverlay" style="position:fixed;inset:0;background:#0E1C3E;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:700;gap:16px">
-  <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite"></div>
-  <p style="color:rgba(255,255,255,.7);font-size:13px;font-family:-apple-system,sans-serif">데이터 불러오는 중...</p>
-</div>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
 <!-- ─── App ─── -->
 <div class="app" id="app">
@@ -781,18 +773,7 @@ let historyLog=[],knowledgeRequests=[],missingSearches=[],customCategories={},co
 let selectedCompany="전체",searchQ="",filterCo="전체",filterPart="전체",filterSub="전체";
 let selectedProduct="전체",selectedProductSection=null;
 let filterMultiple=[],curView="home",sortMode="recent",showChips=false;
-const BK="csBM_v1",RK="csRV_v1",SESSION="csSession";
-const SUPABASE_URL="https://nqlenbachncjkzirvlkv.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xbGVuYmFjaG5jamt6aXJ2bGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NzMyNDQsImV4cCI6MjA5NDQ0OTI0NH0.UHnT0043zrmpQX02nV2Ut1q1RFuwHES7RPr93shhLYI";
-let _sb=null;
-function getSB(){if(!_sb)_sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);return _sb;}
-
-async function sbGet(key){
-  try{const{data,error}=await getSB().from("kv_store").select("value").eq("key",key).maybeSingle();if(error)throw error;return data?.value||null;}catch{return null;}
-}
-async function sbSet(key,value){
-  try{const{error}=await getSB().from("kv_store").upsert({key,value,updated_at:new Date().toISOString()},{onConflict:"key"});if(error)throw error;}catch(e){console.error("Supabase save error:",e);}
-}
+const BK="csBM_v1",RK="csRV_v1",SESSION="csSession",SK="csDB_v1";
 
 /* ─── Utils ─── */
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
@@ -801,29 +782,31 @@ function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace
 function getGreeting(){const h=new Date().getHours();const n=currentUser?currentUser.id:"";if(h<12)return`좋은 아침이에요, ${n}님! ☀️`;if(h<18)return`안녕하세요, ${n}님! 👋`;return`수고 많으셨어요, ${n}님! 🌙`;}
 
 /* ─── Data ─── */
-let _saveTimer=null;
 function saveAll(){
-  try{localStorage.setItem(BK,JSON.stringify(bookmarks));localStorage.setItem(RK,JSON.stringify(recentViewed));}catch{}
-  clearTimeout(_saveTimer);
-  _saveTimer=setTimeout(()=>{sbSet("cs_shared",{entries,users,historyLog,knowledgeRequests,missingSearches,customCategories,companyProfiles,productProfiles,notices});},600);
+  try{
+    const data={entries,users,historyLog,knowledgeRequests,missingSearches,customCategories,companyProfiles,productProfiles,notices};
+    localStorage.setItem(SK,JSON.stringify(data));
+    localStorage.setItem(BK,JSON.stringify(bookmarks));
+    localStorage.setItem(RK,JSON.stringify(recentViewed));
+  }catch(e){console.error("Save error:",e);}
 }
 function applyCustomCategories(){customCategories={b2b:[],b2c:[],lms:[],admin:[],ops:[],...customCategories};customCategories.b2b.forEach(x=>{if(!B2B_COS.includes(x))B2B_COS.push(x)});customCategories.b2c.forEach(x=>{if(!B2C_PRODUCTS.includes(x))B2C_PRODUCTS.push(x)});customCategories.lms.forEach(x=>{if(!LMS_CATS.includes(x))LMS_CATS.push(x)});customCategories.admin.forEach(x=>{if(!ADMIN_SUBS.includes(x))ADMIN_SUBS.push(x)});customCategories.ops.forEach(x=>{if(!OPS_SUBS.includes(x))OPS_SUBS.push(x)});}
 function statusLabel(s){return{active:"사용중",draft:"작성중",review:"검토중",hidden:"숨김"}[s||"active"]||"사용중";}
 function statusClass(s){return"status-badge status-"+(s||"active");}
-async function loadData(){
-  document.getElementById("loadingOverlay").style.display="flex";
+function loadData(){
   try{
-    const shared=await sbGet("cs_shared");
-    if(shared){
-      entries=Array.isArray(shared.entries)?shared.entries:[];
-      users=Array.isArray(shared.users)?shared.users:[];
-      historyLog=Array.isArray(shared.historyLog)?shared.historyLog:[];
-      knowledgeRequests=Array.isArray(shared.knowledgeRequests)?shared.knowledgeRequests:[];
-      missingSearches=Array.isArray(shared.missingSearches)?shared.missingSearches:[];
-      customCategories=shared.customCategories||{};
-      companyProfiles=shared.companyProfiles||{};
-      notices=Array.isArray(shared.notices)?shared.notices:[];
-      productProfiles=shared.productProfiles||{};
+    const raw=localStorage.getItem(SK);
+    if(raw){
+      const d=JSON.parse(raw);
+      entries=Array.isArray(d.entries)?d.entries:[];
+      users=Array.isArray(d.users)?d.users:[];
+      historyLog=Array.isArray(d.historyLog)?d.historyLog:[];
+      knowledgeRequests=Array.isArray(d.knowledgeRequests)?d.knowledgeRequests:[];
+      missingSearches=Array.isArray(d.missingSearches)?d.missingSearches:[];
+      customCategories=d.customCategories||{};
+      companyProfiles=d.companyProfiles||{};
+      productProfiles=d.productProfiles||{};
+      notices=Array.isArray(d.notices)?d.notices:[];
     }
   }catch(e){console.error("Load error:",e);}
   if(!Array.isArray(users)||!users.length){
@@ -836,7 +819,6 @@ async function loadData(){
   entries=entries.map(e=>({...e,status:e.status||"active",history:e.history||[]}));
   if(!Array.isArray(entries))entries=[];
   initFilters();
-  document.getElementById("loadingOverlay").style.display="none";
 }
 
 /* ─── Auth ─── */
@@ -976,12 +958,12 @@ function filterPart2(p){
 }
 /* ─── Supabase Storage 파일 업로드 ─── */
 async function uploadFileToStorage(file){
-  const ext=file.name.split('.').pop();
-  const path=`proposals/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-  const{data,error}=await getSB().storage.from("cs-files").upload(path,file,{upsert:true});
-  if(error)throw new Error("파일 업로드 실패: "+error.message);
-  const{data:pub}=getSB().storage.from("cs-files").getPublicUrl(path);
-  return pub.publicUrl;
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>resolve(e.target.result);
+    reader.onerror=()=>reject(new Error("파일 읽기 실패"));
+    reader.readAsDataURL(file);
+  });
 }
 
 /* ─── 상품 안내 뷰 ─── */
@@ -2291,7 +2273,7 @@ function removeCategory(type,name){customCategories[type]=(customCategories[type
 function renderCategories(){const box=document.getElementById("categoryList");if(!box)return;const labels={b2b:"B2B 기업명",b2c:"B2C 상품",lms:"LMS 기능",admin:"ADMIN/뉴어드민",ops:"운영지원"};box.innerHTML=Object.keys(labels).map(type=>`<h3 style="font-size:12px;font-weight:700;color:var(--t2);margin:10px 0 6px">${labels[type]}</h3><div class="cat-pill-wrap">`+((customCategories[type]||[]).map(name=>`<span class="cat-pill">${esc(name)} <button onclick="removeCategory('${type}','${esc(name)}')">×</button></span>`).join("")||`<span style="font-size:11.5px;color:var(--t3)">추가된 분류 없음</span>`)+`</div>`).join('<div style="height:8px"></div>');}
 
 /* ─── Init ─── */
-loadData().then(()=>{restoreSession();initSidebar();});
+loadData();restoreSession();initSidebar();
 </script>
 </body>
 </html>
