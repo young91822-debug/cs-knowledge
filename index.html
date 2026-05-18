@@ -559,7 +559,7 @@ body.is-admin .admin-only.block{display:block!important}
           <span class="list-title" id="listTitle">검색 결과</span>
           <span class="list-cnt" id="listCnt"></span>
           <select class="list-sort" id="sortSel" onchange="renderResults()"><option value="recent">최신순</option><option value="views">조회 많은순</option><option value="alpha">가나다순</option></select>
-          <button class="list-add-btn admin-only inline" id="listAddBtn" onclick="openNoticeForm('')"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
+          <button class="list-add-btn admin-only inline" id="listAddBtn" onclick="onListAdd()"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
         </div>
         <div class="filter-chips" id="filterChips"></div>
         <div class="r-list" id="resultsList"></div>
@@ -1228,7 +1228,6 @@ function renderHome(){
     {label:"B2B",icon:"ti-building-skyscraper",cls:"cat-blue",cnt:()=>entries.filter(e=>e.part==="B2B 상위기업").length,action:"filterPart2('B2B 상위기업')"},
     {label:"상품 안내",icon:"ti-package",cls:"cat-amber",cnt:()=>entries.filter(e=>e.part==="상품 안내").length,action:"filterPart2('상품 안내')"},
     {label:"오류 해결방법",icon:"ti-bug",cls:"cat-purple",cnt:()=>entries.filter(e=>e.part==="오류 해결방법").length,action:"openErrorView()"},
-    {label:"업무 요청",icon:"ti-clipboard-check",cls:"cat-pink",cnt:()=>entries.filter(e=>e.part==="운영지원").length,action:"filterPart2('운영지원')"},
     {label:"공지사항",icon:"ti-bell",cls:"cat-red",cnt:()=>notices.length,action:"setView('notices')"},
   ];
   document.getElementById("homeCats").innerHTML=cats.map(c=>`
@@ -1652,6 +1651,10 @@ function deleteOpsEntry(id,company){if(!requireAdmin())return;if(!confirm("이 �
 function doDelete(id){if(!requireAdmin())return;if(!confirm("이 항목을 삭제할까요?"))return;entries=entries.filter(e=>e.id!==id);saveAll();selId=null;closeDetailPanel();renderResults();}
 
 /* ─── Add/Edit Modal ─── */
+function onListAdd(){
+  if(curView==="notices")openNoticeForm('');
+  else openAdd();
+}
 function openAdd(){if(!requireAdmin())return;const company=curView==="companies"&&selectedCompany!=="전체"?selectedCompany:"";showForm({part:"B2B 상위기업",company,version:"1.0",updatedBy:currentUser?currentUser.id:""},false);}
 function openEdit(id){if(!requireAdmin())return;const e=entries.find(x=>x.id===id);if(e)showForm(e,true);}
 function showForm(d,isEdit){
