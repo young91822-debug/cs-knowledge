@@ -633,6 +633,18 @@ body.is-admin .admin-only.block{display:block!important}
   </div>
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDetailPanel()"></div>
 
+<!-- Jira Modal -->
+<div id="jiraModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div style="padding:16px 20px;background:linear-gradient(135deg,#0052CC,#0065FF);display:flex;align-items:center;gap:10px">
+      <i class="ti ti-brand-jira" style="font-size:20px;color:#fff"></i>
+      <span style="font-size:15px;font-weight:700;color:#fff">Jira 바로가기</span>
+      <button onclick="document.getElementById('jiraModal').style.display='none'" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;border-radius:7px;width:30px;height:30px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:8px" id="jiraLinkList"></div>
+  </div>
+</div>
+
 <!-- Onboarding Modal -->
 <div id="onboardingModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:600;align-items:center;justify-content:center;padding:20px">
   <div style="background:#fff;border-radius:14px;width:100%;max-width:1000px;height:90vh;display:flex;flex-direction:column;overflow:hidden">
@@ -869,14 +881,38 @@ function setView(v){
   else if(v==="newguide"){showView("viewList");setSbView("");const ng=entries.filter(e=>e.newGuide&&e.status!=="hidden");renderList(ng,"신규 상담사 가이드",`총 ${ng.length}건`);}
   closeDetailPanel();
 }
-function toggleJiraMenu(e){
-  e.stopPropagation();
-  const dd=document.getElementById("jiraDropdown");
-  if(dd)dd.style.display=dd.style.display==="none"?"block":"none";
+function openJiraModal(){
+  const links=[
+    {label:"교육운영팀 업무요청",url:"https://ihunet.atlassian.net/jira/core/projects/FIWQ/board?filter=reporter+%3D+%225bd12032d0f01e7162be68be%22&groupBy=status"},
+    {label:"계산서 발행 업무요청",url:"https://ihunet.atlassian.net/jira/core/projects/CJKK/list"},
+    {label:"고객행복팀 업무요청",url:"https://ihunet.atlassian.net/jira/core/projects/NNQB/board?filter=&groupBy=status"},
+    {label:"VOC 업무요청",url:"https://ihunet.atlassian.net/jira/software/projects/VOC/boards/1498"},
+    {label:"개발팀 업무요청",url:"https://ihunet.atlassian.net/jira/software/projects/HRFW/form"},
+    {label:"컨매팀 업무요청",url:"https://ihunet.atlassian.net/jira/software/projects/INOQ/boards/1531"},
+  ];
+  document.getElementById("jiraLinkList").innerHTML=links.map(l=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#F8F9FF;border:1px solid #DBEAFE;border-radius:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;background:#EFF6FF;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="ti ti-brand-jira" style="font-size:17px;color:#0052CC"></i>
+        </div>
+        <span style="font-size:13px;font-weight:600;color:#1E293B">${l.label}</span>
+      </div>
+      <a href="${l.url}" target="_blank" style="display:flex;align-items:center;gap:5px;height:32px;padding:0 14px;background:#0052CC;border-radius:8px;color:#fff;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;font-family:var(--font)">
+        <i class="ti ti-external-link" style="font-size:13px"></i>바로가기
+      </a>
+    </div>`).join("");
+  document.getElementById("jiraModal").style.display="flex";
 }
-function openOnboarding(){
+function openQuickModal(file,title,icon){
   const modal=document.getElementById("onboardingModal");
-  document.getElementById("onboardingFrame").src="https://young91822-debug.github.io/cs-knowledge/onboarding.html";
+  const hd=modal.querySelector("div>div:first-child");
+  if(hd){
+    hd.innerHTML=`<i class="ti ${icon}" style="font-size:18px;color:#A78BFA"></i>
+      <span style="font-size:14px;font-weight:700;color:#fff">${title}</span>
+      <button onclick="closeOnboarding()" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;border-radius:7px;width:30px;height:30px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-x"></i></button>`;
+  }
+  document.getElementById("onboardingFrame").src=`https://young91822-debug.github.io/cs-knowledge/${file}`;
   modal.style.display="flex";
 }
 function closeOnboarding(){
@@ -1343,9 +1379,10 @@ function renderHome(){
     {label:"컨매팀 업무요청",url:"https://ihunet.atlassian.net/jira/software/projects/INOQ/boards/1531?atlOrigin=eyJpIjoiNmJiMTJhNTNmNDY5NGNkZGExOWMyMzk5ODk1ZGI5ZWMiLCJwIjoiaiJ9"},
   ];
   const quickItems=[
-    {label:"신규입사자 온보딩",icon:"ti-rocket",color:"#7C3AED",bg:"#EDE9FE",action:`openOnboarding()`},
-    {label:"시험 사이트",icon:"ti-clipboard-check",color:"#059669",bg:"#D1FAE5",action:`alert('링크 준비 중이에요!')`},
-    {label:"Jira",icon:"ti-brand-jira",color:"#0052CC",bg:"#DBEAFE",action:`toggleJiraMenu(event)`},
+    {label:"신규입사자 온보딩",icon:"ti-rocket",color:"#7C3AED",bg:"#EDE9FE",action:`openQuickModal('onboarding.html','신규입사자 온보딩','ti-rocket')`},
+    {label:"시험 사이트",icon:"ti-clipboard-check",color:"#059669",bg:"#D1FAE5",action:`openQuickModal('quiz.html','시험 사이트','ti-clipboard-check')`},
+    {label:"팀 캘린더",icon:"ti-calendar",color:"#0284C7",bg:"#E0F2FE",action:`openQuickModal('calendar.html','팀 캘린더','ti-calendar')`},
+    {label:"Jira",icon:"ti-brand-jira",color:"#0052CC",bg:"#DBEAFE",action:`openJiraModal()`},
     {label:"Confluence",icon:"ti-books",color:"#1D4ED8",bg:"#EFF6FF",action:`alert('링크 준비 중이에요!')`},
   ];
   document.getElementById("quickMenu").innerHTML=quickItems.map(q=>`
@@ -1353,9 +1390,7 @@ function renderHome(){
       <button onclick="${q.action}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:130px;height:100px;background:${q.bg};border:1.5px solid ${q.color}33;border-radius:16px;color:${q.color};font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .18s;box-shadow:0 2px 10px ${q.color}15;flex-shrink:0" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px ${q.color}25'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 10px ${q.color}15'">
         <i class="ti ${q.icon}" style="font-size:28px"></i>${q.label}${q.label==="Jira"?` <i class="ti ti-chevron-down" style="font-size:11px;margin-top:-6px"></i>`:""}
       </button>
-      ${q.label==="Jira"?`<div id="jiraDropdown" style="display:none;position:absolute;top:108px;left:0;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:200;min-width:220px;overflow:hidden">
-        ${jiraLinks.map(l=>`<a href="${l.url}" target="_blank" onclick="document.getElementById('jiraDropdown').style.display='none'" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:12.5px;color:var(--t1);text-decoration:none;border-bottom:1px solid #F3F5F9;transition:background .1s;font-family:var(--font)" onmouseover="this.style.background='#F0F4FF'" onmouseout="this.style.background='#fff'"><i class="ti ti-brand-jira" style="font-size:15px;color:#0052CC;flex-shrink:0"></i>${l.label}</a>`).join("")}
-      </div>`:""}
+      ${q.label==="Jira"?``:""}
     </div>`).join("");
 
   /* 외부 클릭 시 드롭다운 닫기 */
