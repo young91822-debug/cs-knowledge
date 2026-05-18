@@ -908,6 +908,7 @@ function renderProductView(product="전체",section=null){
     const target=all.filter(e=>e.productName===product&&e.productSection===section);
     document.getElementById("prCnt").textContent=`${product} › ${section} · ${target.length}건`;
     document.getElementById("prSummary").innerHTML=`
+      <button class="co-back-btn" onclick="renderProductView('${esc(product)}')"><i class="ti ti-arrow-left" style="font-size:14px"></i>카테고리 목록</button>
       <div class="breadcrumb">
         <span class="bc-link" onclick="renderProductView('전체')">상품 목록</span>
         <i class="ti ti-chevron-right"></i>
