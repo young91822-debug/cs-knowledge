@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>학습 관리 플랫폼</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;}
+.app{max-width:860px;margin:0 auto;padding:1rem;}
+.nav{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;background:#fff;padding:1rem;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.nb{padding:6px 13px;border-radius:8px;border:1px solid #e0e0e0;background:transparent;cursor:pointer;font-size:13px;color:#666;transition:all .15s;}
+.nb:hover{background:#f5f5f5;}
+.nb.act{background:#f0f0f0;color:#1a1a1a;font-weight:500;}
+.nb.atab{border-color:#c4b5fd;color:#7c3aed;}
+.nb.atab.act{background:#ede9fe;color:#5b21b6;}
+.nb.satab{border-color:#6ee7b7;color:#065f46;}
+.nb.satab.act{background:#d1fae5;color:#065f46;}
+.sec{display:none;}.sec.act{display:block;}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:1rem 1.25rem;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+label{font-size:13px;color:#666;display:block;margin-bottom:5px;}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;background:#fff;color:#1a1a1a;outline:none;transition:border .15s;}
+input:focus,select:focus,textarea:focus{border-color:#999;}
+textarea{resize:vertical;min-height:70px;}
+.btn{padding:8px 16px;border-radius:8px;border:1px solid #e0e0e0;background:#fff;cursor:pointer;font-size:13px;color:#1a1a1a;transition:all .15s;}
+.btn:hover{background:#f5f5f5;}
+.btn:active{transform:scale(.98);}
+.btn.p{background:#10b981;border-color:#059669;color:#fff;font-weight:500;}
+.btn.p:hover{background:#059669;}
+.btn.pu{background:#ede9fe;border-color:#c4b5fd;color:#5b21b6;font-weight:500;}
+.btn.pu:hover{background:#ddd6fe;}
+.btn.sa{background:#d1fae5;border-color:#6ee7b7;color:#065f46;font-weight:500;}
+.btn.sa:hover{background:#a7f3d0;}
+.btn.warn{background:#fef3c7;border-color:#fde68a;color:#92400e;font-weight:500;}
+.btn.warn:hover{background:#fde68a;}
+.btn.d:hover{background:#fef2f2;color:#dc2626;border-color:#fca5a5;}
+.btn.sm{padding:4px 10px;font-size:12px;}
+.row{display:flex;gap:10px;align-items:flex-start;}.row>*{flex:1;}
+.bdg{display:inline-block;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:500;}
+.bdg.ox{background:#d1fae5;color:#065f46;}
+.bdg.multiple{background:#dbeafe;color:#1e40af;}
+.bdg.fill{background:#fef3c7;color:#92400e;}
+.bdg.pass{background:#d1fae5;color:#065f46;}
+.bdg.fail{background:#fee2e2;color:#991b1b;}
+.bdg.sadm{background:#d1fae5;color:#065f46;}
+.bdg.adm{background:#ede9fe;color:#5b21b6;}
+.bdg.stu{background:#f3f4f6;color:#4b5563;}
+.bdg.open{background:#d1fae5;color:#065f46;}
+.bdg.sch{background:#dbeafe;color:#1e40af;}
+.bdg.cls{background:#f3f4f6;color:#4b5563;}
+.bdg.bank{background:#fef3c7;color:#92400e;}
+.bdg.fixed{background:#dbeafe;color:#1e40af;}
+.qi{display:flex;align-items:flex-start;gap:10px;padding:10px;background:#f9fafb;border-radius:8px;margin-bottom:8px;}
+.qn{width:24px;height:24px;min-width:24px;border-radius:50%;background:#a7f3d0;color:#064e3b;font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;}
+.qt{flex:1;font-size:13px;}
+.qm{font-size:12px;color:#666;margin-top:2px;}
+.choice{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all .15s;background:#fff;}
+.choice:hover{border-color:#999;background:#f9fafb;}
+.choice.sel{border-color:#10b981;background:#ecfdf5;}
+.choice-letter{width:26px;height:26px;min-width:26px;border-radius:50%;border:1px solid #e0e0e0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#666;}
+.ox-btns{display:flex;gap:8px;margin-bottom:1rem;}
+.ox-btn{flex:1;padding:14px;font-size:18px;border-radius:8px;border:1px solid #e0e0e0;cursor:pointer;background:#fff;transition:all .15s;}
+.ox-btn:hover{background:#f9fafb;}
+.ox-btn.sel-o{background:#ecfdf5;border-color:#10b981;}
+.ox-btn.sel-x{background:#fef2f2;border-color:#ef4444;}
+.page-dots{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem;}
+.pdot{width:28px;height:28px;border-radius:50%;border:1px solid #e0e0e0;background:transparent;cursor:pointer;font-size:12px;color:#666;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.pdot.answered{background:#a7f3d0;border-color:#10b981;color:#064e3b;}
+.pdot.current{border-color:#10b981;font-weight:500;color:#10b981;}
+.progress-bar{height:6px;background:#f3f4f6;border-radius:3px;margin-bottom:1.5rem;overflow:hidden;}
+.progress-fill{height:100%;background:#10b981;transition:width .3s;}
+.stat-grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
+.stat{background:#f9fafb;border-radius:8px;padding:1rem;text-align:center;}
+.stat-val{font-size:22px;font-weight:500;}
+.stat-lbl{font-size:12px;color:#666;margin-top:4px;}
+.score-bar{height:10px;background:#f3f4f6;border-radius:5px;overflow:hidden;margin-top:6px;}
+.score-fill{height:100%;border-radius:5px;transition:width .6s;}
+.res-item{display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:8px;margin-bottom:8px;}
+.res-item.ok{background:#ecfdf5;}
+.res-item.ng{background:#fef2f2;}
+.dist-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.upload-area{border:2px dashed #e0e0e0;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;color:#666;font-size:13px;transition:all .15s;}
+.upload-area:hover{border-color:#999;background:#f9fafb;}
+.ai-box{background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;padding:1rem 1.25rem;margin-bottom:12px;}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid #c4b5fd;border-top-color:#7c3aed;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:1rem;}
+.cal-mo{background:#f9fafb;border-radius:8px;padding:10px;cursor:pointer;transition:all .15s;border:1px solid transparent;}
+.cal-mo:hover{border-color:#e0e0e0;}
+.cal-mo.has{border-color:#a7f3d0;background:#ecfdf5;}
+.cal-mo.sel{border-color:#10b981;background:#ecfdf5;}
+.ec{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.sr{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .15s;}
+.sr:hover{background:#f9fafb;}
+.sr:last-child{border-bottom:none;}
+.sr-detail{display:none;background:#f9fafb;border-bottom:1px solid #f3f4f6;padding:8px 12px 10px 52px;}
+.sr-detail.open{display:block;}
+.sr-result-row{display:grid;grid-template-columns:1fr 100px 70px 70px 120px 60px;gap:4px;padding:5px 6px;font-size:12px;border-radius:4px;}
+.sr-result-row:hover{background:#f3f4f6;}
+.sr-result-header{color:#888;font-size:11px;border-bottom:1px solid #e5e7eb;margin-bottom:4px;padding-bottom:4px;}
+.res-pg-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;font-size:13px;cursor:pointer;color:#374151;}
+.res-pg-btn:hover{background:#f3f4f6;}
+.res-pg-btn.active{background:#7c3aed;color:#fff;border-color:#7c3aed;font-weight:600;}
+.active-tab{background:#7c3aed!important;color:#fff!important;border-color:#7c3aed!important;}
+.res-item-ok{background:#f0fdf4;border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:13px;}
+.res-item-ng{background:#fef2f2;border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:13px;}
+.sr:last-child{border-bottom:none;}
+.av{width:32px;height:32px;min-width:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;}
+.pwbox{background:#f9fafb;border-radius:12px;padding:1rem 1.25rem;margin-bottom:12px;}
+.empty{text-align:center;color:#666;padding:2rem;font-size:13px;}
+.sa-banner{background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:8px 14px;margin-bottom:12px;font-size:13px;color:#065f46;display:flex;align-items:center;gap:8px;}
+.toast{position:fixed;bottom:24px;right:24px;background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;}
+.toast.show{opacity:1;}
+.mode-box{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-bottom:10px;}
+.draft-bar{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px 14px;margin-bottom:10px;font-size:13px;color:#92400e;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- 로그인 -->
+<div id="login-screen" class="card" style="max-width:380px;margin:3rem auto;padding:2rem;">
+  <div style="text-align:center;margin-bottom:1.5rem;">
+    <div style="font-size:36px;margin-bottom:8px;">📋</div>
+    <div style="font-size:13px;color:#666;">학습 관리 플랫폼</div>
+  </div>
+  <div style="margin-bottom:10px;"><label>아이디</label><input id="li-id" placeholder="아이디 입력"/></div>
+  <div style="margin-bottom:6px;"><label>비밀번호</label><input id="li-pw" type="password" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+  <div style="margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+    <input type="checkbox" id="save-id-chk" style="width:auto;margin:0;cursor:pointer;" onchange="toggleSaveId()"/>
+    <label for="save-id-chk" style="margin:0;font-size:12px;color:#666;cursor:pointer;font-weight:400;">아이디 저장</label>
+  </div>
+  <div style="margin-bottom:14px;"><label>역할</label>
+    <select id="li-role">
+      <option value="superadmin">최고 관리자</option>
+      <option value="admin">관리자</option>
+      <option value="student">직원</option>
+    </select>
+  </div>
+  <button class="btn p" style="width:100%;" onclick="doLogin()">로그인</button>
+  <div id="li-err" style="color:#dc2626;font-size:12px;margin-top:8px;text-align:center;"></div>
+</div>
+
+<!-- 메인 -->
+<div id="main-app" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:#fff;padding:.75rem 1rem;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+    <div style="font-size:13px;display:flex;align-items:center;gap:8px;">
+      <span style="font-weight:500;" id="user-name"></span>
+      <span class="bdg" id="user-badge"></span>
+    </div>
+    <button class="btn sm" onclick="doLogout()">로그아웃</button>
+  </div>
+  <div id="sa-banner" style="display:none;" class="sa-banner">★ 최고 관리자 모드 — 모든 관리자의 데이터를 열람하고 관리자 계정을 관리할 수 있습니다.</div>
+  <div class="nav" id="main-nav"></div>
+
+  <!-- 최고관리자: 관리자 관리 -->
+  <div class="sec" id="sec-admins">
+    <div class="card">
+      <div style="font-size:15px;font-weight:500;margin-bottom:14px;">관리자 계정 등록</div>
+      <div class="row" style="margin-bottom:8px;">
+        <div><label>아이디</label><input id="a-id" placeholder="예: admin_kim"/></div>
+        <div><label>이름</label><input id="a-name" placeholder="예: 김관리자"/></div>
+        <div><label>비밀번호</label><input id="a-pw" value="admin1234"/></div>
+      </div>
+      <div class="row" style="margin-bottom:8px;">
+        <div><label>소속/부서 (선택)</label><input id="a-dept" placeholder="예: 영업1팀"/></div>
+        <div><label>이메일 (선택)</label><input id="a-email" placeholder="example@email.com"/></div>
+      </div>
+      <div class="row" style="margin-bottom:12px;">
+        <div>
+          <label>출제 방식</label>
+          <select id="a-exammode">
+            <option value="bank">문제은행 (랜덤 출제)</option>
+            <option value="fixed">출제된 문제 그대로</option>
+          </select>
+        </div>
+        <div id="a-bankcount-wrap">
+          <label>랜덤 출제 문항수</label>
+          <input id="a-bankcount" type="number" min="1" value="10" placeholder="예: 10"/>
+        </div>
+      </div>
+      <button class="btn p" onclick="addAdmin()">관리자 등록</button>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:500;margin-bottom:10px;">관리자 목록 <span id="a-count" style="font-size:12px;color:#666;font-weight:400;"></span></div>
+      <div id="a-list"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:500;margin-bottom:10px;">관리자별 데이터 열람</div>
+      <div style="margin-bottom:10px;"><label>관리자 선택</label><select id="view-admin-sel" onchange="renderAdminOverview()"></select></div>
+      <div id="admin-overview"></div>
+    </div>
+  </div>
+
+  <!-- 시험 관리 -->
+  <div class="sec" id="sec-exams">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <span style="font-size:15px;font-weight:500;">월별 시험 일정</span>
+        <button class="btn p sm" id="add-exam-btn" onclick="openExamModal()">+ 새 시험 등록</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <button class="btn sm" onclick="changeYear(-1)">‹</button>
+        <span id="cal-year" style="font-size:15px;font-weight:500;min-width:60px;text-align:center;"></span>
+        <button class="btn sm" onclick="changeYear(1)">›</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div id="exam-detail-area"></div>
+  </div>
+
+  <!-- 문제 관리 -->
+  <div class="sec" id="sec-manage">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <label style="margin:0;white-space:nowrap;">시험 선택</label>
+      <select id="manage-exam-sel" onchange="renderQList()" style="max-width:260px;"></select>
+    </div>
+    <div class="ai-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:500;color:#5b21b6;">AI 문제 자동 생성</span>
+        <span style="font-size:11px;color:#7c3aed;">Claude 연동</span>
+      </div>
+      <div class="row" style="margin-bottom:8px;">
+        <div><label>주제/분야</label><input id="ai-topic" placeholder="예: 한국사, 파이썬 기초..."/></div>
+        <div><label>유형</label><select id="ai-type"><option value="mixed">혼합</option><option value="ox">OX</option><option value="multiple">객관식</option><option value="fill">단답형</option></select></div>
+        <div><label>개수</label><select id="ai-count"><option value="3">3개</option><option value="5" selected>5개</option><option value="10">10개</option></select></div>
+      </div>
+      <div style="margin-bottom:8px;"><label>난이도/조건</label><input id="ai-hint" placeholder="예: 초등 수준, 심화..."/></div>
+      <button class="btn pu" id="ai-btn" onclick="generateAI()">AI로 문제 생성</button>
+      <span id="ai-status" style="font-size:12px;color:#7c3aed;margin-left:8px;"></span>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:500;margin-bottom:12px;">직접 문제 추가</div>
+      <div class="row" style="margin-bottom:8px;">
+        <div><label>유형</label><select id="q-type" onchange="updateForm()"><option value="ox">OX 퀴즈</option><option value="multiple">객관식</option><option value="fill">단답형</option></select></div>
+        <div><label>배점 (점)</label><input id="q-score" type="number" min="1" value="5" style="max-width:100px;"/></div>
+      </div>
+      <div style="margin-bottom:8px;"><label>문제</label><textarea id="q-text" placeholder="문제를 입력하세요..."></textarea></div>
+      <div id="form-ox"><label>정답</label><select id="ox-ans"><option value="O">O</option><option value="X">X</option></select><div style="margin-top:8px;"><label>해설</label><input id="ox-exp" placeholder="선택사항"/></div></div>
+      <div id="form-mc" style="display:none;">
+        <div class="row" style="margin-bottom:6px;"><div><label>① 보기</label><input id="mc1"/></div><div><label>② 보기</label><input id="mc2"/></div></div>
+        <div class="row" style="margin-bottom:6px;"><div><label>③ 보기</label><input id="mc3"/></div><div><label>④ 보기</label><input id="mc4"/></div></div>
+        <div class="row"><div><label>정답 번호</label><select id="mc-ans"><option value="0">①</option><option value="1">②</option><option value="2">③</option><option value="3">④</option></select></div><div><label>해설</label><input id="mc-exp" placeholder="선택사항"/></div></div>
+      </div>
+      <div id="form-fill" style="display:none;"><div class="row"><div><label>정답</label><input id="fill-ans-i"/></div><div><label>해설</label><input id="fill-exp" placeholder="선택사항"/></div></div></div>
+      <div style="margin-top:10px;"><button class="btn p" onclick="addQuestion()">문제 추가</button></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:500;">엑셀 업로드</span>
+        <button class="btn sm pu" onclick="downloadTemplate()">샘플 양식 다운로드 ↓</button>
+      </div>
+      <div class="upload-area" onclick="document.getElementById('file-input').click()">
+        <div style="font-size:20px;margin-bottom:4px;">📂</div>
+        <div style="font-size:13px;">.xlsx / .csv 클릭하여 업로드</div>
+        <div style="font-size:11px;margin-top:4px;">열: 유형 | 문제 | 보기1~4 | 정답 | 해설 | 배점</div>
+      </div>
+      <input type="file" id="file-input" accept=".xlsx,.csv" style="display:none" onchange="handleFile(event)"/>
+      <div id="upload-status" style="margin-top:6px;font-size:12px;color:#666;"></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:500;">문제 목록 <span id="q-count" style="font-size:12px;color:#666;font-weight:400;"></span></span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn sm pu" onclick="openBulkScoreModal()" id="bulk-score-btn" style="display:none;">✏ 선택 배점 변경</button>
+          <button class="btn sm d" onclick="clearAll()">전체 삭제</button>
+        </div>
+      </div>
+      <div id="q-bulk-bar" style="display:none;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;font-size:13px;">
+        <input type="checkbox" id="q-select-all" onchange="toggleSelectAll(this.checked)" style="width:auto;margin:0;cursor:pointer;"/>
+        <label for="q-select-all" style="margin:0;cursor:pointer;color:#0369a1;font-weight:500;">전체 선택</label>
+        <span id="q-selected-count" style="color:#666;margin-left:4px;"></span>
+      </div>
+      <div id="q-list"></div>
+    </div>
+  </div>
+
+  <!-- 직원 관리 -->
+  <div class="sec" id="sec-students">
+    <div class="card">
+      <div style="font-size:14px;font-weight:500;margin-bottom:12px;">직원 등록</div>
+      <div class="row" style="margin-bottom:8px;">
+        <div><label>사번/아이디</label><input id="s-id" placeholder="예: 2024001"/></div>
+        <div><label>이름</label><input id="s-name" placeholder="예: 홍길동"/></div>
+        <div><label>비밀번호</label><input id="s-pw" value="1234"/></div>
+      </div>
+      <div class="row" style="margin-bottom:8px;">
+        <div><label>부서/그룹</label><input id="s-group" placeholder="예: 영업팀"/></div>
+        <div><label>이메일 (선택)</label><input id="s-email" placeholder="example@email.com"/></div>
+      </div>
+      <button class="btn p" onclick="addStudent()">직원 등록</button>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:500;">직원 목록 <span id="s-count" style="font-size:12px;color:#666;font-weight:400;"></span></span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn sm" onclick="fixStudentRoles()" title="role이 student가 아닌 직원을 일괄 수정">⚙ 권한 일괄 수정</button>
+          <input style="width:150px;" placeholder="이름/사번 검색..." id="s-search" oninput="renderStudents()"/>
+        </div>
+      </div>
+      <div id="s-list"></div>
+    </div>
+  </div>
+
+  <!-- 시험 결과 + 분포도 -->
+  <div class="sec" id="sec-results">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <span style="font-size:15px;font-weight:500;">시험별 결과 조회</span>
+        <div style="display:flex;gap:6px;">
+          <button class="btn sm" onclick="fixResultTotals()" title="문제은행 시험의 정답수/전체문항을 실제 응시 문항 기준으로 수정">🔧 문항수 수정</button>
+          <button class="btn sm" onclick="recalcResults()" title="문제 배점 변경 시 기존 결과 재계산">🔄 배점 재계산</button>
+          <button class="btn sm" onclick="syncAllExplanations()" title="문제 해설 수정 후 기존 결과에 일괄 반영">💬 해설 동기화</button>
+          <button class="btn sm pu" onclick="downloadResults()">결과 내보내기 ↓</button>
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:12px;">
+        <div><label>시험 선택</label><select id="res-exam-sel" onchange="renderAdminResults()"></select></div>
+        <div><label>합격 여부</label><select id="res-filter" onchange="renderAdminResults()"><option value="all">전체</option><option value="pass">합격</option><option value="fail">불합격</option></select></div>
+      </div>
+      <div id="admin-results-list"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:15px;font-weight:500;margin-bottom:12px;">문항별 답 분포도</div>
+      <div id="dist-area"><div class="empty">위에서 시험을 선택하면 분포도가 표시됩니다.</div></div>
+    </div>
+  </div>
+
+  <!-- 계정 설정 -->
+  <div class="sec" id="sec-settings">
+    <div class="card">
+      <div style="font-size:15px;font-weight:500;margin-bottom:14px;">비밀번호 변경</div>
+      <div class="pwbox">
+        <div style="margin-bottom:10px;"><label>현재 비밀번호</label><input id="pw-cur" type="password"/></div>
+        <div style="margin-bottom:10px;"><label>새 비밀번호 (4자 이상)</label><input id="pw-new" type="password"/></div>
+        <div style="margin-bottom:12px;"><label>새 비밀번호 확인</label><input id="pw-con" type="password"/></div>
+        <button class="btn p" onclick="changePw()">비밀번호 변경</button>
+        <div id="pw-msg" style="font-size:12px;margin-top:8px;"></div>
+      </div>
+    </div>
+    <div class="card" id="pass-score-card">
+      <div style="font-size:15px;font-weight:500;margin-bottom:14px;">합격 기준 설정</div>
+      <div class="row">
+        <div><label>합격 기준 점수 (%)</label><input id="pass-score-inp" type="number" min="1" max="100" value="60"/></div>
+        <div style="display:flex;align-items:flex-end;"><button class="btn p" onclick="saveSettings()">저장</button></div>
+      </div>
+      <div id="settings-msg" style="font-size:12px;margin-top:8px;color:#666;"></div>
+    </div>
+    <!-- 관리자: 출제방식 확인 -->
+    <div class="card" id="exam-mode-card" style="display:none;">
+      <div style="font-size:15px;font-weight:500;margin-bottom:10px;">출제 방식</div>
+      <div id="my-exammode-info"></div>
+    </div>
+  </div>
+
+  <!-- 퀴즈 풀기 -->
+  <div class="sec" id="sec-play">
+    <div id="play-start" class="card" style="padding:2rem;"></div>
+    <div id="play-screen" style="display:none;">
+      <div style="background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:1rem 1.25rem;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span id="page-info" style="font-size:13px;color:#666;"></span>
+          <span id="answered-info" style="font-size:13px;color:#666;"></span>
+        </div>
+        <div class="progress-bar" style="margin-bottom:10px;"><div class="progress-fill" id="play-prog-fill"></div></div>
+        <div class="page-dots" id="page-dots"></div>
+        <!-- 임시저장 바 -->
+        <div id="draft-bar" class="draft-bar" style="display:none;">
+          <span>💾 임시저장된 답안이 있습니다.</span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn sm warn" onclick="loadDraft()">불러오기</button>
+            <button class="btn sm d" onclick="clearDraft()">삭제</button>
+          </div>
+        </div>
+      </div>
+      <div id="questions-container"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;gap:8px;flex-wrap:wrap;">
+        <button class="btn" id="prev-page-btn" onclick="changePage(-1)" style="display:none;">← 이전</button>
+        <div style="flex:1;"></div>
+        <button class="btn warn" onclick="saveDraft()">💾 임시저장</button>
+        <button class="btn" id="next-page-btn" onclick="changePage(1)">다음 →</button>
+        <button class="btn p" id="submit-btn" onclick="submitExam()" style="display:none;">제출하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 직원: 내 결과 -->
+  <div class="sec" id="sec-my-results">
+    <div id="my-results-list"></div>
+  </div>
+</div>
+
+<!-- 시험 등록 모달 -->
+<div id="exam-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+  <div class="card" style="width:100%;max-width:440px;margin:0 1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span style="font-size:15px;font-weight:500;" id="modal-title">새 시험 등록</span>
+      <button class="btn sm" onclick="closeExamModal()">✕</button>
+    </div>
+    <div style="margin-bottom:8px;"><label>시험명</label><input id="ex-name" placeholder="예: 4월 정기 시험"/></div>
+    <div class="row" style="margin-bottom:8px;">
+      <div><label>연도</label><select id="ex-year"></select></div>
+      <div><label>월</label><select id="ex-month"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select></div>
+    </div>
+    <div class="row" style="margin-bottom:8px;">
+      <div><label>시작일</label><input id="ex-start" type="date"/></div>
+      <div><label>종료일</label><input id="ex-end" type="date"/></div>
+    </div>
+    <div style="margin-bottom:8px;"><label>설명 (선택)</label><input id="ex-desc" placeholder="시험 안내사항..."/></div>
+    <div style="margin-bottom:8px;"><label>상태</label><select id="ex-status"><option value="scheduled">예정</option><option value="open">진행중</option><option value="closed">종료</option></select></div>
+    <div style="margin-bottom:8px;">
+      <label>출제 방식</label>
+      <select id="ex-exammode" onchange="toggleExamBankCount()">
+        <option value="fixed">출제된 문제 그대로</option>
+        <option value="bank">문제은행 (랜덤 출제)</option>
+      </select>
+    </div>
+    <div id="ex-bankcount-wrap" style="display:none;margin-bottom:14px;">
+      <label>랜덤 출제 문항수</label>
+      <input id="ex-bankcount" type="number" min="1" value="10" placeholder="예: 10"/>
+      <div style="font-size:12px;color:#666;margin-top:4px;">※ 등록된 문제 수 이하로 설정하세요.</div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;">
+      <button class="btn" onclick="closeExamModal()">취소</button>
+      <button class="btn p" onclick="saveExam()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 출제방식 설정 모달 (최고관리자용) -->
+<div id="exammode-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+  <div class="card" style="width:100%;max-width:420px;margin:0 1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span style="font-size:15px;font-weight:500;">출제 방식 설정</span>
+      <button class="btn sm" onclick="closeExamModeModal()">✕</button>
+    </div>
+    <div style="margin-bottom:6px;font-size:13px;color:#666;" id="exammode-admin-name"></div>
+    <div style="margin-bottom:12px;">
+      <label>출제 방식</label>
+      <select id="em-mode" onchange="toggleBankCount()">
+        <option value="bank">문제은행 (시험마다 랜덤 출제)</option>
+        <option value="fixed">출제된 문제 그대로 응시</option>
+      </select>
+    </div>
+    <div id="em-bankcount-wrap" style="margin-bottom:14px;">
+      <label>랜덤 출제 문항수 (문제은행에서 N개 선택)</label>
+      <input id="em-bankcount" type="number" min="1" value="10" placeholder="예: 10"/>
+      <div style="font-size:12px;color:#666;margin-top:4px;">※ 시험에 등록된 문제 수 이하로 설정하세요.</div>
+    </div>
+    <div style="background:#f9fafb;border-radius:8px;padding:10px;margin-bottom:14px;font-size:13px;color:#666;">
+      <strong>문제은행:</strong> 시험에 등록된 문제 중 N개를 매번 랜덤으로 뽑아 출제합니다.<br/>
+      <strong style="margin-top:6px;display:block;">출제된 문제 그대로:</strong> 시험에 등록된 문제를 순서대로 모두 출제합니다.
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn" onclick="closeExamModeModal()">취소</button>
+      <button class="btn p" onclick="saveExamMode()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 배점 일괄 수정 모달 -->
+<div id="bulk-score-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+  <div class="card" style="width:100%;max-width:380px;margin:1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span style="font-size:15px;font-weight:500;">선택 문제 배점 변경</span>
+      <button class="btn sm" onclick="closeBulkScoreModal()">✕</button>
+    </div>
+    <input type="hidden" id="bulk-score-ids"/>
+    <div style="background:#f0f9ff;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#0369a1;">
+      📝 <span id="bulk-score-count" style="font-weight:500;"></span>의 배점을 일괄 변경합니다.
+    </div>
+    <div style="margin-bottom:16px;">
+      <label>변경할 배점 (점)</label>
+      <input id="bulk-score-inp" type="number" min="1" value="5" style="max-width:120px;"/>
+    </div>
+    <div style="font-size:12px;color:#f59e0b;margin-bottom:14px;">⚠ 저장 시 기존 응시 결과가 자동 재계산됩니다.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn" onclick="closeBulkScoreModal()">취소</button>
+      <button class="btn p" onclick="saveBulkScore()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 문제 수정 모달 -->
+<div id="editq-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;overflow-y:auto;">
+  <div class="card" style="width:100%;max-width:520px;margin:1rem;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span style="font-size:15px;font-weight:500;">문제 수정</span>
+      <button class="btn sm" onclick="closeEditQModal()">✕</button>
+    </div>
+    <input type="hidden" id="eq-id"/>
+    <div style="margin-bottom:10px;">
+      <label>문제 유형</label>
+      <div id="eq-type-label" style="padding:8px 10px;background:#f3f4f6;border-radius:6px;font-size:13px;color:#555;"></div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <label>문제</label>
+      <textarea id="eq-text" rows="3" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;resize:vertical;"></textarea>
+    </div>
+    <div style="margin-bottom:10px;">
+      <label>배점 (점)</label>
+      <input id="eq-score" type="number" min="1" value="5" style="max-width:100px;"/>
+      <span style="font-size:12px;color:#f59e0b;margin-left:8px;">⚠ 배점 변경 시 기존 결과 자동 재계산</span>
+    </div>
+    <div id="eq-form-ox" style="display:none;">
+      <div style="margin-bottom:10px;"><label>정답</label><select id="eq-ox-ans"><option value="O">O</option><option value="X">X</option></select></div>
+      <div style="margin-bottom:10px;"><label>해설 (선택)</label><input id="eq-ox-exp" placeholder="해설 입력..."/></div>
+    </div>
+    <div id="eq-form-mc" style="display:none;">
+      <div style="margin-bottom:8px;"><label>① 보기</label><input id="eq-mc1"/></div>
+      <div style="margin-bottom:8px;"><label>② 보기</label><input id="eq-mc2"/></div>
+      <div style="margin-bottom:8px;"><label>③ 보기</label><input id="eq-mc3"/></div>
+      <div style="margin-bottom:10px;"><label>④ 보기</label><input id="eq-mc4"/></div>
+      <div style="margin-bottom:10px;"><label>정답 번호</label><select id="eq-mc-ans"><option value="0">① 1번</option><option value="1">② 2번</option><option value="2">③ 3번</option><option value="3">④ 4번</option></select></div>
+      <div style="margin-bottom:10px;"><label>해설 (선택)</label><input id="eq-mc-exp" placeholder="해설 입력..."/></div>
+    </div>
+    <div id="eq-form-fill" style="display:none;">
+      <div style="margin-bottom:10px;"><label>정답</label><input id="eq-fill-ans" placeholder="정답 입력..."/></div>
+      <div style="margin-bottom:10px;"><label>해설 (선택)</label><input id="eq-fill-exp" placeholder="해설 입력..."/></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px;">
+      <button class="btn" onclick="closeEditQModal()">취소</button>
+      <button class="btn p" onclick="saveEditQ()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 결과 상세 모달 -->
+<div id="result-detail-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;overflow-y:auto;">
+  <div class="card" style="width:100%;max-width:640px;margin:1rem;max-height:90vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-shrink:0;">
+      <span id="rd-title" style="font-size:15px;font-weight:500;"></span>
+      <button class="btn sm" onclick="closeResultDetail()">✕</button>
+    </div>
+    <div id="rd-exam-name" style="font-size:12px;color:#a78bfa;margin-bottom:10px;flex-shrink:0;"></div>
+    <div id="rd-summary" style="margin-bottom:14px;flex-shrink:0;"></div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-shrink:0;">
+      <button id="rd-wrong-tab" class="btn sm active-tab" onclick="switchResTab('wrong')">오답</button>
+      <button id="rd-all-tab" class="btn sm" onclick="switchResTab('all')">전체</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;">
+      <div id="rd-wrong-body"></div>
+      <div id="rd-all-body" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 직원 수정 모달 -->
+<div id="edits-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+  <div class="card" style="width:100%;max-width:420px;margin:1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span style="font-size:15px;font-weight:500;">직원 정보 수정</span>
+      <button class="btn sm" onclick="closeEditSModal()">✕</button>
+    </div>
+    <input type="hidden" id="es-id"/>
+    <div style="margin-bottom:10px;">
+      <label>사번/아이디</label>
+      <div id="es-id-label" style="padding:8px 10px;background:#f3f4f6;border-radius:6px;font-size:13px;color:#888;"></div>
+    </div>
+    <div style="margin-bottom:10px;"><label>이름</label><input id="es-name"/></div>
+    <div style="margin-bottom:10px;"><label>새 비밀번호 (변경 시에만 입력)</label><input id="es-pw" type="password" placeholder="비워두면 변경 안 함"/></div>
+    <div style="margin-bottom:10px;"><label>부서/그룹</label><input id="es-group" placeholder="예: 영업팀"/></div>
+    <div style="margin-bottom:14px;"><label>이메일 (선택)</label><input id="es-email" placeholder="example@email.com"/></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn" onclick="closeEditSModal()">취소</button>
+      <button class="btn p" onclick="saveEditStudent()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCpB5S-bCrlIbPKT5CBVuK1s-fWyZOJWJ4",
+  authDomain: "know-98a3b.firebaseapp.com",
+  projectId: "know-98a3b",
+  storageBucket: "know-98a3b.firebasestorage.app",
+  messagingSenderId: "1009294165095",
+  appId: "1:1009294165095:web:f9ccac6e0ed6f0ce0540c2",
+  measurementId: "G-QL1773NLZS"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const MONTHS=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const PER_PAGE=10;
+let PASS_SCORE=60;
+let currentUser=null,calYear=new Date().getFullYear(),editExamId=null,prevSection='';
+let users=[],exams=[],examResults=[];
+let quizQ=[],pageAnswers={},currentPage=0,activeExamId=null;
+let examModeAdminId=null; // 출제방식 모달에서 편집 중인 관리자 id
+
+let xlsxReady=false;
+function loadXLSX(cb){
+  if(xlsxReady){cb();return;}
+  const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+  s.onload=()=>{xlsxReady=true;cb();};document.head.appendChild(s);
+}
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+function myExams(){
+  if(!currentUser)return[];
+  if(currentUser.role==='superadmin')return exams;
+  return exams.filter(e=>e.ownerId&&e.ownerId===currentUser.id);
+}
+function myStudents(){
+  if(!currentUser)return[];
+  if(currentUser.role==='superadmin')return users.filter(u=>u.role==='student');
+  return users.filter(u=>u.role==='student'&&u.ownerId&&u.ownerId===currentUser.id);
+}
+
+/* ====== 출제방식 헬퍼 ====== */
+function getAdminExamMode(adminId){
+  const admin=users.find(u=>u.id===adminId);
+  if(!admin) return {mode:'fixed',bankCount:10};
+  return {mode:admin.examMode||'fixed', bankCount:admin.bankCount||10};
+}
+
+function renderExamModeSummary(admin){
+  const mode=admin.examMode||'fixed';
+  const cnt=admin.bankCount||10;
+  if(mode==='bank'){
+    return`<span class="bdg bank">문제은행</span> <span style="font-size:13px;color:#666;margin-left:6px;">시험마다 ${cnt}개 랜덤 출제</span>`;
+  }
+  return`<span class="bdg fixed">출제문제 그대로</span> <span style="font-size:13px;color:#666;margin-left:6px;">등록된 문제 전체 출제</span>`;
+}
+
+/* ====== 아이디 저장 ====== */
+(function initSavedId(){
+  const saved=localStorage.getItem('savedLoginId');
+  const savedRole=localStorage.getItem('savedLoginRole');
+  if(saved){
+    document.getElementById('li-id').value=saved;
+    document.getElementById('save-id-chk').checked=true;
+    if(savedRole)document.getElementById('li-role').value=savedRole;
+  }
+})();
+window.toggleSaveId=function(){
+  if(!document.getElementById('save-id-chk').checked){
+    localStorage.removeItem('savedLoginId');
+    localStorage.removeItem('savedLoginRole');
+  }
+};
+
+/* ====== 로그인 ====== */
+window.doLogin=async function(){
+  const id=document.getElementById('li-id').value.trim();
+  const pw=document.getElementById('li-pw').value;
+  const role=document.getElementById('li-role').value;
+  const err=document.getElementById('li-err');
+  err.textContent='확인 중...';
+  try{
+    const snap=await getDoc(doc(db,'users',id));
+    if(!snap.exists()||snap.data().pw!==pw||snap.data().role!==role){
+      err.textContent='아이디, 비밀번호 또는 역할을 확인하세요.';return;
+    }
+    // 아이디 저장 처리
+    if(document.getElementById('save-id-chk').checked){
+      localStorage.setItem('savedLoginId',id);
+      localStorage.setItem('savedLoginRole',role);
+    }else{
+      localStorage.removeItem('savedLoginId');
+      localStorage.removeItem('savedLoginRole');
+    }
+    currentUser={id,...snap.data()};err.textContent='';
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('main-app').style.display='block';
+    document.getElementById('user-name').textContent=currentUser.name+'님';
+    const badge=document.getElementById('user-badge');
+    if(currentUser.role==='superadmin'){badge.textContent='최고 관리자';badge.className='bdg sadm';}
+    else if(currentUser.role==='admin'){badge.textContent='관리자';badge.className='bdg adm';}
+    else{badge.textContent='직원';badge.className='bdg stu';}
+    document.getElementById('sa-banner').style.display=currentUser.role==='superadmin'?'flex':'none';
+    await loadData();
+    buildNav();
+    if(currentUser.role==='superadmin'){renderAdminList();showSec('admins');}
+    else if(currentUser.role==='admin'){renderCalendar();showSec('exams');}
+    else{renderMyResults();showSec('my-results');}
+  }catch(e){err.textContent='연결 오류. 네트워크를 확인하세요.';}
+};
+
+window.doLogout=function(){
+  currentUser=null;
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-screen').style.display='block';
+  document.getElementById('li-pw').value='';
+  // 아이디 저장 체크 시 아이디·역할 유지, 아닐 경우 초기화
+  const saved=localStorage.getItem('savedLoginId');
+  if(!saved)document.getElementById('li-id').value='';
+};
+
+async function loadData(){
+  const [uS,eS,rS]=await Promise.all([getDocs(collection(db,'users')),getDocs(collection(db,'exams')),getDocs(collection(db,'results'))]);
+  users=uS.docs.map(d=>({id:d.id,...d.data()}));
+  exams=eS.docs.map(d=>({id:d.id,...d.data(),questions:d.data().questions||[]}));
+  exams.sort((a,b)=>a.year!==b.year?a.year-b.year:a.month-b.month);
+  examResults=rS.docs.map(d=>({id:d.id,...d.data()}));
+}
+
+function buildNav(){
+  const nav=document.getElementById('main-nav');
+  if(currentUser.role==='superadmin'){
+    nav.innerHTML=`
+      <button class="nb satab act" onclick="renderAdminList();showSec('admins')">관리자 관리</button>
+      <button class="nb satab" onclick="renderCalendar();showSec('exams')">시험 현황</button>
+      <button class="nb satab" onclick="renderStudents();showSec('students')">직원 현황</button>
+      <button class="nb satab" onclick="refreshResultSel();showSec('results')">전체 결과</button>
+      <button class="nb" onclick="showSec('settings')">계정 설정</button>`;
+    document.getElementById('add-exam-btn').style.display='none';
+  } else if(currentUser.role==='admin'){
+    nav.innerHTML=`
+      <button class="nb atab act" onclick="renderCalendar();showSec('exams')">시험 관리</button>
+      <button class="nb atab" onclick="refreshManageSel();showSec('manage')">문제 관리</button>
+      <button class="nb atab" onclick="renderStudents();showSec('students')">직원 관리</button>
+      <button class="nb atab" onclick="refreshResultSel();showSec('results')">시험 결과</button>
+      <button class="nb" onclick="showAdminSettings();showSec('settings')">계정 설정</button>`;
+    document.getElementById('add-exam-btn').style.display='block';
+  } else {
+    nav.innerHTML=`
+      <button class="nb act" onclick="renderMyResults();showSec('my-results')">내 시험 결과</button>
+      <button class="nb" onclick="showStudentExams()">시험 응시</button>`;
+  }
+}
+
+window.showSec=function(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('act'));
+  document.getElementById('sec-'+id).classList.add('act');
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('act'));
+  const btns=document.querySelectorAll('.nb');
+  const sm={'admins':0,'exams':1,'students':2,'results':3,'settings':4};
+  const am={'exams':0,'manage':1,'students':2,'results':3,'settings':4};
+  const stm={'my-results':0,'play':1};
+  const m=currentUser.role==='superadmin'?sm:currentUser.role==='admin'?am:stm;
+  if(m[id]!==undefined&&btns[m[id]])btns[m[id]].classList.add('act');
+};
+
+function showAdminSettings(){
+  const card=document.getElementById('exam-mode-card');
+  const info=document.getElementById('my-exammode-info');
+  card.style.display='block';
+  const admin=users.find(u=>u.id===currentUser.id)||currentUser;
+  info.innerHTML=renderExamModeSummary(admin);
+}
+
+/* ====== 최고관리자: 관리자 관리 ====== */
+// 출제방식 등록 시 bankcount 토글
+document.getElementById('a-exammode').addEventListener('change',function(){
+  document.getElementById('a-bankcount-wrap').style.display=this.value==='bank'?'block':'none';
+});
+
+window.addAdmin=async function(){
+  const id=document.getElementById('a-id').value.trim();
+  const name=document.getElementById('a-name').value.trim();
+  const pw=document.getElementById('a-pw').value.trim();
+  const dept=document.getElementById('a-dept').value.trim();
+  const email=document.getElementById('a-email').value.trim();
+  const examMode=document.getElementById('a-exammode').value;
+  const bankCount=parseInt(document.getElementById('a-bankcount').value)||10;
+  if(!id||!name||!pw){alert('아이디, 이름, 비밀번호는 필수입니다.');return;}
+  if(users.find(u=>u.id===id)){alert('이미 존재하는 아이디입니다.');return;}
+  const data={name,pw,role:'admin',dept,email,examMode,bankCount};
+  await setDoc(doc(db,'users',id),data);
+  users.push({id,...data});
+  ['a-id','a-name','a-dept','a-email'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('a-pw').value='admin1234';
+  renderAdminList();toast(name+' 관리자가 등록되었습니다.');
+};
+
+window.renderAdminList=function(){
+  const admins=users.filter(u=>u.role==='admin');
+  document.getElementById('a-count').textContent='('+admins.length+'명)';
+  const sel=document.getElementById('view-admin-sel');
+  sel.innerHTML=admins.map(a=>`<option value="${a.id}">${a.name} (${a.id})</option>`).join('');
+  const el=document.getElementById('a-list');
+  if(!admins.length){el.innerHTML='<div class="empty">등록된 관리자가 없습니다.</div>';return;}
+  const colors=['#ddd6fe','#a7f3d0','#fde68a','#fbcfe8','#bfdbfe'];
+  const tcs=['#4c1d95','#064e3b','#78350f','#831843','#1e3a8a'];
+  el.innerHTML=admins.map((a,i)=>{
+    const myE=exams.filter(e=>e.ownerId===a.id).length;
+    const myS=users.filter(u=>u.role==='student'&&u.ownerId===a.id).length;
+    const myR=examResults.filter(r=>exams.find(e=>e.id===r.examId&&e.ownerId===a.id)).length;
+    return`<div class="sr">
+      <div class="av" style="background:${colors[i%5]};color:${tcs[i%5]};">${a.name.slice(0,1)}</div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:500;">${a.name} <span style="font-size:12px;color:#666;font-weight:400;">${a.id}</span>${a.dept?` <span style="font-size:12px;color:#666;">· ${a.dept}</span>`:''}
+        </div>
+        <div style="font-size:12px;color:#666;margin-top:2px;">시험 ${myE}개 · 직원 ${myS}명 · 응시결과 ${myR}건 · ${renderExamModeSummary(a)}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn sm pu" onclick="openExamModeModal('${a.id}')">출제방식</button>
+        <button class="btn sm d" onclick="deleteAdmin('${a.id}')">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+  renderAdminOverview();
+};
+
+window.deleteAdmin=async function(aid){
+  if(!confirm('이 관리자를 삭제하시겠습니까?\n해당 관리자의 시험/직원 데이터도 모두 삭제됩니다.'))return;
+  const adminExams=exams.filter(e=>e.ownerId===aid);
+  const adminStudents=users.filter(u=>u.role==='student'&&u.ownerId===aid);
+  await Promise.all([
+    deleteDoc(doc(db,'users',aid)),
+    ...adminExams.map(e=>deleteDoc(doc(db,'exams',e.id))),
+    ...adminStudents.map(s=>deleteDoc(doc(db,'users',s.id)))
+  ]);
+  users=users.filter(u=>u.id!==aid&&u.ownerId!==aid);
+  exams=exams.filter(e=>e.ownerId!==aid);
+  renderAdminList();toast('삭제되었습니다.');
+};
+
+window.renderAdminOverview=function(){
+  const aid=document.getElementById('view-admin-sel').value;
+  const admin=users.find(u=>u.id===aid);
+  if(!admin){document.getElementById('admin-overview').innerHTML='';return;}
+  const adminExams=exams.filter(e=>e.ownerId===aid);
+  const adminStudents=users.filter(u=>u.role==='student'&&u.ownerId===aid);
+  const adminResults=examResults.filter(r=>adminExams.find(e=>e.id===r.examId));
+  const passRate=adminResults.length>0?Math.round((adminResults.filter(r=>r.pass).length/adminResults.length)*100):0;
+  document.getElementById('admin-overview').innerHTML=`
+    <div style="background:#f9fafb;border-radius:8px;padding:1rem;margin-bottom:10px;">
+      <div style="font-size:14px;font-weight:500;margin-bottom:10px;">${admin.name} 관리자 현황${admin.dept?' — '+admin.dept:''}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px;">
+        <div class="stat"><div class="stat-val">${adminExams.length}</div><div class="stat-lbl">등록 시험</div></div>
+        <div class="stat"><div class="stat-val">${adminStudents.length}</div><div class="stat-lbl">등록 직원</div></div>
+        <div class="stat"><div class="stat-val">${adminResults.length}</div><div class="stat-lbl">총 응시</div></div>
+        <div class="stat"><div class="stat-val" style="color:#059669;">${passRate}%</div><div class="stat-lbl">합격률</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid #e5e5e5;border-radius:8px;padding:10px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:500;margin-bottom:6px;">현재 출제방식</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>${renderExamModeSummary(admin)}</div>
+          <button class="btn sm pu" onclick="openExamModeModal('${aid}')">변경</button>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:13px;font-weight:500;margin-bottom:8px;">등록된 시험</div>
+    ${adminExams.length?adminExams.map(e=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:8px;background:#f9fafb;border-radius:8px;margin-bottom:6px;">
+        <span class="bdg ${e.status==='open'?'open':e.status==='scheduled'?'sch':'cls'}">${e.status==='open'?'진행중':e.status==='scheduled'?'예정':'종료'}</span>
+        <span style="font-size:13px;flex:1;">${e.name}</span>
+        <span style="font-size:12px;color:#666;">문제 ${e.questions.length}개 · 응시 ${examResults.filter(r=>r.examId===e.id).length}명</span>
+      </div>`).join(''):'<div class="empty" style="padding:1rem;">등록된 시험이 없습니다.</div>'}`;
+};
+
+/* ====== 출제방식 모달 ====== */
+window.openExamModeModal=function(aid){
+  examModeAdminId=aid;
+  const admin=users.find(u=>u.id===aid);
+  document.getElementById('exammode-admin-name').textContent=`관리자: ${admin?admin.name:aid}`;
+  const mode=admin?admin.examMode||'fixed':'fixed';
+  const cnt=admin?admin.bankCount||10:10;
+  document.getElementById('em-mode').value=mode;
+  document.getElementById('em-bankcount').value=cnt;
+  toggleBankCount();
+  document.getElementById('exammode-modal').style.display='flex';
+};
+window.closeExamModeModal=function(){document.getElementById('exammode-modal').style.display='none';examModeAdminId=null;};
+window.toggleBankCount=function(){
+  const mode=document.getElementById('em-mode').value;
+  document.getElementById('em-bankcount-wrap').style.display=mode==='bank'?'block':'none';
+};
+window.saveExamMode=async function(){
+  if(!examModeAdminId)return;
+  const mode=document.getElementById('em-mode').value;
+  const bankCount=parseInt(document.getElementById('em-bankcount').value)||10;
+  await updateDoc(doc(db,'users',examModeAdminId),{examMode:mode,bankCount});
+  const admin=users.find(u=>u.id===examModeAdminId);
+  if(admin){admin.examMode=mode;admin.bankCount=bankCount;}
+  closeExamModeModal();
+  renderAdminList();
+  toast('출제방식이 저장되었습니다.');
+};
+
+/* ====== 시험 관리 ====== */
+window.renderCalendar=function(){
+  document.getElementById('cal-year').textContent=calYear+'년';
+  const myE=myExams();
+  document.getElementById('cal-grid').innerHTML=MONTHS.map((m,i)=>{
+    const mo=i+1,ex=myE.filter(e=>e.year===calYear&&e.month===mo);
+    return`<div class="cal-mo ${ex.length?'has':''}" onclick="selectMonth(${mo})">
+      <div style="font-size:13px;font-weight:500;">${m}</div>
+      <div style="font-size:11px;margin-top:4px;color:#666;">${ex.length?ex.length+'개 시험':'없음'}</div>
+      ${ex.length?`<div style="margin-top:4px;">${ex.map(e=>`<span class="bdg ${e.status==='open'?'open':e.status==='scheduled'?'sch':'cls'}" style="font-size:10px;">${e.status==='open'?'진행중':e.status==='scheduled'?'예정':'종료'}</span>`).join(' ')}</div>`:''}
+    </div>`;
+  }).join('');
+};
+window.changeYear=function(d){calYear+=d;renderCalendar();document.getElementById('exam-detail-area').innerHTML='';};
+
+window.selectMonth=function(mo){
+  document.querySelectorAll('.cal-mo').forEach((el,i)=>el.classList.toggle('sel',i===mo-1));
+  const ex=myExams().filter(e=>e.year===calYear&&e.month===mo);
+  const area=document.getElementById('exam-detail-area');
+  const isSA=currentUser.role==='superadmin';
+  if(!ex.length){
+    area.innerHTML=isSA?`<div class="card"><div class="empty">${calYear}년 ${mo}월 등록된 시험이 없습니다.</div></div>`:
+      `<div class="card"><div class="empty">${calYear}년 ${mo}월 등록된 시험이 없습니다.<br><button class="btn p sm" style="margin-top:10px;" onclick="openExamModal(${mo})">+ 시험 등록</button></div></div>`;
+    return;
+  }
+  area.innerHTML=ex.map(e=>{
+    const tot=e.questions.reduce((s,q)=>s+(q.scoreVal||5),0);
+    const owner=users.find(u=>u.id===e.ownerId);
+    return`<div class="ec">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div>
+          <span style="font-size:15px;font-weight:500;">${e.name}</span>
+          <span class="bdg ${e.status==='open'?'open':e.status==='scheduled'?'sch':'cls'}" style="margin-left:8px;">${e.status==='open'?'진행중':e.status==='scheduled'?'예정':'종료'}</span>
+          ${isSA&&owner?`<span style="font-size:12px;color:#666;margin-left:8px;">담당: ${owner.name}</span>`:''}
+        </div>
+        ${!isSA?`<div style="display:flex;gap:6px;"><button class="btn sm" onclick="openExamModal(null,'${e.id}')">수정</button><button class="btn sm d" onclick="deleteExam('${e.id}')">삭제</button></div>`:''}
+      </div>
+      <div style="font-size:13px;color:#666;margin-bottom:6px;">📅 ${e.start||''} ~ ${e.end||''}</div>
+      ${e.desc?`<div style="font-size:13px;color:#666;margin-bottom:6px;">📝 ${e.desc}</div>`:''}
+      <div style="font-size:13px;color:#666;margin-bottom:${isSA?'0':'10px'};">문제: ${e.questions.length}개 · 총 배점: ${tot}점 · 응시자: ${examResults.filter(r=>r.examId===e.id).length}명 · <span class="bdg ${e.examMode==='bank'?'bank':'fixed'}">${e.examMode==='bank'?'문제은행 '+e.bankCount+'문항 랜덤':'출제문제 그대로'}</span></div>
+      ${!isSA?`<div style="font-size:11px;color:#aaa;margin-bottom:8px;">🔍 Firebase 저장값: examMode=<b>${e.examMode||'(없음)'}</b> · bankCount=<b>${e.bankCount||'(없음)'}</b></div>`:''}
+      ${!isSA?`<div style="display:flex;gap:6px;">
+        <button class="btn sm p" onclick="startExamAsAdmin('${e.id}')">시험 미리보기</button>
+        <button class="btn sm pu" onclick="refreshManageSel('${e.id}');showSec('manage')">문제 편집 ↗</button>
+      </div>`:''}
+    </div>`;
+  }).join('');
+};
+
+window.openExamModal=function(mo,eid){
+  editExamId=eid||null;
+  const yr=document.getElementById('ex-year');yr.innerHTML='';
+  for(let y=2024;y<=2030;y++)yr.innerHTML+=`<option value="${y}" ${y===calYear?'selected':''}>${y}년</option>`;
+  if(eid){
+    const e=exams.find(x=>x.id===eid);
+    document.getElementById('modal-title').textContent='시험 수정';
+    document.getElementById('ex-name').value=e.name;
+    document.getElementById('ex-year').value=e.year;document.getElementById('ex-month').value=e.month;
+    document.getElementById('ex-start').value=e.start||'';document.getElementById('ex-end').value=e.end||'';
+    document.getElementById('ex-desc').value=e.desc||'';document.getElementById('ex-status').value=e.status;
+    document.getElementById('ex-exammode').value=e.examMode||'fixed';
+    document.getElementById('ex-bankcount').value=e.bankCount||10;
+  }else{
+    document.getElementById('modal-title').textContent='새 시험 등록';
+    ['ex-name','ex-start','ex-end','ex-desc'].forEach(k=>document.getElementById(k).value='');
+    document.getElementById('ex-month').value=mo||new Date().getMonth()+1;
+    document.getElementById('ex-status').value='scheduled';
+    document.getElementById('ex-exammode').value='fixed';
+    document.getElementById('ex-bankcount').value=10;
+  }
+  toggleExamBankCount();
+  document.getElementById('exam-modal').style.display='flex';
+};
+window.toggleExamBankCount=function(){
+  const mode=document.getElementById('ex-exammode').value;
+  document.getElementById('ex-bankcount-wrap').style.display=mode==='bank'?'block':'none';
+};
+window.closeExamModal=function(){document.getElementById('exam-modal').style.display='none';};
+
+window.saveExam=async function(){
+  const name=document.getElementById('ex-name').value.trim();if(!name){alert('시험명을 입력하세요.');return;}
+  const examMode=document.getElementById('ex-exammode').value;
+  const bankCount=parseInt(document.getElementById('ex-bankcount').value)||10;
+  const obj={name,year:parseInt(document.getElementById('ex-year').value),month:parseInt(document.getElementById('ex-month').value),
+    start:document.getElementById('ex-start').value,end:document.getElementById('ex-end').value,
+    desc:document.getElementById('ex-desc').value,status:document.getElementById('ex-status').value,
+    examMode,bankCount};
+  if(editExamId){
+    await updateDoc(doc(db,'exams',editExamId),obj);Object.assign(exams.find(e=>e.id===editExamId),obj);
+  }else{
+    obj.questions=[];obj.ownerId=currentUser.id;
+    const ref=await addDoc(collection(db,'exams'),obj);exams.push({id:ref.id,...obj});
+  }
+  closeExamModal();renderCalendar();selectMonth(obj.month);toast('시험이 저장되었습니다.');
+};
+window.deleteExam=async function(eid){
+  if(!confirm('이 시험을 삭제하시겠습니까?'))return;
+  await deleteDoc(doc(db,'exams',eid));exams=exams.filter(e=>e.id!==eid);
+  renderCalendar();document.getElementById('exam-detail-area').innerHTML='';toast('삭제되었습니다.');
+};
+
+/* ====== 문제 관리 ====== */
+window.refreshManageSel=function(sid){
+  const sel=document.getElementById('manage-exam-sel');
+  const myE=myExams();
+  sel.innerHTML=myE.length?myE.map(e=>`<option value="${e.id}">${e.year}년 ${e.month}월 - ${e.name}</option>`).join(''):'<option value="">시험 없음</option>';
+  if(sid)sel.value=sid;renderQList();
+};
+function getCurExam(){return exams.find(e=>e.id===document.getElementById('manage-exam-sel').value)||null;}
+
+window.renderQList=function(){
+  const ex=getCurExam();const qs=ex?ex.questions:[];
+  const tot=qs.reduce((s,q)=>s+(q.scoreVal||5),0);
+  document.getElementById('q-count').textContent=`(${qs.length}개 · 총 ${tot}점)`;
+  const el=document.getElementById('q-list');
+  if(!qs.length){
+    el.innerHTML='<div class="empty">등록된 문제가 없습니다.</div>';
+    document.getElementById('q-bulk-bar').style.display='none';
+    document.getElementById('bulk-score-btn').style.display='none';
+    return;
+  }
+  document.getElementById('q-bulk-bar').style.display='flex';
+  document.getElementById('q-select-all').checked=false;
+  document.getElementById('q-selected-count').textContent='';
+  document.getElementById('bulk-score-btn').style.display='none';
+  el.innerHTML=qs.map((q,i)=>`
+    <div class="qi" id="qi-${q.id}">
+      <input type="checkbox" class="q-chk" data-id="${q.id}" onchange="onQChkChange()" style="width:auto;margin:0;cursor:pointer;flex-shrink:0;"/>
+      <div class="qn">${i+1}</div>
+      <div class="qt">
+        <span class="bdg ${q.type}">${q.type==='ox'?'OX':q.type==='multiple'?'객관식':'단답형'}</span>
+        <span style="background:#ecfdf5;color:#065f46;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:500;margin-left:4px;">${q.scoreVal||5}점</span>
+        <span style="margin-left:6px;">${q.text.length>55?q.text.slice(0,55)+'…':q.text}</span>
+        <div class="qm">정답: ${q.type==='multiple'?(q.answer+1)+'번':q.answer}</div>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <button class="btn sm" onclick="openEditQModal('${q.id}')">수정</button>
+        <button class="btn sm d" onclick="deleteQ('${q.id}')">삭제</button>
+      </div>
+    </div>`).join('');
+};
+window.onQChkChange=function(){
+  const chks=document.querySelectorAll('.q-chk');
+  const selected=[...chks].filter(c=>c.checked).length;
+  const allChk=document.getElementById('q-select-all');
+  allChk.checked=selected===chks.length&&chks.length>0;
+  allChk.indeterminate=selected>0&&selected<chks.length;
+  document.getElementById('q-selected-count').textContent=selected>0?`${selected}개 선택됨`:'';
+  document.getElementById('bulk-score-btn').style.display=selected>0?'inline-block':'none';
+};
+window.toggleSelectAll=function(checked){
+  document.querySelectorAll('.q-chk').forEach(c=>c.checked=checked);
+  onQChkChange();
+};
+window.deleteQ=async function(qid){
+  const ex=getCurExam();if(!ex)return;
+  ex.questions=ex.questions.filter(q=>q.id!==qid);
+  await updateDoc(doc(db,'exams',ex.id),{questions:ex.questions});renderQList();toast('삭제되었습니다.');
+};
+window.clearAll=async function(){
+  const ex=getCurExam();if(!ex||!ex.questions.length)return;
+  if(!confirm('전체 문제를 삭제할까요?'))return;
+  ex.questions=[];await updateDoc(doc(db,'exams',ex.id),{questions:[]});renderQList();
+};
+window.updateForm=function(){
+  const t=document.getElementById('q-type').value;
+  document.getElementById('form-ox').style.display=t==='ox'?'block':'none';
+  document.getElementById('form-mc').style.display=t==='multiple'?'block':'none';
+  document.getElementById('form-fill').style.display=t==='fill'?'block':'none';
+};
+window.addQuestion=async function(){
+  const ex=getCurExam();if(!ex){alert('시험을 먼저 선택하세요.');return;}
+  const t=document.getElementById('q-type').value;
+  const text=document.getElementById('q-text').value.trim();if(!text){alert('문제를 입력하세요.');return;}
+  const scoreVal=parseInt(document.getElementById('q-score').value)||5;
+  let obj={type:t,text,scoreVal,id:'q'+Date.now()};
+  if(t==='ox'){obj.answer=document.getElementById('ox-ans').value;obj.explanation=document.getElementById('ox-exp').value;}
+  else if(t==='multiple'){
+    const opts=[document.getElementById('mc1').value,document.getElementById('mc2').value,document.getElementById('mc3').value,document.getElementById('mc4').value];
+    if(opts.some(o=>!o.trim())){alert('모든 보기를 입력하세요.');return;}
+    obj.options=opts;obj.answer=parseInt(document.getElementById('mc-ans').value);obj.explanation=document.getElementById('mc-exp').value;
+  }else{
+    const a=document.getElementById('fill-ans-i').value.trim();if(!a){alert('정답을 입력하세요.');return;}
+    obj.answer=a;obj.explanation=document.getElementById('fill-exp').value;
+  }
+  ex.questions.push(obj);
+  await updateDoc(doc(db,'exams',ex.id),{questions:ex.questions});
+  ['q-text','ox-exp','mc-exp','fill-ans-i','fill-exp'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderQList();toast('문제가 추가되었습니다.');
+};
+
+/* ====== 직원 관리 ====== */
+window.addStudent=async function(){
+  const id=document.getElementById('s-id').value.trim(),name=document.getElementById('s-name').value.trim();
+  const pw=document.getElementById('s-pw').value.trim(),group=document.getElementById('s-group').value.trim();
+  const email=document.getElementById('s-email').value.trim();
+  if(!id||!name||!pw){alert('사번, 이름, 비밀번호는 필수입니다.');return;}
+  if(users.find(u=>u.id===id)){alert('이미 존재하는 사번입니다.');return;}
+  const data={name,pw,role:'student',group,email,ownerId:currentUser.id};
+  await setDoc(doc(db,'users',id),data);users.push({id,...data});
+  ['s-id','s-name','s-group','s-email'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('s-pw').value='1234';
+  renderStudents();toast(name+' 직원이 등록되었습니다.');
+};
+window.renderStudents=function(){
+  const list=myStudents();
+  const kw=(document.getElementById('s-search').value||'').toLowerCase();
+  const filtered=list.filter(s=>s.name.includes(kw)||s.id.includes(kw));
+  document.getElementById('s-count').textContent='('+list.length+'명)';
+  const colors=['#a7f3d0','#bfdbfe','#ddd6fe','#fbcfe8','#fde68a'];
+  const tcs=['#064e3b','#1e3a8a','#4c1d95','#831843','#78350f'];
+  const el=document.getElementById('s-list');
+  if(!filtered.length){el.innerHTML='<div class="empty">등록된 직원이 없습니다.</div>';return;}
+  el.innerHTML=filtered.map((s,i)=>{
+    const sResults=examResults.filter(r=>r.studentId===s.id);
+    const last=sResults.slice(-1)[0];
+    const owner=currentUser.role==='superadmin'?users.find(u=>u.id===s.ownerId):null;
+    const passCount=sResults.filter(r=>r.pass).length;
+    const totalCount=sResults.length;
+    const detailRows=totalCount===0
+      ?`<div style="color:#aaa;font-size:12px;padding:4px 0;">응시 이력이 없습니다.</div>`
+      :`<div class="sr-result-row sr-result-header">
+          <span>시험명</span><span>획득/만점</span><span>정답률</span><span>정답수</span><span>응시일시</span><span>결과</span>
+        </div>`
+      +sResults.map(r=>{
+        const ex=exams.find(e=>e.id===r.examId);
+        const exName=ex?ex.name:'(삭제된 시험)';
+        const pct=r.totalPossible>0?Math.round((r.score/r.totalPossible)*100):0;
+        return`<div class="sr-result-row">
+          <span style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${exName}</span>
+          <span style="color:${r.pass?'#059669':'#dc2626'};font-weight:500;">${r.score}/${r.totalPossible}점</span>
+          <span>${pct}%</span><span>${r.correct}/${r.detail?r.detail.length:r.total}</span>
+          <span style="color:#888;">${r.date||''}</span>
+          <span><span class="bdg ${r.pass?'pass':'fail'}">${r.pass?'합격':'불합격'}</span></span>
+        </div>`;
+      }).join('');
+    return`<div>
+      <div class="sr" onclick="toggleStudentDetail('sd-${s.id}')">
+        <div class="av" style="background:${colors[i%5]};color:${tcs[i%5]};">${s.name.slice(0,1)}</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:500;">${s.name} <span style="font-size:12px;color:#666;font-weight:400;">${s.id}</span></div>
+          <div style="font-size:12px;color:#666;">${s.group||'부서 미지정'}${s.email?' · '+s.email:''}${owner?' · 담당: '+owner.name:' · 담당: '+(currentUser.name||'관리자')}</div>
+        </div>
+        <div style="font-size:12px;color:#666;margin-right:6px;text-align:right;">
+          ${totalCount>0
+            ?`<div>${last?`최근 ${last.score}점 <span class="bdg ${last.pass?'pass':'fail'}">${last.pass?'합격':'불합격'}</span>`:''}</div>
+               <div style="color:#aaa;margin-top:2px;">총 ${totalCount}회 응시 · 합격 ${passCount}회</div>`
+            :'-'}
+        </div>
+        <div style="font-size:11px;color:#bbb;margin-right:4px;">${totalCount>0?'▼':''}</div>
+        <div style="display:flex;gap:4px;" onclick="event.stopPropagation()">
+          <button class="btn sm" onclick="openEditSModal('${s.id}')">수정</button>
+          <button class="btn sm d" onclick="deleteStudent('${s.id}')">삭제</button>
+        </div>
+      </div>
+      <div class="sr-detail" id="sd-${s.id}">${detailRows}</div>
+    </div>`;
+  }).join('');
+};
+window.toggleStudentDetail=function(id){
+  const el=document.getElementById(id);if(el)el.classList.toggle('open');
+};
+window.deleteStudent=async function(id){
+  if(!confirm('삭제하시겠습니까?'))return;
+  await deleteDoc(doc(db,'users',id));users=users.filter(u=>u.id!==id);renderStudents();toast('삭제되었습니다.');
+};
+
+/* ===== 직원 수정 모달 ===== */
+window.openEditSModal=function(sid){
+  const s=users.find(u=>u.id===sid);if(!s)return;
+  document.getElementById('es-id').value=sid;
+  document.getElementById('es-id-label').textContent=sid;
+  document.getElementById('es-name').value=s.name||'';
+  document.getElementById('es-pw').value='';
+  document.getElementById('es-group').value=s.group||'';
+  document.getElementById('es-email').value=s.email||'';
+  document.getElementById('edits-modal').style.display='flex';
+};
+window.closeEditSModal=function(){document.getElementById('edits-modal').style.display='none';};
+window.saveEditStudent=async function(){
+  const sid=document.getElementById('es-id').value;
+  const name=document.getElementById('es-name').value.trim();
+  const pw=document.getElementById('es-pw').value.trim();
+  const group=document.getElementById('es-group').value.trim();
+  const email=document.getElementById('es-email').value.trim();
+  if(!name){alert('이름을 입력하세요.');return;}
+  const upd={name,group,email,role:'student'};
+  if(pw){if(pw.length<4){alert('비밀번호는 4자 이상이어야 합니다.');return;}upd.pw=pw;}
+  await updateDoc(doc(db,'users',sid),upd);
+  const u=users.find(u=>u.id===sid);if(u)Object.assign(u,upd);
+  closeEditSModal();renderStudents();toast(name+' 직원 정보가 수정되었습니다.');
+};
+
+/* ===== 권한 일괄 수정 ===== */
+window.fixStudentRoles=async function(){
+  const wrong=users.filter(u=>u.ownerId===currentUser.id&&u.role!=='student');
+  if(!wrong.length){toast('수정이 필요한 직원 계정이 없습니다.');return;}
+  if(!confirm('role이 잘못된 직원 계정 '+wrong.length+'명을 직원으로 일괄 수정할까요?\n\n대상: '+wrong.map(u=>u.name+'('+u.id+')').join(', ')))return;
+  await Promise.all(wrong.map(u=>updateDoc(doc(db,'users',u.id),{role:'student'})));
+  wrong.forEach(u=>{const found=users.find(x=>x.id===u.id);if(found)found.role='student';});
+  renderStudents();toast(wrong.length+'명 권한이 직원으로 수정되었습니다.');
+};
+
+/* ===== 배점 일괄 수정 ===== */
+window.openBulkScoreModal=function(){
+  const selected=[...document.querySelectorAll('.q-chk:checked')].map(c=>c.dataset.id);
+  if(!selected.length){alert('문제를 선택하세요.');return;}
+  document.getElementById('bulk-score-ids').value=JSON.stringify(selected);
+  document.getElementById('bulk-score-inp').value='5';
+  document.getElementById('bulk-score-count').textContent=selected.length+'개 문제';
+  document.getElementById('bulk-score-modal').style.display='flex';
+};
+window.closeBulkScoreModal=function(){document.getElementById('bulk-score-modal').style.display='none';};
+window.saveBulkScore=async function(){
+  const ex=getCurExam();if(!ex)return;
+  const ids=JSON.parse(document.getElementById('bulk-score-ids').value||'[]');
+  const val=parseInt(document.getElementById('bulk-score-inp').value);
+  if(!val||val<1){alert('1점 이상 입력하세요.');return;}
+  ids.forEach(id=>{const q=ex.questions.find(q=>q.id===id);if(q)q.scoreVal=val;});
+  await updateDoc(doc(db,'exams',ex.id),{questions:ex.questions});
+  await _recalcExamResults(ex.id,ex.questions);
+  closeBulkScoreModal();renderQList();toast(ids.length+'개 문제 배점이 '+val+'점으로 변경되었습니다.');
+};
+
+/* ===== 문제 수정 모달 ===== */
+window.openEditQModal=function(qid){
+  const ex=getCurExam();if(!ex)return;
+  const q=ex.questions.find(q=>q.id===qid);if(!q)return;
+  document.getElementById('eq-id').value=qid;
+  document.getElementById('eq-text').value=q.text||'';
+  document.getElementById('eq-score').value=q.scoreVal||5;
+  const typeLabel={ox:'OX (O/X 선택)',multiple:'객관식 (4지선다)',fill:'단답형'};
+  document.getElementById('eq-type-label').textContent=typeLabel[q.type]||q.type;
+  ['eq-form-ox','eq-form-mc','eq-form-fill'].forEach(function(id){document.getElementById(id).style.display='none';});
+  if(q.type==='ox'){
+    document.getElementById('eq-form-ox').style.display='block';
+    document.getElementById('eq-ox-ans').value=q.answer||'O';
+    document.getElementById('eq-ox-exp').value=q.explanation||'';
+  }else if(q.type==='multiple'){
+    document.getElementById('eq-form-mc').style.display='block';
+    (q.options||['','','','']).forEach(function(v,i){document.getElementById('eq-mc'+(i+1)).value=v;});
+    document.getElementById('eq-mc-ans').value=q.answer!=null?q.answer:0;
+    document.getElementById('eq-mc-exp').value=q.explanation||'';
+  }else{
+    document.getElementById('eq-form-fill').style.display='block';
+    document.getElementById('eq-fill-ans').value=q.answer||'';
+    document.getElementById('eq-fill-exp').value=q.explanation||'';
+  }
+  document.getElementById('editq-modal').style.display='flex';
+};
+window.closeEditQModal=function(){document.getElementById('editq-modal').style.display='none';};
+window.saveEditQ=async function(){
+  const ex=getCurExam();if(!ex)return;
+  const qid=document.getElementById('eq-id').value;
+  const qi=ex.questions.findIndex(function(q){return q.id===qid;});if(qi===-1)return;
+  const q=ex.questions[qi];
+  const text=document.getElementById('eq-text').value.trim();
+  if(!text){alert('문제를 입력하세요.');return;}
+  const newScore=parseInt(document.getElementById('eq-score').value)||5;
+  const scoreChanged=newScore!==(q.scoreVal||5);
+  q.text=text;q.scoreVal=newScore;
+  if(q.type==='ox'){
+    q.answer=document.getElementById('eq-ox-ans').value;
+    q.explanation=document.getElementById('eq-ox-exp').value;
+  }else if(q.type==='multiple'){
+    const opts=['eq-mc1','eq-mc2','eq-mc3','eq-mc4'].map(function(id){return document.getElementById(id).value;});
+    if(opts.some(function(o){return !o.trim();})){alert('모든 보기를 입력하세요.');return;}
+    q.options=opts;q.answer=parseInt(document.getElementById('eq-mc-ans').value);
+    q.explanation=document.getElementById('eq-mc-exp').value;
+  }else{
+    const a=document.getElementById('eq-fill-ans').value.trim();
+    if(!a){alert('정답을 입력하세요.');return;}
+    q.answer=a;q.explanation=document.getElementById('eq-fill-exp').value;
+  }
+  ex.questions[qi]=q;
+  await updateDoc(doc(db,'exams',ex.id),{questions:ex.questions});
+  await _syncExplanations(ex.id,ex.questions);
+  if(scoreChanged){await _recalcExamResults(ex.id,ex.questions);toast('문제 수정 및 결과 재계산 완료!');}
+  else{toast('문제가 수정되었습니다.');}
+  closeEditQModal();renderQList();
+};
+
+/* ===== 해설 동기화: 기존 결과의 d.q.explanation을 현재 문항 기준으로 갱신 ===== */
+async function _syncExplanations(eid,questions){
+  const targets=examResults.filter(function(r){return r.examId===eid;});
+  if(!targets.length)return;
+  const expMap={};questions.forEach(function(q){expMap[q.text]=q.explanation||'';});
+  const batch=[];
+  for(const r of targets){
+    if(!r.detail||!r.detail.length)continue;
+    let changed=false;
+    const newDetail=r.detail.map(function(d){
+      const newExp=expMap[d.q&&d.q.text];
+      if(newExp!==undefined&&newExp!==(d.q.explanation||'')){
+        changed=true;
+        return Object.assign({},d,{q:Object.assign({},d.q,{explanation:newExp})});
+      }
+      return d;
+    });
+    if(!changed)continue;
+    Object.assign(r,{detail:newDetail});
+    batch.push(updateDoc(doc(db,'results',r.id),{detail:newDetail}));
+  }
+  await Promise.all(batch);
+}
+
+/* ===== 배점 재계산 ===== */
+async function _recalcExamResults(eid,questions){
+  const targets=examResults.filter(function(r){return r.examId===eid;});
+  if(!targets.length)return;
+  const qMap={};questions.forEach(function(q){qMap[q.text]=q.scoreVal||5;});
+  const batch=[];
+  for(const r of targets){
+    if(!r.detail||!r.detail.length)continue;
+    const newDetail=r.detail.map(function(d){return Object.assign({},d,{scoreVal:qMap[d.q&&d.q.text]!=null?qMap[d.q.text]:d.scoreVal});});
+    const newScore=newDetail.filter(function(d){return d.correct;}).reduce(function(s,d){return s+(d.scoreVal||0);},0);
+    const newTotal=newDetail.reduce(function(s,d){return s+(d.scoreVal||0);},0);
+    const pct=newTotal>0?Math.round((newScore/newTotal)*100):0;
+    const newPass=pct>=PASS_SCORE;
+    const updated={detail:newDetail,score:newScore,totalPossible:newTotal,pass:newPass};
+    Object.assign(r,updated);
+    batch.push(updateDoc(doc(db,'results',r.id),updated));
+  }
+  await Promise.all(batch);
+}
+window.recalcResults=async function(){
+  const eid=document.getElementById('res-exam-sel').value;
+  if(!eid){alert('시험을 먼저 선택하세요.');return;}
+  const ex=exams.find(function(e){return e.id===eid;});if(!ex)return;
+  const count=examResults.filter(function(r){return r.examId===eid;}).length;
+  if(!count){alert('재계산할 응시 결과가 없습니다.');return;}
+  if(!confirm('이 시험의 응시 결과 '+count+'건을 현재 배점 기준으로 재계산할까요?'))return;
+  await _recalcExamResults(eid,ex.questions);
+  renderAdminResults();toast(count+'건 재계산 완료!');
+};
+
+window.syncAllExplanations=async function(){
+  const eid=document.getElementById('res-exam-sel').value;
+  if(!eid){alert('시험을 먼저 선택하세요.');return;}
+  const ex=exams.find(function(e){return e.id===eid;});if(!ex)return;
+  const count=examResults.filter(function(r){return r.examId===eid;}).length;
+  if(!count){alert('동기화할 응시 결과가 없습니다.');return;}
+  if(!confirm('이 시험의 응시 결과 '+count+'건에 현재 문항 해설을 일괄 반영할까요?'))return;
+  await _syncExplanations(eid,ex.questions);
+  renderAdminResults();toast(count+'건 해설 동기화 완료!');
+};
+
+/* ===== 문항수 일괄 수정 (detail 기준으로 total 값 수정) ===== */
+window.fixResultTotals=async function(){
+  const eid=document.getElementById('res-exam-sel').value;
+  if(!eid){alert('시험을 먼저 선택하세요.');return;}
+  const targets=examResults.filter(r=>r.examId===eid&&r.detail&&r.detail.length);
+  const wrongOnes=targets.filter(r=>r.total!==r.detail.length);
+  if(!wrongOnes.length){toast('수정이 필요한 결과가 없습니다.');return;}
+  if(!confirm(wrongOnes.length+'건의 정답수/전체문항을 실제 응시 문항 기준으로 수정할까요?'))return;
+  const batch=wrongOnes.map(r=>{
+    const actualTotal=r.detail.length;
+    const actualCorrect=r.detail.filter(d=>d.correct).length;
+    r.total=actualTotal;
+    r.correct=actualCorrect;
+    return updateDoc(doc(db,'results',r.id),{total:actualTotal,correct:actualCorrect});
+  });
+  await Promise.all(batch);
+  renderAdminResults();
+  toast(wrongOnes.length+'건 수정 완료!');
+};
+
+/* ====== 시험 결과 + 분포도 ====== */
+window.refreshResultSel=function(){
+  const sel=document.getElementById('res-exam-sel');
+  const myE=myExams();
+  sel.innerHTML=myE.length?myE.map(e=>`<option value="${e.id}">${e.year}년 ${e.month}월 - ${e.name}</option>`).join(''):'<option value="">시험 없음</option>';
+  renderAdminResults();
+};
+let _resPage=0;
+const RES_PER_PAGE=12;
+window.renderAdminResults=function(page){
+  _resPage=page||0;
+  const eid=document.getElementById('res-exam-sel').value;
+  const filter=document.getElementById('res-filter').value;
+  const list=examResults.filter(r=>r.examId===eid&&(filter==='all'||r.pass===(filter==='pass')));
+  const el=document.getElementById('admin-results-list');
+  if(!list.length){el.innerHTML='<div class="empty">해당 조건의 결과가 없습니다.</div>';renderDistribution(eid);return;}
+  const totalPages=Math.ceil(list.length/RES_PER_PAGE);
+  _resPage=Math.min(_resPage,totalPages-1);
+  const paged=list.slice(_resPage*RES_PER_PAGE,(_resPage+1)*RES_PER_PAGE);
+  // 페이지네이션 버튼
+  const pgHTML=totalPages>1?`<div style="display:flex;align-items:center;gap:4px;padding:10px 8px 4px;flex-wrap:wrap;">
+    <button class="res-pg-btn" onclick="renderAdminResults(${_resPage-1})" ${_resPage===0?'disabled style="opacity:.4;cursor:default;"':''}>‹</button>
+    ${Array.from({length:totalPages},(_,i)=>`<button class="res-pg-btn ${i===_resPage?'active':''}" onclick="renderAdminResults(${i})">${i+1}</button>`).join('')}
+    <button class="res-pg-btn" onclick="renderAdminResults(${_resPage+1})" ${_resPage===totalPages-1?'disabled style="opacity:.4;cursor:default;"':''}>›</button>
+    <span style="font-size:12px;color:#aaa;margin-left:6px;">${list.length}명 중 ${_resPage*RES_PER_PAGE+1}~${Math.min((_resPage+1)*RES_PER_PAGE,list.length)}명</span>
+  </div>`:'';
+  el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 110px 80px 80px 130px 70px;gap:6px;padding:6px 8px;font-size:12px;color:#666;border-bottom:1px solid #f3f4f6;">
+    <span>직원 <span style="font-size:10px;color:#a78bfa;">(클릭 시 상세)</span></span><span>획득/만점</span><span>정답률</span><span>정답수</span><span>응시일시</span><span>상태</span>
+  </div>`+paged.map(r=>{
+    const s=users.find(u=>u.id===r.studentId)||{name:'알 수 없음'};
+    const pct=r.totalPossible>0?Math.round((r.score/r.totalPossible)*100):0;
+    return`<div style="display:grid;grid-template-columns:1fr 110px 80px 80px 130px 70px;gap:6px;padding:8px;font-size:13px;border-bottom:1px solid #f9fafb;cursor:pointer;transition:background .15s;" onmouseenter="this.style.background='#faf5ff'" onmouseleave="this.style.background=''" onclick="openResultDetail('${r.id}')">
+      <span style="font-weight:500;color:#7c3aed;">${s.name}<span style="font-weight:400;color:#666;font-size:11px;margin-left:4px;">${r.studentId}</span></span>
+      <span style="color:${r.pass?'#059669':'#dc2626'};font-weight:500;">${r.score}/${r.totalPossible}점</span>
+      <span>${pct}%</span><span>${r.correct}/${r.detail?r.detail.length:r.total}</span>
+      <span style="color:#666;font-size:12px;">${r.date}</span>
+      <span><span class="bdg ${r.pass?'pass':'fail'}">${r.pass?'합격':'불합격'}</span></span>
+    </div>`;
+  }).join('')+pgHTML;
+  renderDistribution(eid);
+};
+/* ===== 해설 fallback: 저장된 해설이 없으면 현재 문항 데이터에서 조회 ===== */
+function getLiveExplanation(qText, examId){
+  const ex=exams.find(e=>e.id===examId);
+  if(!ex)return'';
+  const q=(ex.questions||[]).find(q=>q.text===qText);
+  return(q&&q.explanation)||'';
+}
+
+/* ===== 결과 상세 모달 ===== */
+window.openResultDetail=function(rid){
+  const r=examResults.find(x=>x.id===rid);
+  if(!r){alert('결과를 찾을 수 없습니다.');return;}
+  const s=users.find(u=>u.id===r.studentId)||{name:'알 수 없음'};
+  const ex=exams.find(e=>e.id===r.examId);
+  const pct=r.totalPossible>0?Math.round((r.score/r.totalPossible)*100):0;
+  const actualTotal=r.detail?r.detail.length:r.total;
+  const detail=r.detail||[];
+  const wrongItems=detail.filter(d=>!d.correct);
+  const rightItems=detail.filter(d=>d.correct);
+
+  function renderItem(d,idx,showAll){
+    const q=d.q||{};
+    const userAnsLabel=q.type==='multiple'
+      ?(d.userAnswer!=null?(d.userAnswer+1)+'번 '+(q.options||[])[d.userAnswer]:'미응답')
+      :(d.userAnswer??'미응답');
+    const correctAnsLabel=q.type==='multiple'
+      ?(q.answer+1)+'번 '+(q.options||[])[q.answer]
+      :q.answer;
+    return`<div class="${d.correct?'res-item-ok':'res-item-ng'}">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:4px;">
+        <span style="font-size:11px;background:${d.correct?'#bbf7d0':'#fecaca'};color:${d.correct?'#065f46':'#991b1b'};padding:1px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;">${d.correct?'✅ 정답':'❌ 오답'}</span>
+        <span style="font-size:13px;font-weight:500;">Q${idx+1}. ${(q.text||'').length>60?(q.text||'').slice(0,60)+'…':(q.text||'')}</span>
+      </div>
+      <div style="font-size:12px;color:#555;padding-left:4px;">
+        내 답: <b style="color:${d.correct?'#059669':'#dc2626'};">${userAnsLabel}</b>
+        ${!d.correct?` · 정답: <b style="color:#059669;">${correctAnsLabel}</b>`:''}
+        ${(getLiveExplanation(q.text,r.examId)||q.explanation||'')?` · <span style="color:#6b7280;">${getLiveExplanation(q.text,r.examId)||q.explanation||''}</span>`:''}
+        · <b>${d.correct?d.scoreVal:0}/${d.scoreVal}점</b>
+      </div>
+    </div>`;
+  }
+
+  const wrongHTML=wrongItems.length===0
+    ?'<div style="color:#059669;font-size:13px;text-align:center;padding:16px;">🎉 모든 문항을 정답 처리했습니다!</div>'
+    :wrongItems.map((d,i)=>renderItem(d,detail.indexOf(d),i)).join('');
+
+  document.getElementById('rd-title').textContent=`${s.name} (${r.studentId}) 시험 결과 상세`;
+  document.getElementById('rd-exam-name').textContent=ex?ex.name:'';
+  document.getElementById('rd-summary').innerHTML=`
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <div class="stat"><div class="stat-val" style="color:${r.pass?'#059669':'#dc2626'};">${r.score}</div><div class="stat-lbl">획득 점수</div></div>
+      <div class="stat"><div class="stat-val">${r.totalPossible}</div><div class="stat-lbl">만점</div></div>
+      <div class="stat"><div class="stat-val">${pct}%</div><div class="stat-lbl">정답률</div></div>
+      <div class="stat"><div class="stat-val">${r.correct}/${actualTotal}</div><div class="stat-lbl">정답/응시</div></div>
+      <div class="stat"><div class="stat-val"><span class="bdg ${r.pass?'pass':'fail'}">${r.pass?'합격':'불합격'}</span></div><div class="stat-lbl">결과</div></div>
+    </div>
+    <div style="font-size:11px;color:#aaa;margin-top:6px;">응시일시: ${r.date||''}</div>`;
+
+  // 탭 전환
+  document.getElementById('rd-wrong-tab').classList.add('active-tab');
+  document.getElementById('rd-all-tab').classList.remove('active-tab');
+  document.getElementById('rd-wrong-body').innerHTML=wrongHTML;
+  document.getElementById('rd-all-body').innerHTML=detail.map((d,i)=>renderItem(d,i,true)).join('');
+  document.getElementById('rd-wrong-body').style.display='block';
+  document.getElementById('rd-all-body').style.display='none';
+  document.getElementById('rd-wrong-tab').textContent=`오답 (${wrongItems.length}개)`;
+  document.getElementById('rd-all-tab').textContent=`전체 (${detail.length}개)`;
+  document.getElementById('result-detail-modal').style.display='flex';
+};
+window.closeResultDetail=function(){document.getElementById('result-detail-modal').style.display='none';};
+window.switchResTab=function(tab){
+  document.getElementById('rd-wrong-body').style.display=tab==='wrong'?'block':'none';
+  document.getElementById('rd-all-body').style.display=tab==='all'?'block':'none';
+  document.getElementById('rd-wrong-tab').classList.toggle('active-tab',tab==='wrong');
+  document.getElementById('rd-all-tab').classList.toggle('active-tab',tab==='all');
+};
+
+function renderDistribution(eid){
+  const ex=exams.find(e=>e.id===eid);
+  const results=examResults.filter(r=>r.examId===eid);
+  const area=document.getElementById('dist-area');
+  if(!ex||!results.length){area.innerHTML='<div class="empty">응시 결과가 없어 분포도를 표시할 수 없습니다.</div>';return;}
+  const total=results.length;
+  // 문제은행 시험: 실제 응시된 문항만 표시 (detail에 존재하는 문항 기준)
+  const appearedTexts=new Set();
+  results.forEach(r=>(r.detail||[]).forEach(d=>{if(d&&d.q&&d.q.text)appearedTexts.add(d.q.text);}));
+  const qs=ex.questions.filter(q=>appearedTexts.size===0||appearedTexts.has(q.text));
+  area.innerHTML=(qs.length?qs:ex.questions).map((q,qi)=>{
+    const qResults=results.map(r=>(r.detail||[]).find(d=>d&&d.q&&d.q.text===q.text)).filter(Boolean);
+    // 이 문항을 실제 응시한 인원 수 (랜덤 출제로 일부만 받았을 수 있음)
+    const qTotal=qResults.length||1;
+    let distHTML='';
+    if(q.type==='ox'){
+      const items=[{label:'O',cnt:qResults.filter(d=>d.userAnswer==='O').length,color:'#6ee7b7'},
+        {label:'X',cnt:qResults.filter(d=>d.userAnswer==='X').length,color:'#fca5a5'},
+        {label:'미응답',cnt:qTotal-qResults.length,color:'#d1d5db'}].filter(i=>i.cnt>0);
+      distHTML=items.map(it=>{const pct=Math.round((it.cnt/qTotal)*100);const isC=q.answer===it.label;
+        return`<div class="dist-row"><div style="width:60px;font-size:13px;font-weight:${isC?'500':'400'};">${it.label}${isC?' ✓':''}</div>
+          <div style="flex:1;background:#f3f4f6;border-radius:3px;height:18px;overflow:hidden;"><div style="width:${pct}%;background:${it.color};height:18px;border-radius:3px;"></div></div>
+          <div style="width:60px;font-size:12px;color:#666;text-align:right;">${it.cnt}명 (${pct}%)</div></div>`;}).join('');
+    }else if(q.type==='multiple'){
+      const optColors=['#6ee7b7','#93c5fd','#fde68a','#f9a8d4'];
+      distHTML=(q.options||[]).map((opt,oi)=>{const cnt=qResults.filter(d=>d.userAnswer===oi).length;const pct=Math.round((cnt/qTotal)*100);const isC=q.answer===oi;
+        return`<div class="dist-row"><div style="width:60px;font-size:13px;font-weight:${isC?'500':'400'};">${['①','②','③','④'][oi]}${isC?' ✓':''}</div>
+          <div style="flex:1;background:#f3f4f6;border-radius:3px;height:18px;overflow:hidden;"><div style="width:${pct}%;background:${isC?'#6ee7b7':optColors[oi]};height:18px;border-radius:3px;"></div></div>
+          <div style="width:60px;font-size:12px;color:#666;text-align:right;">${cnt}명 (${pct}%)</div></div>`;}).join('');
+    }else{
+      const am={};qResults.forEach(d=>{const a=(d.userAnswer||'미응답').toLowerCase();am[a]=(am[a]||0)+1;});
+      distHTML=Object.entries(am).sort((a,b)=>b[1]-a[1]).map(([ans,cnt])=>{const pct=Math.round((cnt/qTotal)*100);const isC=ans===q.answer.toLowerCase();
+        return`<div class="dist-row"><div style="width:80px;font-size:13px;font-weight:${isC?'500':'400'};">${ans}${isC?' ✓':''}</div>
+          <div style="flex:1;background:#f3f4f6;border-radius:3px;height:18px;overflow:hidden;"><div style="width:${pct}%;background:${isC?'#6ee7b7':'#fde68a'};height:18px;border-radius:3px;"></div></div>
+          <div style="width:60px;font-size:12px;color:#666;text-align:right;">${cnt}명 (${pct}%)</div></div>`;}).join('');
+    }
+    const correctRate=qResults.length>0?Math.round((qResults.filter(d=>d.correct).length/qTotal)*100):0;
+    return`<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">
+        <span style="background:#ecfdf5;color:#065f46;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:500;white-space:nowrap;">Q${qi+1}</span>
+        <span style="font-size:13px;flex:1;">${q.text.length>60?q.text.slice(0,60)+'…':q.text}</span>
+        <span style="font-size:12px;color:${correctRate>=60?'#059669':'#dc2626'};white-space:nowrap;">정답률 ${correctRate}%</span>
+      </div>
+      ${distHTML}
+    </div>`;
+  }).join('');
+}
+
+/* ====== 계정 설정 ====== */
+window.changePw=async function(){
+  const cur=document.getElementById('pw-cur').value,nw=document.getElementById('pw-new').value,con=document.getElementById('pw-con').value;
+  const msg=document.getElementById('pw-msg');
+  if(cur!==currentUser.pw){msg.style.color='#dc2626';msg.textContent='현재 비밀번호가 틀렸습니다.';return;}
+  if(nw.length<4){msg.style.color='#dc2626';msg.textContent='새 비밀번호는 4자 이상이어야 합니다.';return;}
+  if(nw!==con){msg.style.color='#dc2626';msg.textContent='새 비밀번호가 일치하지 않습니다.';return;}
+  await updateDoc(doc(db,'users',currentUser.id),{pw:nw});currentUser.pw=nw;
+  msg.style.color='#059669';msg.textContent='비밀번호가 변경되었습니다.';
+  ['pw-cur','pw-new','pw-con'].forEach(id=>document.getElementById(id).value='');
+};
+window.saveSettings=async function(){
+  const v=parseInt(document.getElementById('pass-score-inp').value);
+  if(!v||v<1||v>100){alert('1~100 사이의 숫자를 입력하세요.');return;}
+  PASS_SCORE=v;
+  await updateDoc(doc(db,'users',currentUser.id),{passScore:v});
+  document.getElementById('settings-msg').textContent=`합격 기준이 ${v}%로 설정되었습니다.`;
+};
+window.startExamAsAdmin=function(eid){
+  const ex=exams.find(e=>e.id===eid);
+  if(!ex||!ex.questions.length){alert('등록된 문제가 없습니다.');return;}
+  activeExamId=eid;prevSection='exams';
+  launchPlay(ex,true);
+};
+
+/* ====== 직원: 시험 목록 ====== */
+window.showStudentExams=function(){
+  const myOwner=users.find(u=>u.id===currentUser.ownerId);
+  const openExams=exams.filter(e=>e.status==='open'&&e.ownerId===currentUser.ownerId);
+  const el=document.getElementById('play-start');
+  if(!openExams.length){
+    el.innerHTML=`<div style="text-align:center;padding:2rem;"><div style="font-size:32px;margin-bottom:1rem;">📭</div><div style="font-size:15px;font-weight:500;">현재 응시 가능한 시험이 없습니다</div></div>`;
+    prevSection='my-results';showSec('play');return;
+  }
+  el.innerHTML=`<div style="font-size:15px;font-weight:500;margin-bottom:12px;">응시 가능한 시험</div>`+
+    openExams.map(e=>{
+      const tot=e.questions.reduce((s,q)=>s+(q.scoreVal||5),0);
+      // 문제은행 모드 정보 표시
+      const modeLabel=e.examMode==='bank'
+        ?`<span class="bdg bank" style="margin-left:6px;">문제은행 ${e.bankCount||10}문항</span>`
+        :`<span class="bdg fixed" style="margin-left:6px;">전체 ${e.questions.length}문항</span>`;
+      // 임시저장 존재 여부
+      const draftKey=`draft_${currentUser.id}_${e.id}`;
+      const hasDraft=!!localStorage.getItem(draftKey);
+      return`<div style="border:1px solid #e5e5e5;border-radius:12px;padding:1rem;margin-bottom:8px;background:#fff;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div><span style="font-size:14px;font-weight:500;">${e.name}</span><span class="bdg open" style="margin-left:6px;">진행중</span>${modeLabel}</div>
+          <button class="btn sm p" onclick="selectStudentExam('${e.id}')">응시하기</button>
+        </div>
+        <div style="font-size:12px;color:#666;margin-top:6px;">📅 ${e.start||''} ~ ${e.end||''} · ${tot}점 만점</div>
+        ${e.desc?`<div style="font-size:12px;color:#666;margin-top:2px;">${e.desc}</div>`:''}
+        ${hasDraft?`<div style="margin-top:8px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:6px 10px;font-size:12px;color:#92400e;">💾 임시저장된 답안이 있습니다</div>`:''}
+      </div>`;
+    }).join('');
+  prevSection='my-results';showSec('play');
+};
+window.selectStudentExam=function(eid){
+  const ex=exams.find(e=>e.id===eid);
+  if(!ex||!ex.questions.length){alert('등록된 문제가 없습니다.');return;}
+  activeExamId=eid;launchPlay(ex,false);
+};
+
+/* ====== 출제방식 적용하여 문제 준비 ====== */
+function prepareQuestions(ex, isAdmin){
+  if(isAdmin) return [...ex.questions].sort(()=>Math.random()-0.5);
+  const mode=ex.examMode||'fixed';
+  const bankCount=ex.bankCount||10;
+  if(mode==='bank'){
+    const shuffled=[...ex.questions].sort(()=>Math.random()-0.5);
+    return shuffled.slice(0,Math.min(bankCount,shuffled.length));
+  }
+  return [...ex.questions];
+}
+
+function launchPlay(ex, isAdmin=false){
+  quizQ=prepareQuestions(ex,isAdmin);
+  pageAnswers={};currentPage=0;
+  const tot=quizQ.reduce((s,q)=>s+(q.scoreVal||5),0);
+  const totalPages=Math.ceil(quizQ.length/PER_PAGE);
+  // 임시저장 확인
+  const draftKey=`draft_${currentUser.id}_${ex.id}`;
+  const hasDraft=!isAdmin&&!!localStorage.getItem(draftKey);
+  const mode=isAdmin?'fixed':ex.examMode||'fixed';
+  const modeLabel=isAdmin?'미리보기':mode==='bank'?`문제은행 랜덤 ${quizQ.length}문항`:`전체 ${quizQ.length}문항`;
+  document.getElementById('play-start').innerHTML=`
+    <div style="text-align:center;padding:1rem 0;">
+      <div style="font-size:32px;margin-bottom:1rem;">📝</div>
+      <div style="font-size:17px;font-weight:500;margin-bottom:6px;">${ex.name}</div>
+      <div style="font-size:13px;color:#666;margin-bottom:4px;">${quizQ.length}문제 · ${tot}점 만점 · 합격 기준 ${PASS_SCORE}%</div>
+      <div style="font-size:12px;margin-bottom:4px;"><span class="bdg ${mode==='bank'?'bank':'fixed'}">${modeLabel}</span></div>
+      <div style="font-size:13px;color:#666;margin-bottom:1.5rem;">페이지당 ${PER_PAGE}문제씩 · 총 ${totalPages}페이지</div>
+      ${hasDraft?`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px;margin-bottom:12px;font-size:13px;color:#92400e;">💾 임시저장된 답안이 있습니다. 불러오시겠습니까?<br/><div style="display:flex;gap:8px;justify-content:center;margin-top:8px;"><button class="btn sm warn" onclick="loadDraftAndStart('${ex.id}')">불러오기</button><button class="btn sm" onclick="clearDraftAndStart('${ex.id}')">새로 시작</button></div></div>`:''}
+      <div style="display:flex;gap:8px;justify-content:center;">
+        <button class="btn" onclick="showSec(prevSection)">돌아가기</button>
+        ${!hasDraft?`<button class="btn p" onclick="startPlay()">시작하기</button>`:''}
+      </div>
+    </div>`;
+  document.getElementById('play-start').style.display='block';
+  document.getElementById('play-screen').style.display='none';
+  showSec('play');
+}
+
+window.loadDraftAndStart=function(eid){
+  const draftKey=`draft_${currentUser.id}_${eid}`;
+  try{
+    const saved=JSON.parse(localStorage.getItem(draftKey));
+    if(saved&&saved.answers){pageAnswers=saved.answers;}
+  }catch(e){}
+  startPlay();
+};
+window.clearDraftAndStart=function(eid){
+  const draftKey=`draft_${currentUser.id}_${eid}`;
+  localStorage.removeItem(draftKey);
+  startPlay();
+};
+
+window.startPlay=function(){
+  document.getElementById('play-start').style.display='none';
+  document.getElementById('play-screen').style.display='block';
+  renderPage();
+};
+
+function renderPage(){
+  const totalPages=Math.ceil(quizQ.length/PER_PAGE);
+  const start=currentPage*PER_PAGE,end=Math.min(start+PER_PAGE,quizQ.length);
+  const pageQs=quizQ.slice(start,end);
+  const answeredCount=Object.keys(pageAnswers).length;
+  document.getElementById('page-info').textContent=`${currentPage+1} / ${totalPages} 페이지`;
+  document.getElementById('answered-info').textContent=`${answeredCount} / ${quizQ.length} 문항 응답`;
+  document.getElementById('play-prog-fill').style.width=Math.round((answeredCount/quizQ.length)*100)+'%';
+  document.getElementById('page-dots').innerHTML=quizQ.map((q,i)=>{
+    const isAns=pageAnswers.hasOwnProperty(i),isCur=i>=start&&i<end;
+    return`<div class="pdot ${isAns?'answered':''} ${isCur?'current':''}" onclick="jumpToPage(${Math.floor(i/PER_PAGE)})">${i+1}</div>`;
+  }).join('');
+  // 임시저장 여부 표시
+  const draftKey=`draft_${currentUser.id}_${activeExamId}`;
+  const hasDraft=!!localStorage.getItem(draftKey);
+  document.getElementById('draft-bar').style.display=hasDraft?'flex':'none';
+  const isLast=currentPage===totalPages-1;
+  document.getElementById('prev-page-btn').style.display=currentPage>0?'block':'none';
+  document.getElementById('next-page-btn').style.display=isLast?'none':'block';
+  document.getElementById('submit-btn').style.display=isLast?'block':'none';
+  document.getElementById('questions-container').innerHTML=pageQs.map((q,pi)=>{
+    const qi=start+pi,saved=pageAnswers[qi];
+    let inputHTML='';
+    if(q.type==='ox'){
+      inputHTML=`<div class="ox-btns"><button class="ox-btn ${saved==='O'?'sel-o':''}" id="ox-o-${qi}" onclick="saveAnswer(${qi},'O')">⭕ O</button><button class="ox-btn ${saved==='X'?'sel-x':''}" id="ox-x-${qi}" onclick="saveAnswer(${qi},'X')">❌ X</button></div>`;
+    }else if(q.type==='multiple'){
+      inputHTML=q.options.map((o,oi)=>`<div class="choice ${saved===oi?'sel':''}" onclick="saveAnswer(${qi},${oi})" id="ch-${qi}-${oi}"><div class="choice-letter">${['①','②','③','④'][oi]}</div><div style="font-size:14px;">${o}</div></div>`).join('');
+    }else{
+      inputHTML=`<div style="display:flex;gap:8px;"><input id="fill-${qi}" value="${saved||''}" placeholder="정답을 입력하세요..." oninput="saveAnswer(${qi},this.value)" style="flex:1;"/></div>`;
+    }
+    return`<div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;">
+          <span style="width:28px;height:28px;min-width:28px;border-radius:50%;background:${pageAnswers.hasOwnProperty(qi)?'#a7f3d0':'#f3f4f6'};color:${pageAnswers.hasOwnProperty(qi)?'#064e3b':'#666'};font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;">${qi+1}</span>
+          <span style="font-size:15px;font-weight:500;line-height:1.5;">${q.text}</span>
+        </div>
+        <span style="font-size:12px;background:#ecfdf5;color:#065f46;padding:3px 10px;border-radius:8px;white-space:nowrap;margin-left:10px;font-weight:500;">${q.scoreVal||5}점</span>
+      </div>
+      ${inputHTML}
+    </div>`;
+  }).join('');
+}
+window.saveAnswer=function(qi,val){
+  pageAnswers[qi]=val;
+  const q=quizQ[qi];
+  if(q.type==='multiple'){(q.options||[]).forEach((_,oi)=>{const el=document.getElementById(`ch-${qi}-${oi}`);if(el)el.className='choice'+(oi===val?' sel':'');});}
+  else if(q.type==='ox'){
+    const oEl=document.getElementById(`ox-o-${qi}`),xEl=document.getElementById(`ox-x-${qi}`);
+    if(oEl)oEl.className='ox-btn'+(val==='O'?' sel-o':'');if(xEl)xEl.className='ox-btn'+(val==='X'?' sel-x':'');
+  }
+  document.querySelectorAll('.pdot').forEach((d,i)=>{if(i===qi)d.classList.add('answered');});
+  document.getElementById('answered-info').textContent=`${Object.keys(pageAnswers).length} / ${quizQ.length} 문항 응답`;
+  document.getElementById('play-prog-fill').style.width=Math.round((Object.keys(pageAnswers).length/quizQ.length)*100)+'%';
+};
+window.changePage=function(dir){currentPage+=dir;renderPage();document.getElementById('play-screen').scrollIntoView({behavior:'smooth'});};
+window.jumpToPage=function(page){currentPage=page;renderPage();};
+
+/* ====== 임시저장 ====== */
+window.saveDraft=function(){
+  if(!activeExamId){toast('시험 정보가 없습니다.');return;}
+  const draftKey=`draft_${currentUser.id}_${activeExamId}`;
+  const now=new Date();
+  const timeStr=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  localStorage.setItem(draftKey,JSON.stringify({answers:pageAnswers,savedAt:timeStr}));
+  document.getElementById('draft-bar').style.display='flex';
+  toast(`💾 임시저장 완료 (${timeStr})`);
+};
+window.loadDraft=function(){
+  if(!activeExamId)return;
+  const draftKey=`draft_${currentUser.id}_${activeExamId}`;
+  try{
+    const saved=JSON.parse(localStorage.getItem(draftKey));
+    if(saved&&saved.answers){
+      pageAnswers=saved.answers;
+      renderPage();
+      toast('임시저장 답안을 불러왔습니다.');
+    }
+  }catch(e){toast('불러오기에 실패했습니다.');}
+};
+window.clearDraft=function(){
+  if(!activeExamId)return;
+  const draftKey=`draft_${currentUser.id}_${activeExamId}`;
+  localStorage.removeItem(draftKey);
+  document.getElementById('draft-bar').style.display='none';
+  toast('임시저장이 삭제되었습니다.');
+};
+
+window.submitExam=function(){
+  const unanswered=quizQ.length-Object.keys(pageAnswers).length;
+  if(unanswered>0&&!confirm(`아직 ${unanswered}개 문항에 답하지 않았습니다. 그래도 제출하시겠습니까?`))return;
+  // 임시저장 삭제
+  if(activeExamId){
+    const draftKey=`draft_${currentUser.id}_${activeExamId}`;
+    localStorage.removeItem(draftKey);
+  }
+  const answers=quizQ.map((q,i)=>{
+    const ua=pageAnswers[i];let correct=false;
+    if(q.type==='ox')correct=ua===q.answer;
+    else if(q.type==='multiple')correct=ua===q.answer;
+    else correct=ua!=null&&checkAnswer(String(ua),String(q.answer));
+    return{q,correct,scoreVal:q.scoreVal||5,userAnswer:ua};
+  });
+  const total=answers.length,correct=answers.filter(a=>a.correct).length;
+  const score=answers.filter(a=>a.correct).reduce((s,a)=>s+a.scoreVal,0);
+  const totalPossible=answers.reduce((s,a)=>s+a.scoreVal,0);
+  const pct=totalPossible>0?Math.round((score/totalPossible)*100):0;
+  const pass=pct>=PASS_SCORE;
+  const now=new Date();
+  const date=`${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const data={examId:activeExamId,studentId:currentUser.id,score,totalPossible,correct,total,pass,date,
+    detail:answers.map(a=>({correct:a.correct,scoreVal:a.scoreVal,userAnswer:a.userAnswer,
+      q:{text:a.q.text,type:a.q.type,answer:a.q.answer,explanation:a.q.explanation||'',options:a.q.options||[]}}))};
+  addDoc(collection(db,'results'),data).then(ref=>{examResults.push({id:ref.id,...data});});
+  showFinalResult(answers,score,totalPossible,correct,total,pass,date);
+};
+
+function showFinalResult(answers,score,totalPossible,correct,total,pass,date){
+  document.getElementById('play-screen').style.display='none';
+  const ex=exams.find(e=>e.id===activeExamId);
+  const pct=totalPossible>0?Math.round((score/totalPossible)*100):0;
+  const detailHTML=answers.map((a,j)=>`
+    <div class="res-item ${a.correct?'ok':'ng'}">
+      <div style="width:26px;height:26px;min-width:26px;border-radius:50%;background:${a.correct?'#a7f3d0':'#fecaca'};color:${a.correct?'#064e3b':'#7f1d1d'};font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;">${j+1}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:500;">${a.q.text.length>60?a.q.text.slice(0,60)+'…':a.q.text}</div>
+        <div style="font-size:12px;margin-top:3px;color:${a.correct?'#065f46':'#991b1b'};">
+          ${a.correct?'✅ 정답':'❌ 오답'} · 내 답: <strong>${a.q.type==='multiple'?((a.userAnswer!=null)?(a.userAnswer+1)+'번 '+(a.q.options||[])[a.userAnswer]:'미응답'):a.userAnswer??'미응답'}</strong> · 정답: <strong>${a.q.type==='multiple'?(a.q.answer+1)+'번 '+(a.q.options||[])[a.q.answer]:a.q.answer}</strong>${a.q.explanation?' · '+a.q.explanation:''} · <strong>${a.correct?a.scoreVal:0}/${a.scoreVal}점</strong>
+        </div>
+      </div>
+    </div>`).join('');
+  document.getElementById('play-start').innerHTML=`
+    <div>
+      <div style="text-align:center;padding:1rem 0 1.5rem;">
+        <div style="font-size:44px;margin-bottom:1rem;">${pass?'🎉':'📚'}</div>
+        <div style="font-size:18px;font-weight:500;margin-bottom:4px;">${pass?'합격!':'불합격'}</div>
+        <div style="font-size:13px;color:#666;margin-bottom:1.5rem;">${ex?ex.name:''} · ${date}</div>
+        <div class="stat-grid4" style="margin-bottom:1rem;">
+          <div class="stat"><div class="stat-val" style="color:${pass?'#059669':'#dc2626'};">${score}</div><div class="stat-lbl">획득 점수</div></div>
+          <div class="stat"><div class="stat-val">${totalPossible}</div><div class="stat-lbl">만점</div></div>
+          <div class="stat"><div class="stat-val" style="color:#7c3aed;">${pct}%</div><div class="stat-lbl">정답률</div></div>
+          <div class="stat"><div class="stat-val">${correct}/${answers.length}</div><div class="stat-lbl">맞힌 문제</div></div>
+        </div>
+        <div style="margin-bottom:1.5rem;"><div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${pass?'#10b981':'#ef4444'};"></div></div><div style="font-size:11px;color:#666;margin-top:4px;">합격 기준 ${PASS_SCORE}%</div></div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn" onclick="showSec('${prevSection}');if('${prevSection}'==='my-results')renderMyResults();">목록으로</button>
+          ${currentUser.role!=='student'?`<button class="btn p" onclick="retake()">재응시하기 ↗</button>`:''}
+        </div>
+      </div>
+      <div style="border-top:1px solid #f3f4f6;padding-top:1rem;">
+        <div style="font-size:14px;font-weight:500;margin-bottom:10px;">전체 문제 해설</div>
+        ${detailHTML}
+      </div>
+    </div>`;
+  document.getElementById('play-start').style.display='block';
+}
+window.retake=function(){const ex=exams.find(e=>e.id===activeExamId);if(ex)launchPlay(ex,currentUser.role!=='student');};
+
+window.renderMyResults=function(){
+  const el=document.getElementById('my-results-list');
+  const myRes=examResults.filter(r=>r.studentId===currentUser.id);
+  if(!myRes.length){
+    el.innerHTML=`<div class="card" style="text-align:center;padding:2rem;">
+      <div style="font-size:32px;margin-bottom:1rem;">📄</div>
+      <div style="font-size:15px;font-weight:500;margin-bottom:6px;">아직 응시한 시험이 없습니다</div>
+      <button class="btn p" onclick="showStudentExams()" style="margin-top:8px;">시험 응시하러 가기</button>
+    </div>`;return;
+  }
+  el.innerHTML=myRes.map(r=>{
+    const ex=exams.find(e=>e.id===r.examId);
+    const pct=r.totalPossible>0?Math.round((r.score/r.totalPossible)*100):0;
+    return`<div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div><span style="font-size:14px;font-weight:500;">${ex?ex.name:r.examId}</span><span style="font-size:12px;color:#666;margin-left:8px;">${r.date}</span></div>
+        <span class="bdg ${r.pass?'pass':'fail'}">${r.pass?'합격':'불합격'}</span>
+      </div>
+      <div class="stat-grid4" style="margin-bottom:10px;">
+        <div class="stat"><div class="stat-val" style="color:${r.pass?'#059669':'#dc2626'};">${r.score}</div><div class="stat-lbl">획득 점수</div></div>
+        <div class="stat"><div class="stat-val">${r.totalPossible}</div><div class="stat-lbl">만점</div></div>
+        <div class="stat"><div class="stat-val" style="color:#7c3aed;">${pct}%</div><div class="stat-lbl">정답률</div></div>
+        <div class="stat"><div class="stat-val">${r.correct}/${r.detail?r.detail.length:r.total}</div><div class="stat-lbl">맞힌 문제</div></div>
+      </div>
+      <div style="margin-bottom:12px;"><div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${r.pass?'#10b981':'#ef4444'};"></div></div></div>
+      <div style="border-top:1px solid #f3f4f6;padding-top:10px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px;">문제별 결과 및 해설</div>
+        ${(r.detail||[]).map((d,j)=>`<div class="res-item ${d.correct?'ok':'ng'}">
+          <div style="width:24px;height:24px;min-width:24px;border-radius:50%;background:${d.correct?'#a7f3d0':'#fecaca'};color:${d.correct?'#064e3b':'#7f1d1d'};font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;">${j+1}</div>
+          <div style="flex:1;font-size:13px;">${d.q.text.length>55?d.q.text.slice(0,55)+'…':d.q.text}
+            <div style="font-size:12px;margin-top:2px;color:${d.correct?'#065f46':'#991b1b'};">${d.correct?'✅ 정답':'❌ 오답'} · 내 답: <strong style="color:${d.correct?'#059669':'#dc2626'};">${d.q.type==='multiple'?(d.userAnswer!=null?(d.userAnswer+1)+'번 '+(d.q.options||[])[d.userAnswer]:'미응답'):(d.userAnswer??'미응답')}</strong>${!d.correct?' · 정답: <strong style="color:#059669;">'+( d.q.type==='multiple'?(d.q.answer+1)+'번 '+(d.q.options||[])[d.q.answer]:d.q.answer)+'</strong>':''} ${(getLiveExplanation(d.q.text,r.examId)||d.q.explanation||'')?' · '+(getLiveExplanation(d.q.text,r.examId)||d.q.explanation||''):''} · <strong>${d.correct?d.scoreVal:0}/${d.scoreVal}점</strong></div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+};
+
+/* ====== 단답형 채점 ====== */
+function normalize(str){
+  return String(str).toLowerCase().replace(/\s+/g,'').replace(/[·・\-_,\.]/g,'').replace(/[（(][^)）]*[)）]/g,'').trim();
+}
+function checkAnswer(userAns,correctAns){
+  const u=normalize(userAns),c=normalize(correctAns);
+  if(!u)return false;if(u===c)return true;
+  const variants=correctAns.split(/[\/,]/).map(v=>normalize(v)).filter(Boolean);
+  if(variants.some(v=>u===v))return true;
+  if(c.length>=2&&u.includes(c))return true;
+  if(u.length>=2&&c.includes(u))return true;
+  return false;
+}
+
+/* ====== AI 문제 생성 ====== */
+window.generateAI=async function(){
+  const ex=getCurExam();if(!ex){alert('시험을 먼저 선택하세요.');return;}
+  const topic=document.getElementById('ai-topic').value.trim();if(!topic){alert('주제를 입력하세요.');return;}
+  const type=document.getElementById('ai-type').value,count=document.getElementById('ai-count').value,hint=document.getElementById('ai-hint').value;
+  const btn=document.getElementById('ai-btn'),status=document.getElementById('ai-status');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>생성 중...';status.textContent='';
+  const typeMap={mixed:'OX, 객관식, 단답형 혼합',ox:'OX만',multiple:'객관식(4지선다)만',fill:'단답형만'};
+  const prompt=`퀴즈 문제 생성 전문가입니다. JSON 배열만 출력하세요.\n주제: ${topic} | 유형: ${typeMap[type]} | 개수: ${count}개${hint?' | 조건: '+hint:''}\n형식: {"type":"ox"|"multiple"|"fill","text":"문제","answer":"O"|0|"정답","options":["①","②","③","④"],"explanation":"해설","scoreVal":5}\nJSON만 반환:`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const parsed=JSON.parse(data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim());
+    parsed.forEach(q=>{q.id='q'+Date.now()+Math.random();ex.questions.push(q);});
+    await updateDoc(doc(db,'exams',ex.id),{questions:ex.questions});
+    renderQList();status.textContent=`✅ ${parsed.length}개 추가됨!`;
+  }catch(e){status.textContent='오류. 다시 시도하세요.';}
+  btn.disabled=false;btn.textContent='AI로 문제 생성';
+};
+
+/* ====== 엑셀 ====== */
+window.handleFile=function(event){
+  const ex=getCurExam();if(!ex){alert('시험을 선택하세요.');return;}
+  const file=event.target.files[0];if(!file)return;
+  const status=document.getElementById('upload-status');status.textContent='파일 읽는 중...';
+  loadXLSX(()=>{
+    const reader=new FileReader();
+    reader.onload=async function(e){
+      try{
+        const wb=XLSX.read(e.target.result,{type:'binary'});
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+        let added=0,updated=0;
+        for(let i=1;i<rows.length;i++){
+          const r=rows[i];if(!r[0]||!r[1])continue;
+          const t=(r[0]||'').toString().toLowerCase();
+          const scoreVal=parseInt(r[8])||5;
+          const text=r[1].toString();
+          const obj={text,scoreVal};
+          if(t.includes('ox')){obj.type='ox';obj.answer=(r[6]||'O').toString().toUpperCase();obj.explanation=r[7]||'';}
+          else if(t.includes('객관식')||t.includes('mc')||t.includes('multiple')){obj.type='multiple';obj.options=[r[2]||'',r[3]||'',r[4]||'',r[5]||''];obj.answer=Math.max(0,(parseInt(r[6])||1)-1);obj.explanation=r[7]||'';}
+          else{obj.type='fill';obj.answer=(r[6]||'').toString();obj.explanation=r[7]||'';}
+          const existIdx=ex.questions.findIndex(q=>q.text===text);
+          if(existIdx!==-1){Object.assign(ex.questions[existIdx],obj);updated++;}
+          else{obj.id='q'+Date.now()+Math.random();ex.questions.push(obj);added++;}
+        }
+        await updateDoc(doc(db,'exams',ex.id),{questions:ex.questions});
+        status.textContent=`✅ 신규 ${added}개 추가 / 기존 ${updated}개 업데이트 완료`;renderQList();
+      }catch(err){status.textContent='파일 형식 오류. 샘플 양식을 참고하세요.';}
+    };
+    reader.readAsBinaryString(file);event.target.value='';
+  });
+};
+
+window.downloadTemplate=function(){
+  loadXLSX(()=>{
+    const wb=XLSX.utils.book_new();
+    const ws1=XLSX.utils.aoa_to_sheet([
+      ['유형','문제','보기1','보기2','보기3','보기4','정답','해설','배점'],
+      ['','※ 유형: OX / 객관식 / 단답형','','','','','','','※ 숫자만 (예: 5)'],
+      ['OX','대한민국의 수도는 서울이다.','','','','','O','서울은 600년 역사의 수도입니다.','3'],
+      ['OX','지구는 태양계에서 가장 큰 행성이다.','','','','','X','가장 큰 행성은 목성입니다.','3'],
+      ['객관식','태양계에서 가장 큰 행성은?','수성','금성','목성','토성','3','목성은 태양계 최대 행성입니다.','5'],
+      ['객관식','한국의 화폐 단위는?','달러','엔','위안','원','4','대한민국 화폐 단위는 원(₩)입니다.','5'],
+      ['단답형','물의 화학식은?','','','','','H2O','수소 2개와 산소 1개로 구성됩니다.','10'],
+    ]);
+    ws1['!cols']=[{wch:8},{wch:35},{wch:12},{wch:12},{wch:12},{wch:12},{wch:8},{wch:30},{wch:10}];
+    XLSX.utils.book_append_sheet(wb,ws1,'퀴즈문제양식');
+    const ws2=XLSX.utils.aoa_to_sheet([
+      ['사번/아이디','이름','비밀번호','부서/그룹','이메일'],
+      ['','※ 사번 중복 불가','※ 초기 비밀번호','',''],
+      ['2024001','홍길동','1234','영업팀','hong@example.com'],
+      ['2024002','김영희','1234','개발팀','kim@example.com'],
+    ]);
+    ws2['!cols']=[{wch:14},{wch:10},{wch:10},{wch:10},{wch:22}];
+    XLSX.utils.book_append_sheet(wb,ws2,'직원명단양식');
+    const ws3=XLSX.utils.aoa_to_sheet([
+      ['시험명','연도','월','시작일','종료일','설명','상태'],
+      ['','','','','','','※ scheduled(예정) / open(진행중) / closed(종료)'],
+      ['4월 정기시험','2026','4','2026-04-01','2026-04-30','4월 정기 평가','open'],
+    ]);
+    ws3['!cols']=[{wch:16},{wch:6},{wch:4},{wch:12},{wch:12},{wch:20},{wch:20}];
+    XLSX.utils.book_append_sheet(wb,ws3,'시험일정양식');
+    XLSX.writeFile(wb,'퀴즈시스템_샘플양식.xlsx');
+  });
+};
+
+window.downloadResults=function(){
+  loadXLSX(()=>{
+    const eid=document.getElementById('res-exam-sel').value;
+    const ex=exams.find(e=>e.id===eid);
+    const list=examResults.filter(r=>r.examId===eid);
+    if(!list.length){alert('내보낼 결과가 없습니다.');return;}
+    const rows=[['직원명','사번','획득점수','만점','정답률(%)','정답수','전체문항','합격여부','응시일시']];
+    list.forEach(r=>{
+      const s=users.find(u=>u.id===r.studentId)||{name:'알 수 없음'};
+      const pct=r.totalPossible>0?Math.round((r.score/r.totalPossible)*100):0;
+      const actualTotal=r.detail?r.detail.length:r.total;rows.push([s.name,r.studentId,r.score,r.totalPossible,pct,r.correct,actualTotal,r.pass?'합격':'불합격',r.date]);
+    });
+    const wb=XLSX.utils.book_new();
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:10},{wch:12},{wch:10},{wch:8},{wch:10},{wch:8},{wch:8},{wch:8},{wch:18}];
+    XLSX.utils.book_append_sheet(wb,ws,'결과');
+    XLSX.writeFile(wb,`${ex?ex.name:'시험결과'}_결과.xlsx`);
+  });
+};
+
+/* ====== Firebase 초기 계정 ====== */
+async function initSystem(){
+  const saSnap=await getDoc(doc(db,'users','superadmin'));
+  if(!saSnap.exists()){
+    await setDoc(doc(db,'users','superadmin'),{name:'최고관리자',pw:'super1234',role:'superadmin',dept:'',email:''});
+  }
+  const settingsSnap=await getDoc(doc(db,'users','superadmin'));
+  if(settingsSnap.exists()&&settingsSnap.data().passScore){
+    PASS_SCORE=settingsSnap.data().passScore;
+  }
+}
+initSystem();
+</script>
+</body>
+</html>
