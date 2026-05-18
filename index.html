@@ -450,6 +450,7 @@ body.is-admin .admin-only.block{display:block!important}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body class="locked">
 
@@ -532,6 +533,8 @@ body.is-admin .admin-only.block{display:block!important}
           <h1 id="homeGreeting">안녕하세요! 👋</h1>
           <p>검색창에 문의 내용을 입력하면 바로 처리 가이드를 찾을 수 있어요.</p>
         </div>
+        <!-- 퀵메뉴 -->
+        <div id="quickMenu" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap"></div>
         <div class="home-cats" id="homeCats"></div>
         <div class="home-grid">
           <div class="home-card" id="homeRecentCard">
@@ -570,6 +573,7 @@ body.is-admin .admin-only.block{display:block!important}
           <input id="listSearch" type="text" placeholder="이 목록에서 검색..." style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:12px;font-family:var(--font);outline:none;width:180px;margin-left:8px" oninput="filterListSearch(this.value)">
           <select class="list-sort" id="sortSel" onchange="renderResults()"><option value="recent">최신순</option><option value="views">조회 많은순</option><option value="alpha">가나다순</option></select>
           <button class="list-add-btn admin-only inline" id="listAddBtn" onclick="onListAdd()"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
+          <button class="co-back-btn" style="margin-left:4px" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div class="filter-chips" id="filterChips"></div>
         <div class="r-list" id="resultsList"></div>
@@ -592,6 +596,7 @@ body.is-admin .admin-only.block{display:block!important}
           <span class="list-title">오류 해결방법</span>
           <span class="list-cnt" id="errCnt"></span>
           <button class="list-add-btn admin-only inline" onclick="openErrorForm('')"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
+          <button class="co-back-btn" style="margin-left:auto" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div class="r-list" id="errList"></div>
       </div>
@@ -602,6 +607,7 @@ body.is-admin .admin-only.block{display:block!important}
           <span class="list-title">상품 안내</span>
           <span class="list-cnt" id="prCnt"></span>
           <button class="list-add-btn admin-only inline" onclick="openAddProductForm()"><i class="ti ti-plus" style="font-size:12px"></i>상품 추가</button>
+          <button class="co-back-btn" style="margin-left:auto" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div id="prSummary"></div>
         <div id="prResultsList"></div>
@@ -624,8 +630,19 @@ body.is-admin .admin-only.block{display:block!important}
   </div>
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDetailPanel()"></div>
 
-<!-- Mobile Menu -->
-<div class="mob-overlay" id="mobOverlay" onclick="toggleMobMenu()"></div>
+<!-- Onboarding Modal -->
+<div id="onboardingModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:1000px;height:90vh;display:flex;flex-direction:column;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#1E1B4B,#4C1D95);border-radius:14px 14px 0 0">
+      <i class="ti ti-rocket" style="font-size:18px;color:#A78BFA"></i>
+      <span style="font-size:14px;font-weight:700;color:#fff">신규입사자 온보딩</span>
+      <button onclick="closeOnboarding()" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;border-radius:7px;width:30px;height:30px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-x"></i></button>
+    </div>
+    <iframe id="onboardingFrame" src="" style="flex:1;border:none;width:100%"></iframe>
+  </div>
+</div>
+
+</div><!-- /app --><div class="mob-overlay" id="mobOverlay" onclick="toggleMobMenu()"></div>
 <div class="mob-menu" id="mobMenu">
   <div class="sb-brand" style="cursor:pointer" onclick="goHome();toggleMobMenu()">
     <div class="sb-badge">CS</div>
@@ -666,6 +683,7 @@ body.is-admin .admin-only.block{display:block!important}
     <div class="admin-tabs">
       <button class="admin-tab on" data-admin-tab="knowledge" onclick="setAdminTab('knowledge')">지식 관리</button>
       <button class="admin-tab" data-admin-tab="users" onclick="setAdminTab('users')">계정 관리</button>
+      <button class="admin-tab" data-admin-tab="excel" onclick="setAdminTab('excel')">엑셀 업로드</button>
       <button class="admin-tab" data-admin-tab="ops" onclick="setAdminTab('ops')">요청/이력</button>
       <button class="admin-tab" data-admin-tab="categories" onclick="setAdminTab('categories')">분류 관리</button>
       <button class="admin-tab" data-admin-tab="notices" onclick="setAdminTab('notices')">공지사항 관리</button>
@@ -698,7 +716,19 @@ body.is-admin .admin-only.block{display:block!important}
       <p class="admin-note">계정과 지식 데이터는 현재 브라우저에 저장됩니다. 여러 PC에서 공유하려면 서버 버전으로 전환이 필요합니다.</p>
       <div id="adminUserList"></div>
     </section>
-    <section class="admin-panel" id="adminOps">
+    <section class="admin-panel" id="adminExcel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <h3 class="admin-section-title">엑셀 일괄 업로드</h3>
+        <button class="admin-secondary" onclick="downloadExcelTemplate()"><i class="ti ti-download" style="font-size:13px"></i>샘플 양식 다운로드</button>
+      </div>
+      <div style="background:#F8F7FF;border:2px dashed #C4B5FD;border-radius:12px;padding:28px;text-align:center;margin-bottom:16px;cursor:pointer" onclick="document.getElementById('excelFileInput').click()">
+        <i class="ti ti-file-spreadsheet" style="font-size:36px;color:#7C3AED;display:block;margin-bottom:10px"></i>
+        <div style="font-size:14px;font-weight:600;color:#1E1B4B;margin-bottom:4px">엑셀 파일을 클릭하거나 드래그해서 업로드</div>
+        <div style="font-size:12px;color:#A78BFA">.xlsx, .xls 파일 지원</div>
+        <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleExcelUpload(this)">
+      </div>
+      <div id="excelPreview"></div>
+    </section>
       <div class="ops-grid">
         <div class="ops-card"><h3>지식 요청</h3><div id="requestList" class="ops-list"></div></div>
         <div class="ops-card"><h3>검색 결과 없음</h3><div id="missingList" class="ops-list"></div></div>
@@ -836,6 +866,15 @@ function setView(v){
   else if(v==="newguide"){showView("viewList");setSbView("");const ng=entries.filter(e=>e.newGuide&&e.status!=="hidden");renderList(ng,"신규 상담사 가이드",`총 ${ng.length}건`);}
   closeDetailPanel();
 }
+function openOnboarding(){
+  const modal=document.getElementById("onboardingModal");
+  document.getElementById("onboardingFrame").src="https://young91822-debug.github.io/cs-knowledge/onboarding.html";
+  modal.style.display="flex";
+}
+function closeOnboarding(){
+  document.getElementById("onboardingModal").style.display="none";
+  document.getElementById("onboardingFrame").src="";
+}
 function downloadEntry(id){
   const e=entries.find(x=>x.id===id);if(!e)return;
   const lines=[
@@ -918,7 +957,7 @@ function renderProductView(product="전체",section=null){
       const cnt=all.filter(e=>e.productName===p).length;
       const faqCnt=all.filter(e=>e.productName===p&&e.productSection==="FAQ").length;
       const propCnt=all.filter(e=>e.productName===p&&e.productSection==="제안서").length;
-      return`<div class="r-card" style="display:flex;align-items:center;gap:12px;padding:12px 16px" onclick="renderProductView('${esc(p)}')">
+      return`<div class="r-card" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:default">
         <div style="width:36px;height:36px;background:#EDE9FE;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
           <i class="ti ti-package" style="font-size:18px;color:#7C3AED"></i>
         </div>
@@ -927,13 +966,12 @@ function renderProductView(product="전체",section=null){
           <div style="font-size:11px;color:var(--t3);margin-top:2px">전체 ${cnt}건</div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0">
-          <button onclick="event.stopPropagation();renderProductView('${esc(p)}','FAQ')" style="height:28px;padding:0 10px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:7px;color:#065F46;font-size:11.5px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px">
-            <i class="ti ti-help-circle" style="font-size:12px"></i>FAQ ${faqCnt}
+          <button onclick="renderProductView('${esc(p)}','FAQ')" style="height:30px;padding:0 12px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:7px;color:#065F46;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px">
+            <i class="ti ti-help-circle" style="font-size:13px"></i>FAQ ${faqCnt}
           </button>
-          <button onclick="event.stopPropagation();renderProductView('${esc(p)}','제안서')" style="height:28px;padding:0 10px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;color:#1D4ED8;font-size:11.5px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px">
-            <i class="ti ti-file-description" style="font-size:12px"></i>제안서 ${propCnt}
+          <button onclick="renderProductView('${esc(p)}','제안서')" style="height:30px;padding:0 12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;color:#1D4ED8;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px">
+            <i class="ti ti-file-description" style="font-size:13px"></i>제안서 ${propCnt}
           </button>
-          <i class="ti ti-chevron-right" style="font-size:16px;color:var(--t3);margin-left:2px"></i>
         </div>
       </div>`;}).join("");
     document.getElementById("prSummary").innerHTML="";
@@ -1286,6 +1324,19 @@ function logMissingSearch(q){const key=q.toLowerCase();const found=missingSearch
 /* ─── Home Dashboard ─── */
 function renderHome(){
   document.getElementById("homeGreeting").textContent=getGreeting();
+
+  /* 퀵메뉴 */
+  const quickItems=[
+    {label:"신규입사자 온보딩",icon:"ti-rocket",color:"#7C3AED",bg:"#EDE9FE",action:`openOnboarding()`},
+    {label:"시험 사이트",icon:"ti-clipboard-check",color:"#059669",bg:"#D1FAE5",action:`alert('링크 준비 중이에요!')`},
+    {label:"Jira",icon:"ti-brand-jira",color:"#0052CC",bg:"#DBEAFE",action:`alert('링크 준비 중이에요!')`},
+    {label:"Confluence",icon:"ti-books",color:"#1D4ED8",bg:"#EFF6FF",action:`alert('링크 준비 중이에요!')`},
+  ];
+  document.getElementById("quickMenu").innerHTML=quickItems.map(q=>`
+    <button onclick="${q.action}" style="display:flex;align-items:center;gap:7px;height:36px;padding:0 14px;background:${q.bg};border:1px solid ${q.color}22;border-radius:20px;color:${q.color};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap;transition:all .15s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+      <i class="ti ${q.icon}" style="font-size:15px"></i>${q.label}
+    </button>`).join("");
+
   const cats=[
     {label:"B2C",icon:"ti-users",cls:"cat-green",cnt:()=>entries.filter(e=>e.part==="B2C").length,action:"filterPart2('B2C')"},
     {label:"B2B",icon:"ti-building-skyscraper",cls:"cat-blue",cnt:()=>entries.filter(e=>e.part==="B2B 상위기업").length,action:"filterPart2('B2B 상위기업')"},
@@ -1299,24 +1350,33 @@ function renderHome(){
       <div class="home-cat-label">${c.label}</div>
       <div class="home-cat-cnt">${c.cnt()}건</div>
     </div>`).join("");
-  const recent=[...entries].filter(e=>e.status!=="hidden").sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||"")).slice(0,6);
-  const partColors={"B2B 상위기업":"#EFF6FF","B2C":"#ECFDF5","LMS 기능":"#F5F3FF","ADMIN/뉴어드민":"#FFFBEB","운영지원":"#FEF2F2"};
-  const partIcons={"B2B 상위기업":"ti-building","B2C":"ti-help-circle","LMS 기능":"ti-device-laptop","ADMIN/뉴어드민":"ti-settings","운영지원":"ti-headset"};
-  document.getElementById("homeRecent").innerHTML=recent.length?recent.map(e=>`
-    <div class="recent-item" onclick="openDetail('${e.id}')">
+
+  /* 최근 수정 — 오늘/이번주 뱃지 추가 */
+  const today2=today();
+  const weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-7);
+  const weekStr=weekAgo.toISOString().slice(0,10);
+  const recent=[...entries].filter(e=>e.status!=="hidden").sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||"")).slice(0,8);
+  const partColors={"B2B 상위기업":"#EDE9FE","B2C":"#ECFDF5","상품 안내":"#FEF3C7","오류 해결방법":"#F5F3FF","운영지원":"#FEF2F2"};
+  const partIcons={"B2B 상위기업":"ti-building","B2C":"ti-help-circle","상품 안내":"ti-package","오류 해결방법":"ti-bug","운영지원":"ti-headset"};
+  document.getElementById("homeRecent").innerHTML=recent.length?recent.map(e=>{
+    const isToday=e.updatedAt===today2;
+    const isNew=e.updatedAt>=weekStr;
+    return`<div class="recent-item" onclick="openDetail('${e.id}')">
       <div class="recent-icon" style="background:${partColors[e.part]||"#F3F5F9"}"><i class="ti ${partIcons[e.part]||"ti-file-text"}" style="font-size:14px;color:var(--t2)"></i></div>
       <div class="recent-body">
-        <div class="recent-title">${esc(e.title)}</div>
+        <div class="recent-title">${esc(e.title)}${isToday?`<span style="background:#ECFDF5;color:#059669;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:5px">오늘</span>`:isNew?`<span style="background:#EFF6FF;color:#1D4ED8;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:5px">NEW</span>`:""}</div>
         <div class="recent-meta"><span class="recent-part">${esc(e.part)}</span><span>${e.updatedAt||""}</span>${e.company?`<span>${esc(e.company)}</span>`:""}</div>
       </div>
-    </div>`).join(""):`<div style="padding:28px;text-align:center;color:var(--t3);font-size:12px">등록된 문서가 없습니다</div>`;
+    </div>`;}).join(""):`<div style="padding:28px;text-align:center;color:var(--t3);font-size:12px">등록된 문서가 없습니다</div>`;
+
   document.getElementById("homeNotices").innerHTML=notices.slice(0,4).map(n=>`
     <div class="notice-item2" onclick="openNotice('${n.id}')">
       <div class="notice-dot${n.isNew?" new":""}"></div>
-      <div class="notice-nm2">${esc(n.title)}${n.isNew?`<span class="badge-n">N</span>`:""}</div>
+      <div class="notice-nm2">${n.isPinned?`<i class="ti ti-pin" style="font-size:11px;color:#F97316;margin-right:3px"></i>`:""}${esc(n.title)}${n.isNew?`<span class="badge-n">N</span>`:""}</div>
       <div class="notice-date">${n.date||""}</div>
     </div>`).join("")||`<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px">등록된 공지가 없습니다</div>`;
-  if(notices.some(n=>n.isNew)){document.getElementById("noticeBadge").style.display="";}else{document.getElementById("noticeBadge").style.display="none";}  const top5=[...entries].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
+  if(notices.some(n=>n.isNew)){document.getElementById("noticeBadge").style.display="";}else{document.getElementById("noticeBadge").style.display="none";}
+  const top5=[...entries].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
   document.getElementById("homeTop5").innerHTML=top5.length?top5.map((e,i)=>`
     <div class="top5-item2" onclick="openDetail('${e.id}')">
       <span class="top5-rank2 ${i===0?"r1":i===1?"r2":i===2?"r3":""}">${i+1}</span>
@@ -1372,7 +1432,10 @@ function renderList(f,title,cnt){
     return`<div class="r-card${selId===e.id?" sel":""}" id="ri-${e.id}" onclick="openDetail('${e.id}')">
       <div class="r-card-top">
         <span class="r-card-title">${highlight(e.title,hq)}</span>
-        <button class="r-star${bm?" on":""}" onclick="toggleBM(event,'${e.id}')">${bm?"★":"☆"}</button>
+        <div style="display:flex;align-items:center;gap:3px">
+          <button onclick="event.stopPropagation();downloadEntry('${e.id}')" style="width:26px;height:26px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s" onmouseover="this.style.borderColor='var(--p)';this.style.color='var(--p)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--t3)'" title="다운로드"><i class="ti ti-download" style="font-size:12px"></i></button>
+          <button class="r-star${bm?" on":""}" onclick="toggleBM(event,'${e.id}')">${bm?"★":"☆"}</button>
+        </div>
       </div>
       <div class="r-card-tags">
         ${e.company?`<span class="r-tag co"><i class="ti ti-building" style="font-size:10px"></i>${esc(e.company.length>12?e.company.slice(0,12)+"…":e.company)}</span>`:""}
@@ -1474,6 +1537,11 @@ function openDetail(id){
   selId=id;
   const e=entries.find(x=>x.id===id);if(!e)return;
   e.views=(e.views||0)+1;
+  if(currentUser){
+    if(!Array.isArray(e.viewers))e.viewers=[];
+    e.viewers.unshift({uid:currentUser.id,name:currentUser.name||currentUser.id,at:new Date().toISOString().slice(0,16).replace("T"," ")});
+    if(e.viewers.length>50)e.viewers=e.viewers.slice(0,50);
+  }
   recentViewed=recentViewed.filter(x=>x!==id);recentViewed.unshift(id);if(recentViewed.length>30)recentViewed=recentViewed.slice(0,30);
   saveAll();
   document.querySelectorAll(".r-card").forEach(el=>el.classList.remove("sel"));
@@ -1526,6 +1594,20 @@ function openDetail(id){
   if(isB2B&&e.company){
     html+=`<button class="d-company-btn full" onclick="renderCompanyView('${esc(e.company)}');closeDetailPanel()"><i class="ti ti-building" style="font-size:14px"></i>${esc(e.company)} 기업 정보 보기</button>`;
   }
+  /* 조회수 + 열람자 */
+  html+=`<div class="ds full" style="background:#F8FAFC">
+    <div class="ds-hd" style="display:flex;align-items:center;gap:6px;justify-content:space-between">
+      <span><i class="ti ti-eye" style="font-size:12px"></i> 조회수 <strong>${(e.views||0).toLocaleString()}회</strong></span>
+      ${isAdmin&&e.viewers?.length?`<span style="font-size:10.5px;color:var(--t3)">${e.viewers.length}명 열람</span>`:""}
+    </div>
+    ${isAdmin&&e.viewers?.length?`<div class="ds-body" style="display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto">
+      ${e.viewers.slice(0,20).map(v=>`<div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--t2)">
+        <i class="ti ti-user-circle" style="font-size:13px;color:var(--p)"></i>
+        <span style="font-weight:500">${esc(v.name||v.uid||"")}</span>
+        <span style="color:var(--t3);margin-left:auto">${v.at||""}</span>
+      </div>`).join("")}
+    </div>`:""}
+  </div>`;
   document.getElementById("drawerContent").innerHTML=html;
   openDetailPanel();
   if(curView==="home"||curView==="companies"){}
@@ -1554,17 +1636,18 @@ function renderCompanyView(company="전체", cat=null){
       const p=companyProfiles[c]||{};
       const cnt=all.filter(e=>e.company===c).length;
       const hasCaution=all.some(e=>e.company===c&&e.caution&&e.caution.trim());
-      return`<div class="co-card" onclick="renderCompanyView('${esc(c)}')">
-        <div class="co-card-icon"><i class="ti ti-building-skyscraper"></i></div>
-        <div class="co-card-name">${esc(c)}</div>
-        ${p.code?`<div class="co-card-code">코드: ${esc(p.code)}</div>`:`<div class="co-card-code" style="min-height:16px"></div>`}
-        <div class="co-card-foot">
-          <span class="co-card-cnt"><i class="ti ti-files"></i>${cnt}건${hasCaution?` <span class="r-tag caution" style="font-size:9.5px;padding:1px 5px"><i class="ti ti-alert-triangle" style="font-size:9px"></i>주의</span>`:""}</span>
-          <i class="ti ti-chevron-right co-card-arr"></i>
+      return`<div class="r-card" style="display:flex;align-items:center;gap:12px;padding:12px 16px" onclick="renderCompanyView('${esc(c)}')">
+        <div style="width:36px;height:36px;background:#EDE9FE;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="ti ti-building-skyscraper" style="font-size:18px;color:#7C3AED"></i>
         </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13.5px;font-weight:700;color:var(--t1)">${esc(c)}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px">${p.code?`코드: ${esc(p.code)} · `:""} ${cnt}건${hasCaution?` · <span style="color:#DC2626">주의</span>`:""}</div>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:16px;color:var(--t3);flex-shrink:0"></i>
       </div>`;}).join("");
     document.getElementById("coSummary").innerHTML="";
-    document.getElementById("coResultsList").innerHTML=`<div class="co-card-grid">${cards}${addCard}</div>`
+    document.getElementById("coResultsList").innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">${cards}</div>${addCard}`
       +(companies.length===0?`<div class="empty-state" style="margin-top:32px"><i class="ti ti-building-off"></i><p>등록된 기업이 없습니다</p></div>`:"");
 
   } else if(cat===null){
@@ -1580,17 +1663,23 @@ function renderCompanyView(company="전체", cat=null){
     const uncatCnt=target.filter(e=>!e.companyCat||!cats.includes(e.companyCat)).length;
     const catCards=cats.map(c=>{
       const cnt=target.filter(e=>e.companyCat===c).length;
-      return`<div class="cat-card" onclick="renderCompanyView('${esc(company)}','${esc(c)}')">
-        <div class="cat-card-icon"><i class="ti ti-folder"></i></div>
-        <div class="cat-card-name">${esc(c)}</div>
-        <div class="cat-card-cnt"><i class="ti ti-files"></i>${cnt}건</div>
+      return`<div class="r-card" style="display:flex;align-items:center;gap:12px;padding:12px 16px" onclick="renderCompanyView('${esc(company)}','${esc(c)}')">
+        <div style="width:36px;height:36px;background:#EDE9FE;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="ti ti-folder" style="font-size:18px;color:#7C3AED"></i>
+        </div>
+        <div style="flex:1;font-size:13.5px;font-weight:700;color:var(--t1)">${esc(c)}</div>
+        <span style="font-size:12px;color:var(--t3)">${cnt}건</span>
+        <i class="ti ti-chevron-right" style="font-size:16px;color:var(--t3)"></i>
       </div>`;}).join("");
-    const uncatCard=uncatCnt>0?`<div class="cat-card" onclick="renderCompanyView('${esc(company)}','__uncat__')">
-      <div class="cat-card-icon" style="background:#F3F5F9"><i class="ti ti-folder-off" style="color:var(--t3)"></i></div>
-      <div class="cat-card-name" style="color:var(--t2)">미분류</div>
-      <div class="cat-card-cnt"><i class="ti ti-files"></i>${uncatCnt}건</div>
+    const uncatCard=uncatCnt>0?`<div class="r-card" style="display:flex;align-items:center;gap:12px;padding:12px 16px" onclick="renderCompanyView('${esc(company)}','__uncat__')">
+      <div style="width:36px;height:36px;background:#F3F5F9;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <i class="ti ti-folder-off" style="font-size:18px;color:var(--t3)"></i>
+      </div>
+      <div style="flex:1;font-size:13.5px;font-weight:600;color:var(--t2)">미분류</div>
+      <span style="font-size:12px;color:var(--t3)">${uncatCnt}건</span>
+      <i class="ti ti-chevron-right" style="font-size:16px;color:var(--t3)"></i>
     </div>`:"";
-    const addCatCard=isAdmin?`<div class="cat-add-card" onclick="openCatManager('${esc(company)}')"><i class="ti ti-settings"></i><span>카테고리 관리</span></div>`:"";
+    const addCatCard=isAdmin?`<button class="ops-add-btn" style="margin-top:4px" onclick="openCatManager('${esc(company)}')"><i class="ti ti-settings" style="font-size:13px"></i>카테고리 관리</button>`:"";
     document.getElementById("coSummary").innerHTML=`
       <button class="co-back-btn" onclick="renderCompanyView('전체')"><i class="ti ti-arrow-left" style="font-size:14px"></i>기업 목록</button>
       <div class="co-summary-card">
@@ -1604,8 +1693,8 @@ function renderCompanyView(company="전체", cat=null){
         ${urlHtml}
       </div>`;
     document.getElementById("coResultsList").innerHTML=
-      `<div class="cat-card-grid">${catCards}${uncatCard}${addCatCard}</div>`
-      +(cats.length===0&&uncatCnt===0?`<div class="empty-state" style="margin-top:8px"><i class="ti ti-folder-off"></i><p>카테고리가 없습니다<br><span style="font-size:11px">카테고리 관리에서 추가하세요</span></p></div>`:"");
+      `<div style="display:flex;flex-direction:column;gap:8px">${catCards}${uncatCard}</div>${addCatCard}`
+      +(cats.length===0&&uncatCnt===0?`<div class="empty-state" style="margin-top:8px"><i class="ti ti-folder-off"></i><p>카테고리가 없습니다</p></div>`:"");
     closeDetailPanel();
 
   } else {
@@ -1964,6 +2053,65 @@ function saveRequest(){const title=document.getElementById("rqTitle").value.trim
 function logMissingSearch2(q){const key=q.toLowerCase();const found=missingSearches.find(x=>x.key===key);if(found){found.count=(found.count||1)+1;found.lastAt=new Date().toLocaleString("ko-KR");}else missingSearches.unshift({key,query:q,count:1,lastAt:new Date().toLocaleString("ko-KR")});missingSearches=missingSearches.slice(0,50);saveAll();}
 
 /* ─── Admin ─── */
+function downloadExcelTemplate(){
+  if(!window.XLSX){alert("라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.");return;}
+  const wb=XLSX.utils.book_new();
+  const headers=[["분류","제목","고객문의유형","필수확인질문","답변/해결방법","이관기준","주의사항","기업명(B2B)","카테고리(B2B)","상품명(상품안내)"]];
+  const sample=[
+    ["B2B 상위기업","회원가입은 어떻게 하나요?","회원가입을 하고 싶어요","1. 본인명의 휴대폰 확인","사이트 우측 상단 회원가입 클릭","해당없음","","LH중앙공동주택관리지원센터","회원가입",""],
+    ["B2C","수료증은 언제 출력 가능한가요?","수료증 출력하고 싶어요","수강 완료 여부 확인","마이페이지 > 수료증 > 출력","해당없음","","","",""],
+    ["상품 안내","Business Review란?","비즈니스 리뷰가 뭔가요?","","휴넷CEO 비즈니스 인사이트 서비스","","","","","휴넷CEO"],
+    ["오류 해결방법","결제창이 뜨지 않아요","결제 버튼 눌러도 반응 없어요","팝업 차단 여부 확인","브라우저 팝업 차단 해제 후 재시도","해당없음","Chrome 권장","","",""],
+  ];
+  const ws=XLSX.utils.aoa_to_sheet([...headers,...sample]);
+  ws["!cols"]=[{wch:15},{wch:30},{wch:25},{wch:20},{wch:30},{wch:15},{wch:15},{wch:20},{wch:15},{wch:15}];
+  XLSX.utils.book_append_sheet(wb,ws,"지식창고양식");
+  XLSX.writeFile(wb,"cs지식창고_업로드양식.xlsx");
+}
+function handleExcelUpload(input){
+  const file=input.files[0];if(!file)return;
+  if(!window.XLSX){alert("라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.");return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:"binary"});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+      if(rows.length<2){alert("데이터가 없습니다.");return;}
+      const dataRows=rows.slice(1).filter(r=>r[0]&&r[1]);
+      window._excelRows=dataRows;
+      document.getElementById("excelPreview").innerHTML=`
+        <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:8px">미리보기 (${dataRows.length}건 발견)</div>
+          <table style="width:100%;font-size:11.5px;border-collapse:collapse">
+            <thead><tr style="background:#F8F7FF">${["분류","제목","고객문의","답변/해결방법","기업명","상품명"].map(h=>`<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);color:var(--t2)">${h}</th>`).join("")}</tr></thead>
+            <tbody>${dataRows.slice(0,5).map(r=>`<tr>${[r[0],r[1],r[2],r[4],r[7],r[9]].map(v=>`<td style="padding:6px 8px;border-bottom:1px solid #F3F5F9;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${String(v||"").slice(0,30)}</td>`).join("")}</tr>`).join("")}</tbody>
+          </table>
+          ${dataRows.length>5?`<div style="font-size:11px;color:var(--t3);padding:8px 0">... 외 ${dataRows.length-5}건</div>`:""}
+        </div>
+        <button class="btn-save" onclick="importExcelData()" style="display:flex;align-items:center;gap:6px"><i class="ti ti-check" style="font-size:13px"></i>${dataRows.length}건 추가하기</button>`;
+    }catch(err){alert("파일을 읽는 중 오류가 발생했습니다. 샘플 양식을 참고해주세요.");}
+  };
+  reader.readAsBinaryString(file);input.value="";
+}
+function importExcelData(){
+  const rows=window._excelRows;
+  if(!rows||!rows.length){alert("업로드된 데이터가 없습니다.");return;}
+  if(!confirm(`${rows.length}건을 추가할까요?`))return;
+  const PARTS=["B2B 상위기업","B2C","상품 안내","오류 해결방법","LMS 기능","ADMIN/뉴어드민","운영지원"];
+  rows.forEach(r=>{
+    const part=PARTS.includes(String(r[0]).trim())?String(r[0]).trim():"B2C";
+    const entry={id:uid(),part,title:String(r[1]||"").trim(),customerQ:String(r[2]||"").trim(),
+      checkQ:String(r[3]||"").trim(),steps:String(r[4]||"").trim(),escalation:String(r[5]||"").trim(),
+      caution:String(r[6]||"").trim(),company:String(r[7]||"").trim(),companyCat:String(r[8]||"").trim(),
+      productName:String(r[9]||"").trim(),productSection:"FAQ",
+      status:"active",updatedBy:currentUser?.id||"",updatedAt:today(),createdAt:today(),views:0,history:[],viewers:[]};
+    if(entry.title)entries=[entry,...entries];
+  });
+  saveAll();renderAdminKnowledge();
+  document.getElementById("excelPreview").innerHTML=`<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:14px;color:#065F46;font-weight:600"><i class="ti ti-check"></i> ${rows.length}건이 추가됐어요!</div>`;
+  window._excelRows=null;
+}
 function exportJSON(){
   const data={
     version:"1.0",
@@ -2012,7 +2160,7 @@ function openAdmin(){if(!requireAdmin())return;document.getElementById("adminScr
 function closeAdmin(){const el=document.getElementById("adminScreen");if(el)el.style.display="none";}
 function setAdminTab(tab){
   document.querySelectorAll(".admin-tab").forEach(b=>b.classList.toggle("on",b.dataset.adminTab===tab));
-  ["adminKnowledge","adminUsers","adminOps","adminCategories","adminNotices"].forEach(id=>{
+  ["adminKnowledge","adminUsers","adminExcel","adminOps","adminCategories","adminNotices"].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.classList.toggle("on",id==="admin"+tab.charAt(0).toUpperCase()+tab.slice(1));
   });
