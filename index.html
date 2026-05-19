@@ -464,64 +464,7 @@ body.is-admin .admin-only.block{display:block!important}
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script>
-const _fbConfig={apiKey:"AIzaSyB5zJiUqCQXjH-3C_t_eKckBnOGy3m7iC0",authDomain:"happycenter-cab96.firebaseapp.com",projectId:"happycenter-cab96",storageBucket:"happycenter-cab96.firebasestorage.app",messagingSenderId:"128259907179",appId:"1:128259907179:web:da0113a6c0e4b7fa9c9b2e"};
-if(!firebase.apps.length)firebase.initializeApp(_fbConfig);
-const _fbDb=firebase.firestore();
-async function loadTodaySchedule(){
-  const box=document.getElementById("todayScheduleWidget");
-  if(!box)return;
-  try{
-    const snap=await _fbDb.collection("appData").doc("schedule").get();
-    if(!snap.exists){box.innerHTML=`<span style="color:var(--t3);font-size:12px">일정 데이터 없음</span>`;return;}
-    const weeks=snap.data().weeks||[];
-    // 오늘 날짜를 M/D 형식으로 변환 (캘린더 저장 형식)
-    const now=new Date();
-    const todayLabel=`${now.getMonth()+1}/${now.getDate()}`;
-    let todayData=null;
-    for(const week of weeks){
-      for(const day of (week.days||[])){
-        if(day.date&&day.date.startsWith(todayLabel)){todayData=day;break;}
-      }
-      if(todayData)break;
-    }
-    if(!todayData){box.innerHTML=`<span style="color:var(--t3);font-size:12px">오늘 일정 없음</span>`;return;}
-    const absent=todayData.absentInfo||[];
-    const isMyday=a=>a.type==="마이데이"||a.type==="4일제";
-    const yeoncha=absent.filter(a=>!isMyday(a)&&a.type==="연차").map(a=>a.name);
-    const myday=absent.filter(isMyday).map(a=>a.name);
-    const earlyPerson=todayData.early||"";
-    const chatPerson=todayData.chat||"";
-    const rate=todayData.rate?Math.round(todayData.rate*100):null;
-    box.innerHTML=`<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;font-weight:700;color:#059669;background:#ECFDF5;padding:5px 12px;border-radius:8px;white-space:nowrap">⏰ 8시출근자</span>
-        <span style="font-size:14px;font-weight:600;color:var(--t1)">${earlyPerson||"없음"}</span>
-      </div>
-      <div style="width:1px;height:28px;background:var(--border)"></div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;font-weight:700;color:#0284C7;background:#E0F2FE;padding:5px 12px;border-radius:8px;white-space:nowrap">💬 채팅담당</span>
-        <span style="font-size:14px;font-weight:600;color:var(--t1)">${chatPerson||"없음"}</span>
-      </div>
-      <div style="width:1px;height:28px;background:var(--border)"></div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;font-weight:700;color:#1D4ED8;background:#EFF6FF;padding:5px 12px;border-radius:8px;white-space:nowrap">🖤 연차</span>
-        <span style="font-size:14px;font-weight:600;color:var(--t1)">${yeoncha.length?yeoncha.join(", "):"없음"}</span>
-      </div>
-      <div style="width:1px;height:28px;background:var(--border)"></div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;font-weight:700;color:#DB2777;background:#FDF2F8;padding:5px 12px;border-radius:8px;white-space:nowrap">🌸 마이데이</span>
-        <span style="font-size:14px;font-weight:600;color:var(--t1)">${myday.length?myday.join(", "):"없음"}</span>
-      </div>
-      ${rate!==null?`<div style="width:1px;height:28px;background:var(--border)"></div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;font-weight:700;color:#D97706;background:#FEF3C7;padding:5px 12px;border-radius:8px;white-space:nowrap">📊 근무율</span>
-        <span style="font-size:14px;font-weight:700;color:var(--t1)">${rate}%</span>
-      </div>`:""}
-    </div>`;
-  }catch(e){box.innerHTML=`<span style="color:#EF4444;font-size:12px">불러오기 실패: ${e.message}</span>`;}
-}
-</script>
+
 </head>
 <body class="locked">
 
@@ -896,6 +839,40 @@ async function loadTodaySchedule(){
 </div>
 
 <script>
+const _fbConfig={apiKey:"AIzaSyB5zJiUqCQXjH-3C_t_eKckBnOGy3m7iC0",authDomain:"happycenter-cab96.firebaseapp.com",projectId:"happycenter-cab96",storageBucket:"happycenter-cab96.firebasestorage.app",messagingSenderId:"128259907179",appId:"1:128259907179:web:da0113a6c0e4b7fa9c9b2e"};
+if(!firebase.apps.length)firebase.initializeApp(_fbConfig);
+const _fbDb=firebase.firestore();
+async function loadTodaySchedule(){
+  const box=document.getElementById("todayScheduleWidget");
+  if(!box)return;
+  try{
+    const snap=await _fbDb.collection("appData").doc("schedule").get();
+    if(!snap.exists){box.innerHTML=`<span style="color:var(--t3);font-size:12px">일정 데이터 없음</span>`;return;}
+    const weeks=snap.data().weeks||[];
+    const now=new Date();
+    const todayLabel=`${now.getMonth()+1}/${now.getDate()}`;
+    let todayData=null;
+    for(const week of weeks){for(const day of (week.days||[])){if(day.date&&day.date.startsWith(todayLabel)){todayData=day;break;}}if(todayData)break;}
+    if(!todayData){box.innerHTML=`<span style="color:var(--t3);font-size:12px">오늘 일정 없음</span>`;return;}
+    const absent=todayData.absentInfo||[];
+    const isMyday=a=>a.type==="마이데이"||a.type==="4일제";
+    const yeoncha=absent.filter(a=>!isMyday(a)&&a.type==="연차").map(a=>a.name);
+    const myday=absent.filter(isMyday).map(a=>a.name);
+    const earlyPerson=todayData.early||"";
+    const chatPerson=todayData.chat||"";
+    const rate=todayData.rate?Math.round(todayData.rate*100):null;
+    box.innerHTML=`<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#059669;background:#ECFDF5;padding:5px 12px;border-radius:8px;white-space:nowrap">⏰ 8시출근자</span><span style="font-size:14px;font-weight:600;color:var(--t1)">${earlyPerson||"없음"}</span></div>
+      <div style="width:1px;height:28px;background:var(--border)"></div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#0284C7;background:#E0F2FE;padding:5px 12px;border-radius:8px;white-space:nowrap">💬 채팅담당</span><span style="font-size:14px;font-weight:600;color:var(--t1)">${chatPerson||"없음"}</span></div>
+      <div style="width:1px;height:28px;background:var(--border)"></div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#1D4ED8;background:#EFF6FF;padding:5px 12px;border-radius:8px;white-space:nowrap">🖤 연차</span><span style="font-size:14px;font-weight:600;color:var(--t1)">${yeoncha.length?yeoncha.join(", "):"없음"}</span></div>
+      <div style="width:1px;height:28px;background:var(--border)"></div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#DB2777;background:#FDF2F8;padding:5px 12px;border-radius:8px;white-space:nowrap">🌸 마이데이</span><span style="font-size:14px;font-weight:600;color:var(--t1)">${myday.length?myday.join(", "):"없음"}</span></div>
+      ${rate!==null?`<div style="width:1px;height:28px;background:var(--border)"></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#D97706;background:#FEF3C7;padding:5px 12px;border-radius:8px;white-space:nowrap">📊 근무율</span><span style="font-size:14px;font-weight:700;color:var(--t1)">${rate}%</span></div>`:""}
+    </div>`;
+  }catch(e){box.innerHTML=`<span style="color:#EF4444;font-size:12px">불러오기 실패: ${e.message}</span>`;}
+}
 /* ─── 상수 ─── */
 const PARTS=["B2B 상위기업","B2C","상품 안내","LMS 기능","ADMIN/뉴어드민","운영지원"];
 const B2B_COS=[],B2C_PRODUCTS=[],LMS_CATS=[],ADMIN_SUBS=[],OPS_SUBS=[];
