@@ -491,11 +491,11 @@ async function loadTodaySchedule(){
     const yeoncha=absent.filter(a=>!isMyday(a)&&a.type==="연차").map(a=>a.name);
     const myday=absent.filter(isMyday).map(a=>a.name);
     const earlyPerson=todayData.early||"";
-    box.innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">
-      ${earlyPerson?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:11px;font-weight:700;color:#059669;background:#ECFDF5;padding:3px 8px;border-radius:6px">🌅 조기퇴근</span><span style="font-size:12px;color:var(--t1)">${earlyPerson}</span></div>`:""}
-      ${yeoncha.length?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:11px;font-weight:700;color:#1D4ED8;background:#EFF6FF;padding:3px 8px;border-radius:6px">🖤 연차</span><span style="font-size:12px;color:var(--t1)">${yeoncha.join(", ")}</span></div>`:""}
-      ${myday.length?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:11px;font-weight:700;color:#DB2777;background:#FDF2F8;padding:3px 8px;border-radius:6px">🌸 마이데이</span><span style="font-size:12px;color:var(--t1)">${myday.join(", ")}</span></div>`:""}
-      ${!earlyPerson&&!yeoncha.length&&!myday.length?`<span style="color:var(--t3);font-size:12px">오늘은 특이사항 없어요 😊</span>`:""}
+    box.innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap">
+      ${earlyPerson?`<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#059669;background:#ECFDF5;padding:4px 10px;border-radius:8px;white-space:nowrap">⏰ 8시출근</span><span style="font-size:14px;font-weight:600;color:var(--t1)">${earlyPerson}</span></div>`:""}
+      ${yeoncha.length?`<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#1D4ED8;background:#EFF6FF;padding:4px 10px;border-radius:8px;white-space:nowrap">🖤 연차</span><span style="font-size:14px;font-weight:600;color:var(--t1)">${yeoncha.join(", ")}</span></div>`:""}
+      ${myday.length?`<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#DB2777;background:#FDF2F8;padding:4px 10px;border-radius:8px;white-space:nowrap">🌸 마이데이</span><span style="font-size:14px;font-weight:600;color:var(--t1)">${myday.join(", ")}</span></div>`:""}
+      ${!earlyPerson&&!yeoncha.length&&!myday.length?`<span style="color:var(--t3);font-size:13px">오늘은 특이사항 없어요 😊</span>`:""}
     </div>`;
   }catch(e){box.innerHTML=`<span style="color:#EF4444;font-size:12px">불러오기 실패: ${e.message}</span>`;}
 }
@@ -582,10 +582,10 @@ async function loadTodaySchedule(){
         <!-- 퀵메뉴 + 오늘 근무 현황 -->
         <div style="display:grid;grid-template-columns:auto 1fr;gap:12px;margin-bottom:24px;align-items:stretch">
           <div id="quickMenu" style="display:flex;gap:10px"></div>
-          <div class="home-card" style="padding:14px 18px;min-width:0">
-            <div class="hcard-hd" style="margin-bottom:10px">
-              <span class="hcard-title"><i class="ti ti-calendar-today"></i>오늘 근무 현황</span>
-              <span style="font-size:11px;color:var(--t3);margin-left:6px" id="todayDateLabel"></span>
+          <div class="home-card" style="padding:16px 20px;min-width:0;display:flex;flex-direction:column;justify-content:center">
+            <div class="hcard-hd" style="margin-bottom:12px">
+              <span class="hcard-title" style="font-size:14px"><i class="ti ti-calendar-today"></i>오늘 근무 현황</span>
+              <span style="font-size:12px;color:var(--t3);margin-left:6px" id="todayDateLabel"></span>
               <span class="hcard-more" onclick="openQuickModal('calendar.html','팀 캘린더','ti-calendar')" style="margin-left:auto">캘린더 보기 ›</span>
             </div>
             <div id="todayScheduleWidget"><span style="color:var(--t3);font-size:12px">불러오는 중...</span></div>
