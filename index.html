@@ -538,9 +538,15 @@ body.is-admin .admin-only.block{display:block!important}
 
       <!-- HOME VIEW -->
       <div id="viewHome" class="home-view">
-        <div class="home-greeting">
-          <h1 id="homeGreeting">안녕하세요! 👋</h1>
-          <p>검색창에 문의 내용을 입력하면 바로 처리 가이드를 찾을 수 있어요.</p>
+        <div class="home-greeting" style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <h1 id="homeGreeting">안녕하세요! 👋</h1>
+            <p>검색창에 문의 내용을 입력하면 바로 처리 가이드를 찾을 수 있어요.</p>
+          </div>
+          <div style="text-align:right;flex-shrink:0" id="homeDateDisplay">
+            <div style="font-size:16px;font-weight:700;color:var(--t1);line-height:1.4" id="homeDateLine1"></div>
+            <div style="font-size:16px;font-weight:700;color:#7C3AED;line-height:1.4" id="homeDateLine2"></div>
+          </div>
         </div>
         <!-- 오늘 근무 현황 + 퀵메뉴 -->
         <div style="display:grid;grid-template-columns:1fr auto;gap:12px;margin-bottom:24px;align-items:stretch">
@@ -1714,6 +1720,11 @@ function renderHome(){
   document.getElementById("homeGreeting").textContent=getGreeting();
   // 오늘 날짜 표시
   const now=new Date();
+  const days=["일","월","화","수","목","금","토"];
+  const d1=document.getElementById("homeDateLine1");
+  const d2=document.getElementById("homeDateLine2");
+  if(d1)d1.textContent=`${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
+  if(d2)d2.textContent=`${days[now.getDay()]}요일`;
   const dateEl=document.getElementById("todayDateLabel");
   if(dateEl)dateEl.textContent=`${now.getMonth()+1}월 ${now.getDate()}일 ${["일","월","화","수","목","금","토"][now.getDay()]}요일`;
   // Firebase 캘린더 연동
