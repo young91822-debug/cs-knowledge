@@ -491,11 +491,33 @@ async function loadTodaySchedule(){
     const yeoncha=absent.filter(a=>!isMyday(a)&&a.type==="연차").map(a=>a.name);
     const myday=absent.filter(isMyday).map(a=>a.name);
     const earlyPerson=todayData.early||"";
-    box.innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap">
-      ${earlyPerson?`<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#059669;background:#ECFDF5;padding:4px 10px;border-radius:8px;white-space:nowrap">⏰ 8시출근</span><span style="font-size:14px;font-weight:600;color:var(--t1)">${earlyPerson}</span></div>`:""}
-      ${yeoncha.length?`<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#1D4ED8;background:#EFF6FF;padding:4px 10px;border-radius:8px;white-space:nowrap">🖤 연차</span><span style="font-size:14px;font-weight:600;color:var(--t1)">${yeoncha.join(", ")}</span></div>`:""}
-      ${myday.length?`<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#DB2777;background:#FDF2F8;padding:4px 10px;border-radius:8px;white-space:nowrap">🌸 마이데이</span><span style="font-size:14px;font-weight:600;color:var(--t1)">${myday.join(", ")}</span></div>`:""}
-      ${!earlyPerson&&!yeoncha.length&&!myday.length?`<span style="color:var(--t3);font-size:13px">오늘은 특이사항 없어요 😊</span>`:""}
+    const chatPerson=todayData.chat||"";
+    const rate=todayData.rate?Math.round(todayData.rate*100):null;
+    box.innerHTML=`<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;font-weight:700;color:#059669;background:#ECFDF5;padding:5px 12px;border-radius:8px;white-space:nowrap">⏰ 8시출근자</span>
+        <span style="font-size:14px;font-weight:600;color:var(--t1)">${earlyPerson||"없음"}</span>
+      </div>
+      <div style="width:1px;height:28px;background:var(--border)"></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;font-weight:700;color:#0284C7;background:#E0F2FE;padding:5px 12px;border-radius:8px;white-space:nowrap">💬 채팅담당</span>
+        <span style="font-size:14px;font-weight:600;color:var(--t1)">${chatPerson||"없음"}</span>
+      </div>
+      <div style="width:1px;height:28px;background:var(--border)"></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;font-weight:700;color:#1D4ED8;background:#EFF6FF;padding:5px 12px;border-radius:8px;white-space:nowrap">🖤 연차</span>
+        <span style="font-size:14px;font-weight:600;color:var(--t1)">${yeoncha.length?yeoncha.join(", "):"없음"}</span>
+      </div>
+      <div style="width:1px;height:28px;background:var(--border)"></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;font-weight:700;color:#DB2777;background:#FDF2F8;padding:5px 12px;border-radius:8px;white-space:nowrap">🌸 마이데이</span>
+        <span style="font-size:14px;font-weight:600;color:var(--t1)">${myday.length?myday.join(", "):"없음"}</span>
+      </div>
+      ${rate!==null?`<div style="width:1px;height:28px;background:var(--border)"></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;font-weight:700;color:#D97706;background:#FEF3C7;padding:5px 12px;border-radius:8px;white-space:nowrap">📊 근무율</span>
+        <span style="font-size:14px;font-weight:700;color:var(--t1)">${rate}%</span>
+      </div>`:""}
     </div>`;
   }catch(e){box.innerHTML=`<span style="color:#EF4444;font-size:12px">불러오기 실패: ${e.message}</span>`;}
 }
