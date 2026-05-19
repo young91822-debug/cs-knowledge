@@ -1807,7 +1807,6 @@ function renderNoticeList(){
       <div id="noticeListFromFb"><div style="padding:14px;text-align:center;color:var(--t3);font-size:12px">불러오는 중...</div></div>
       <div style="padding:10px 14px;background:#F8F7FF;border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:12px;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:5px"><i class="ti ti-bell"></i>지식창고 공지사항</span>
-        ${isAdmin?`<label style="font-size:11px;color:var(--t3);cursor:pointer;display:flex;align-items:center;gap:4px"><input type="checkbox" id="noticeSelectAll" onchange="noticeSelectAll(this.checked)" style="cursor:pointer">전체선택</label>`:""}
       </div>
       ${localHtml}
     </div>`;
