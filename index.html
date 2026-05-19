@@ -687,7 +687,7 @@ body.is-admin .admin-only.block{display:block!important}
     </div>
     <div style="padding:20px;overflow-y:auto">
       <div id="fbNoticeDate" style="font-size:12px;color:var(--t3);margin-bottom:12px"></div>
-      <div id="fbNoticeBody" style="font-size:14px;color:var(--t1);line-height:1.8;white-space:pre-wrap"></div>
+      <div id="fbNoticeBody" style="font-size:14px;color:var(--t1);line-height:1.8"></div>
     </div>
   </div>
 </div>
@@ -927,7 +927,7 @@ function openFbNotice(idx){
   const date=n.createdAt?.toDate?n.createdAt.toDate().toISOString().slice(0,10):n.createdAt?.slice?.(0,10)||"";
   document.getElementById("fbNoticeTitle").textContent=n.title||"";
   document.getElementById("fbNoticeDate").textContent=date;
-  document.getElementById("fbNoticeBody").textContent=n.content||n.body||n.text||"내용 없음";
+  document.getElementById("fbNoticeBody").innerHTML=n.content||n.body||n.text||"내용 없음";
   document.getElementById("fbNoticeModal").style.display="flex";
 }
 function renderLocalNotices(){
