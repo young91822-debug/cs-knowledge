@@ -464,6 +464,7 @@ body.is-admin .admin-only.block{display:block!important}
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 </head>
 <body class="locked">
@@ -868,9 +869,20 @@ body.is-admin .admin-only.block{display:block!important}
 const _fbConfig={apiKey:"AIzaSyB5zJiUqCQXjH-3C_t_eKckBnOGy3m7iC0",authDomain:"happycenter-cab96.firebaseapp.com",projectId:"happycenter-cab96",storageBucket:"happycenter-cab96.firebasestorage.app",messagingSenderId:"128259907179",appId:"1:128259907179:web:da0113a6c0e4b7fa9c9b2e"};
 if(!firebase.apps.length)firebase.initializeApp(_fbConfig);
 const _fbDb=firebase.firestore();
+const _fbAuth=firebase.auth();
+
+async function fbAutoLogin(){
+  try{
+    if(_fbAuth.currentUser)return true;
+    await _fbAuth.signInWithEmailAndPassword("cs-readonly@hunet.com","695400");
+    return true;
+  }catch(e){console.error("Firebase 로그인 실패:",e);return false;}
+}
 async function loadTodaySchedule(){
   const box=document.getElementById("todayScheduleWidget");
   if(!box)return;
+  const ok=await fbAutoLogin();
+  if(!ok){box.innerHTML=`<span style="color:#EF4444;font-size:12px">Firebase 로그인 실패</span>`;return;}
   try{
     const snap=await _fbDb.collection("appData").doc("schedule").get();
     if(!snap.exists){box.innerHTML=`<span style="color:var(--t3);font-size:12px">일정 데이터 없음</span>`;return;}
@@ -902,6 +914,7 @@ async function loadTodaySchedule(){
 async function loadFirebaseNotices(){
   const box=document.getElementById("homeNotices");
   if(!box)return;
+  await fbAutoLogin();
   try{
     const snap=await _fbDb.collection("notices").orderBy("createdAt","desc").limit(5).get();
     if(snap.empty){box.innerHTML=`<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px">등록된 공지가 없습니다</div>`;return;}
@@ -919,6 +932,7 @@ async function loadFirebaseNotices(){
 async function loadFirebaseNoticesView(){
   const box=document.getElementById("noticeListFromFb");
   if(!box)return;
+  await fbAutoLogin();
   try{
     const snap=await _fbDb.collection("notices").orderBy("createdAt","desc").get();
     if(snap.empty){box.innerHTML=`<div style="padding:14px;text-align:center;color:var(--t3);font-size:12px">등록된 공지가 없습니다</div>`;return;}
