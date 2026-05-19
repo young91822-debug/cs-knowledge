@@ -541,12 +541,12 @@ body.is-admin .admin-only.block{display:block!important}
           <h1 id="homeGreeting">안녕하세요! 👋</h1>
           <p>검색창에 문의 내용을 입력하면 바로 처리 가이드를 찾을 수 있어요.</p>
         </div>
-        <!-- 퀵메뉴 -->
-        <div style="margin-bottom:24px">
-          <div style="font-size:12px;font-weight:600;color:var(--t3);letter-spacing:.5px;margin-bottom:12px;text-transform:uppercase">빠른 바로가기</div>
         <!-- 퀵메뉴 + 오늘 근무 현황 -->
         <div style="display:grid;grid-template-columns:auto 1fr;gap:12px;margin-bottom:24px;align-items:stretch">
-          <div id="quickMenu" style="display:flex;gap:10px"></div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--t3);letter-spacing:.5px;margin-bottom:12px;text-transform:uppercase">빠른 바로가기</div>
+            <div id="quickMenu" style="display:flex;gap:10px"></div>
+          </div>
           <div class="home-card" style="padding:16px 20px;min-width:0;display:flex;flex-direction:column;justify-content:center">
             <div class="hcard-hd" style="margin-bottom:12px">
               <span class="hcard-title" style="font-size:14px"><i class="ti ti-calendar-today"></i>오늘 근무 현황</span>
@@ -556,7 +556,7 @@ body.is-admin .admin-only.block{display:block!important}
             <div id="todayScheduleWidget"><span style="color:var(--t3);font-size:12px">불러오는 중...</span></div>
           </div>
         </div>
-        <div class="home-grid">
+        <div class="home-cats" id="homeCats"></div>
           <div style="display:flex;flex-direction:column;gap:12px">
             <div class="home-card" id="homeNoticeCard">
               <div class="hcard-hd">
