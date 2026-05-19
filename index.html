@@ -911,16 +911,17 @@ async function loadFirebaseNoticesView(){
   if(!box)return;
   try{
     const snap=await _fbDb.collection("notices").orderBy("createdAt","desc").get();
-    if(snap.empty){box.innerHTML=`<div class="empty-state"><i class="ti ti-bell-off"></i><p>등록된 공지가 없습니다</p></div>`;return;}
+    if(snap.empty){box.innerHTML=`<div style="padding:14px;text-align:center;color:var(--t3);font-size:12px">등록된 공지가 없습니다</div>`;return;}
     window._fbNotices=snap.docs.map(doc=>({id:doc.id,...doc.data()}));
     box.innerHTML=window._fbNotices.map((n,i)=>{
       const date=n.createdAt?.toDate?n.createdAt.toDate().toISOString().slice(0,10):n.createdAt?.slice?.(0,10)||"";
-      return`<div class="r-card" onclick="openFbNotice(${i})">
-        <div class="r-card-top"><span class="r-card-title">${esc(n.title||"")}</span></div>
-        <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${date}</span></div>
+      return`<div onclick="openFbNotice(${i})" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s" onmouseover="this.style.background='#F0F4FF'" onmouseout="this.style.background=''">
+        <i class="ti ti-bell" style="font-size:13px;color:#7C3AED;flex-shrink:0"></i>
+        <span style="flex:1;font-size:13px;font-weight:500;color:var(--t1)">${esc(n.title||"")}</span>
+        <span style="font-size:11.5px;color:var(--t3);flex-shrink:0">${date}</span>
       </div>`;
     }).join("");
-  }catch(e){box.innerHTML=`<span style="color:#EF4444;font-size:12px">불러오기 실패</span>`;}
+  }catch(e){box.innerHTML=`<div style="padding:14px;text-align:center;color:#EF4444;font-size:12px">불러오기 실패</div>`;}
 }
 function openFbNotice(idx){
   const n=(window._fbNotices||[])[idx];if(!n)return;
@@ -1785,43 +1786,32 @@ function filterByIds(ids,title,cnt){
 /* ─── Notices ─── */
 function renderNoticeList(){
   setSbView("notices");
-  document.getElementById("filterChips").innerHTML=`
-    <div style="margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-brand-firebase" style="font-size:14px"></i>팀 공지사항 (캘린더)</div>
-      <div id="noticeListFromFb"><span style="font-size:12px;color:var(--t3)">불러오는 중...</span></div>
-      <div style="height:1px;background:var(--border);margin:14px 0"></div>
-      <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-bell" style="font-size:14px"></i>지식창고 공지사항</div>
-    </div>`;
   const isAdmin=currentUser&&currentUser.role==="admin";
   document.getElementById("listTitle").textContent="공지사항";
-  document.getElementById("listCnt").textContent=`총 ${notices.length}건`;
-  const addBtn=document.getElementById("listAddBtn");
-  if(addBtn)addBtn.style.display=isAdmin?"flex":"none";
-  if(!notices.length){
-    document.getElementById("resultsList").innerHTML=`<div class="empty-state"><i class="ti ti-bell-off"></i><p>등록된 공지사항이 없습니다</p></div>`;
-    return;
-  }
+  document.getElementById("listCnt").textContent="";
+  document.getElementById("filterChips").innerHTML="";
+  // 로컬 공지 렌더
   const sorted=[...notices].sort((a,b)=>(b.isPinned?1:0)-(a.isPinned?1:0));
-  const bulkBar=isAdmin?`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-    <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer">
-      <input type="checkbox" id="noticeSelectAll" onchange="noticeSelectAll(this.checked)" style="width:15px;height:15px;cursor:pointer"> 전체 선택
-    </label>
-    <button class="list-add-btn" style="background:#EF4444;margin-left:auto" onclick="deleteSelectedNotices()"><i class="ti ti-trash" style="font-size:12px"></i>선택 삭제</button>
-  </div>`:"";
-  document.getElementById("resultsList").innerHTML=bulkBar+sorted.map(n=>`
-    <div class="r-card" style="display:flex;align-items:flex-start;gap:10px${n.isPinned?';border-color:#F97316;background:#FFFBF5':''}" onclick="openNotice('${n.id}')">
-      ${isAdmin?`<input type="checkbox" class="notice-chk" value="${n.id}" style="width:15px;height:15px;margin-top:3px;flex-shrink:0;cursor:pointer" onclick="event.stopPropagation()">`:""}
-      <div style="flex:1;min-width:0">
-        <div class="r-card-top">
-          <span class="r-card-title">${n.isPinned?`<i class="ti ti-pin" style="font-size:13px;color:#F97316;margin-right:4px"></i>`:""}${esc(n.title)}</span>
-          ${n.isNew?`<span class="r-tag" style="background:#FEF2F2;color:#991B1B;border-color:#FECACA">NEW</span>`:""}
-          ${n.isPinned?`<span class="r-tag" style="background:#FFF7F0;color:#F97316;border-color:#FED7AA">고정</span>`:""}
-        </div>
-        ${n.body?`<div class="r-card-prev">${esc(n.body.split("\n")[0])}</div>`:""}
-        <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${n.date||""}</span></div>
+  const localHtml=sorted.map(n=>`
+    <div class="notice-row" onclick="openNotice('${n.id}')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s" onmouseover="this.style.background='#F8F7FF'" onmouseout="this.style.background=''">
+      ${n.isPinned?`<i class="ti ti-pin" style="font-size:13px;color:#F97316;flex-shrink:0"></i>`:`<i class="ti ti-bell" style="font-size:13px;color:var(--t3);flex-shrink:0"></i>`}
+      <span style="flex:1;font-size:13px;font-weight:${n.isPinned?'700':'500'};color:var(--t1)">${esc(n.title)}${n.isNew?`<span style="background:#FEF2F2;color:#991B1B;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px">NEW</span>`:''}</span>
+      <span style="font-size:11.5px;color:var(--t3);flex-shrink:0">${n.date||""}</span>
+      ${isAdmin?`<button onclick="event.stopPropagation();deleteSingleNotice('${n.id}')" style="width:26px;height:26px;background:none;border:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px" onmouseover="this.style.background='#FEE2E2';this.style.color='#EF4444'" onmouseout="this.style.background='none';this.style.color='var(--t3)'"><i class="ti ti-trash" style="font-size:13px"></i></button>`:""}
+    </div>`).join("")||`<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px">등록된 지식창고 공지가 없습니다</div>`;
+  document.getElementById("resultsList").innerHTML=`
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <div style="padding:10px 14px;background:#F8F7FF;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:12px;font-weight:700;color:var(--p);display:flex;align-items:center;gap:5px"><i class="ti ti-brand-firebase"></i>팀 공지사항</span>
       </div>
-      ${isAdmin?`<button class="d-act del" style="flex-shrink:0;height:28px;padding:0 8px" onclick="event.stopPropagation();deleteSingleNotice('${n.id}')"><i class="ti ti-trash" style="font-size:12px"></i></button>`:""}
-    </div>`).join("");
+      <div id="noticeListFromFb"><div style="padding:14px;text-align:center;color:var(--t3);font-size:12px">불러오는 중...</div></div>
+      <div style="padding:10px 14px;background:#F8F7FF;border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:12px;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:5px"><i class="ti ti-bell"></i>지식창고 공지사항</span>
+        ${isAdmin?`<label style="font-size:11px;color:var(--t3);cursor:pointer;display:flex;align-items:center;gap:4px"><input type="checkbox" id="noticeSelectAll" onchange="noticeSelectAll(this.checked)" style="cursor:pointer">전체선택</label>`:""}
+      </div>
+      ${localHtml}
+    </div>`;
+  if(window.loadFirebaseNoticesView)loadFirebaseNoticesView();
 }
 function noticeSelectAll(checked){
   document.querySelectorAll(".notice-chk").forEach(cb=>cb.checked=checked);
