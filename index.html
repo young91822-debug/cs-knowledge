@@ -541,19 +541,18 @@ body.is-admin .admin-only.block{display:block!important}
           <h1 id="homeGreeting">안녕하세요! 👋</h1>
           <p>검색창에 문의 내용을 입력하면 바로 처리 가이드를 찾을 수 있어요.</p>
         </div>
-        <!-- 퀵메뉴 + 오늘 근무 현황 -->
-        <div style="display:grid;grid-template-columns:auto 1fr;gap:12px;margin-bottom:24px;align-items:stretch">
-          <div>
-            <div style="font-size:12px;font-weight:600;color:var(--t3);letter-spacing:.5px;margin-bottom:12px;text-transform:uppercase">빠른 바로가기</div>
-            <div id="quickMenu" style="display:flex;gap:10px"></div>
-          </div>
-          <div class="home-card" style="padding:16px 20px;min-width:0;display:flex;flex-direction:column;justify-content:center">
-            <div class="hcard-hd" style="margin-bottom:12px">
-              <span class="hcard-title" style="font-size:14px"><i class="ti ti-calendar-today"></i>오늘 근무 현황</span>
-              <span style="font-size:12px;color:var(--t3);margin-left:6px" id="todayDateLabel"></span>
-              <span class="hcard-more" onclick="openQuickModal('calendar.html','팀 캘린더','ti-calendar')" style="margin-left:auto">캘린더 보기 ›</span>
+        <!-- 오늘 근무 현황 + 퀵메뉴 -->
+        <div style="display:grid;grid-template-columns:1fr auto;gap:12px;margin-bottom:24px;align-items:stretch">
+          <div class="home-card" style="padding:14px 20px;min-width:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <span class="hcard-title" style="font-size:13px"><i class="ti ti-calendar-today"></i>오늘 근무 현황 <span style="font-size:11px;color:var(--t3);font-weight:400" id="todayDateLabel"></span></span>
+              <span class="hcard-more" onclick="openQuickModal('calendar.html','팀 캘린더','ti-calendar')">캘린더 보기 ›</span>
             </div>
             <div id="todayScheduleWidget"><span style="color:var(--t3);font-size:12px">불러오는 중...</span></div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.5px;margin-bottom:10px;text-transform:uppercase">빠른 바로가기</div>
+            <div id="quickMenu" style="display:flex;gap:10px"></div>
           </div>
         </div>
         <div class="home-cats" id="homeCats"></div>
