@@ -727,6 +727,18 @@ body.is-admin .admin-only.block{display:block!important}
   </div>
 </div>
 
+<!-- Slack Modal -->
+<div id="slackModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div style="padding:16px 20px;background:linear-gradient(135deg,#4A154B,#7C3AED);display:flex;align-items:center;gap:10px">
+      <i class="ti ti-brand-slack" style="font-size:20px;color:#fff"></i>
+      <span style="font-size:15px;font-weight:700;color:#fff">Slack 채널 바로가기</span>
+      <button onclick="document.getElementById('slackModal').style.display='none'" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;border-radius:7px;width:30px;height:30px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:8px;max-height:70vh;overflow-y:auto" id="slackLinkList"></div>
+  </div>
+</div>
+
 <!-- Confluence Modal -->
 <div id="confluenceModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;padding:20px">
   <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)">
@@ -1173,6 +1185,34 @@ function openMySpace(){
     </div>`).join(""):`<div class="empty-state" style="padding:32px 0"><i class="ti ti-star-off"></i><p style="font-size:12px">없습니다</p></div>`;
   document.getElementById("myBmList").innerHTML=cardHtml(bmItems);
   document.getElementById("myRvList").innerHTML=cardHtml(rvItems);
+}
+function openSlackModal(){
+  const links=[
+    {label:"연수원-당직",url:"https://join.slack.com/share/enQtMTExNjM5MTMzMDU2NjgtMzA0NDE1NTdlOTkwZjY4NzhlMTFjNjQ4MDE2N2Q2YTdkYWNmMDYyNjY0NGVmMjgwMDQ2YzI3ZWRhZGJiYzkzZg"},
+    {label:"운영대표-공유사항",url:"https://join.slack.com/share/enQtMTExNDQ4NDc0NjIwMzktMmQ5Mjc3OGZjYzBjMzdhY2ViOTk0MTUzZTc4NWQ2MTI0N2JlNDNkMzIyYWJkZWMwM2NmODA2ZDliNWZkYWU0YQ"},
+    {label:"ask-가람디엠씨",url:"https://join.slack.com/share/enQtMTExNTM5MzQ5NDQ5NjMtODBkZGUwODBjOWZmMzQ2NTFlYmNkMDJmMjgzZTYzYTY1YzE4M2ExZDFiMWVmOTdkNTc5MjNhMTEzOTE5ODhjZA"},
+    {label:"ask-모바일앱팀",url:"https://join.slack.com/share/enQtMTExNTM5Mzc0ODkwNTktNjY5Njk1MWZlZjM3ZDUyZmE1NThkNDkyMjFjNTJkNDM1MWYwNmJkMzQ1YTVjNTc3ZTdlYjMzZmVlMjg4NDdiMg"},
+    {label:"ask-사업전략팀",url:"https://join.slack.com/share/enQtMTExNjIxNDc0NTIwODEtMDA2MDQ2ZDc0ZTUwNjQzYTdmYmNiZjcwMjU5N2QwYzNlYWQwNzA1ZDJjYjJhZjY4Y2I3ZTQzMWEwNjIzNTExZA"},
+    {label:"ask-인재경영팀",url:"https://join.slack.com/share/enQtMTExNTM5NjE5MzQ2NDMtOTMyNzhjODE2N2FlY2U4NmMyZmJjZGRiODE3YjA1MDhkMzcxYzNmYzc0ZDI5OTBlMjU2Njc4NzU5MWFhYTk4Mw"},
+    {label:"ask-hrd아카이브",url:"https://join.slack.com/share/enQtMTExNTM5NjQxODgyNDMtYjg0YmRhNTc2NGQ0NTVmNjZjYzA3MWExYTc2YTg3MDcyZDg5OGRhZjA1N2E1MzI0MDMxMTMxNGU3MjU4ZjBhMg"},
+    {label:"ask-it인프라팀-보안unit",url:"https://join.slack.com/share/enQtMTExNjAzMzg0OTg4NTAtOTEzMzhhYjc0NWJlNmM3MTg0YmE5MDcyNTNmYzcwNTk4ZjBlYzQxMzliNDdkMTRlMDI0ZDNhMGNhNWQ5ZDNmOA"},
+    {label:"ask-it인프라팀-시스템인프라",url:"https://join.slack.com/share/enQtMTExNDQ4ODQxNjk5NzUtYjI5YzhmMmYwMjcyNWExNzkxYjNhYjNkNTY5YTY1NDNjNWIxYTA2NWJjMGQyZTBmZDIzZjYzMjA5ZGM2YjRhNw"},
+    {label:"help-법정교육",url:"https://join.slack.com/share/enQtMTExNTgyNzY5MzEyNTQtNjRmYjVkNmUzNWE0ZDBiZmEyOTE5ZjllNWQ0NDI2Yzg3NmZmOTg4ZWY4Yjk1Njk0Njk5YjViN2NhYjc3Yjc3OQ"},
+    {label:"ask-연수원3.0",url:"https://join.slack.com/share/enQtMTExNjAzNTE2MzMxMzgtNzE4NTA4NThjMTM1ZmNmODE2ZTM0Mzg1NDY1NmI0NDg1MGQ0NTc5MzQyZDg4OWZhOTNmNTA4MzBkOTAyMDZhZA"},
+  ];
+  document.getElementById("slackLinkList").innerHTML=links.map(l=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#FAF5FF;border:1px solid #E9D5FF;border-radius:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;background:#F3E8FF;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="ti ti-brand-slack" style="font-size:16px;color:#4A154B"></i>
+        </div>
+        <span style="font-size:13px;font-weight:600;color:#1E293B">${l.label}</span>
+      </div>
+      <a href="${l.url}" target="_blank" style="display:flex;align-items:center;gap:5px;height:30px;padding:0 12px;background:#4A154B;border-radius:8px;color:#fff;font-size:12px;font-weight:600;text-decoration:none;font-family:var(--font);white-space:nowrap">
+        <i class="ti ti-external-link" style="font-size:12px"></i>바로가기
+      </a>
+    </div>`).join("");
+  document.getElementById("slackModal").style.display="flex";
 }
 function openConfluenceModal(){
   const links=[
@@ -1693,6 +1733,7 @@ function renderHome(){
     {label:"신규입사자 온보딩",icon:"ti-rocket",color:"#7C3AED",bg:"#EDE9FE",action:`openQuickModal('onboarding.html','신규입사자 온보딩','ti-rocket')`},
     {label:"시험 사이트",icon:"ti-clipboard-check",color:"#059669",bg:"#D1FAE5",action:`openQuickModal('quiz.html','시험 사이트','ti-clipboard-check')`},
     {label:"팀 캘린더",icon:"ti-calendar",color:"#0284C7",bg:"#E0F2FE",action:`openQuickModal('calendar.html','팀 캘린더','ti-calendar')`},
+    {label:"Slack",icon:"ti-brand-slack",color:"#4A154B",bg:"#F9F0FF",action:`openSlackModal()`},
     {label:"Jira",icon:"ti-layout-kanban",color:"#0052CC",bg:"#DBEAFE",action:`openJiraModal()`},
     {label:"Confluence",icon:"ti-books",color:"#1D4ED8",bg:"#EFF6FF",action:`openConfluenceModal()`},
   ];
