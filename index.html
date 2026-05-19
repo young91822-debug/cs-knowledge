@@ -462,6 +462,67 @@ body.is-admin .admin-only.block{display:block!important}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zJiUqCQXjH-3C_t_eKckBnOGy3m7iC0",
+  authDomain: "happycenter-cab96.firebaseapp.com",
+  projectId: "happycenter-cab96",
+  storageBucket: "happycenter-cab96.firebasestorage.app",
+  messagingSenderId: "128259907179",
+  appId: "1:128259907179:web:da0113a6c0e4b7fa9c9b2e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function loadTodaySchedule(){
+  const box = document.getElementById("todayScheduleWidget");
+  if(!box) return;
+  try {
+    const snap = await getDoc(doc(db, "appData", "schedule"));
+    if(!snap.exists()){box.innerHTML=`<span style="color:var(--t3);font-size:12px">일정 데이터 없음</span>`;return;}
+    const weeks = snap.data().weeks || [];
+    // 오늘 날짜
+    const todayStr = new Date().toISOString().slice(0,10);
+    let todayData = null;
+    for(const week of weeks){
+      for(const day of (week.days||[])){
+        if(day.date === todayStr){ todayData = day; break; }
+      }
+      if(todayData) break;
+    }
+    if(!todayData){box.innerHTML=`<span style="color:var(--t3);font-size:12px">오늘 일정 없음</span>`;return;}
+
+    const absent = todayData.absentInfo || [];
+    const yeoncha = absent.filter(a=>a.type==="연차").map(a=>a.name);
+    const myday = absent.filter(a=>a.type==="마이데이"||a.type==="4일제").map(a=>a.name);
+    const workers = todayData.workers || [];
+
+    box.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:700;color:#7C3AED;background:#EDE9FE;padding:3px 8px;border-radius:6px">👷 근무</span>
+          <span style="font-size:12px;color:var(--t1)">${workers.length?workers.join(", "):"정보 없음"}</span>
+        </div>
+        ${yeoncha.length?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:700;color:#1D4ED8;background:#EFF6FF;padding:3px 8px;border-radius:6px">🖤 연차</span>
+          <span style="font-size:12px;color:var(--t1)">${yeoncha.join(", ")}</span>
+        </div>`:""}
+        ${myday.length?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:700;color:#DB2777;background:#FDF2F8;padding:3px 8px;border-radius:6px">🌸 마이데이</span>
+          <span style="font-size:12px;color:var(--t1)">${myday.join(", ")}</span>
+        </div>`:""}
+      </div>`;
+  } catch(e) {
+    box.innerHTML=`<span style="color:#EF4444;font-size:12px">일정을 불러오지 못했어요</span>`;
+  }
+}
+
+window.loadTodaySchedule = loadTodaySchedule;
+</script>
 </head>
 <body class="locked">
 
@@ -544,6 +605,16 @@ body.is-admin .admin-only.block{display:block!important}
           <div id="quickMenu" style="display:flex;gap:10px"></div>
         </div>
         <div class="home-cats" id="homeCats"></div>
+
+        <!-- 오늘 근무 위젯 -->
+        <div class="home-card" style="margin-bottom:16px;padding:14px 18px">
+          <div class="hcard-hd" style="margin-bottom:10px">
+            <span class="hcard-title"><i class="ti ti-calendar-today"></i>오늘 근무 현황</span>
+            <span style="font-size:11px;color:var(--t3)" id="todayDateLabel"></span>
+            <span class="hcard-more" onclick="openQuickModal('calendar.html','팀 캘린더','ti-calendar')">캘린더 보기 ›</span>
+          </div>
+          <div id="todayScheduleWidget"><span style="color:var(--t3);font-size:12px">불러오는 중...</span></div>
+        </div>
         <div class="home-grid">
           <div style="display:flex;flex-direction:column;gap:12px">
             <div class="home-card" id="homeNoticeCard">
@@ -1513,6 +1584,12 @@ function logMissingSearch(q){const key=q.toLowerCase();const found=missingSearch
 /* ─── Home Dashboard ─── */
 function renderHome(){
   document.getElementById("homeGreeting").textContent=getGreeting();
+  // 오늘 날짜 표시
+  const now=new Date();
+  const dateEl=document.getElementById("todayDateLabel");
+  if(dateEl)dateEl.textContent=`${now.getMonth()+1}월 ${now.getDate()}일 ${["일","월","화","수","목","금","토"][now.getDay()]}요일`;
+  // Firebase 캘린더 연동
+  if(window.loadTodaySchedule)window.loadTodaySchedule();
 
   /* 퀵메뉴 */
   const jiraLinks=[
