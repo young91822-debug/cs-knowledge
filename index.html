@@ -475,21 +475,27 @@ async function loadTodaySchedule(){
     const snap=await _fbDb.collection("appData").doc("schedule").get();
     if(!snap.exists){box.innerHTML=`<span style="color:var(--t3);font-size:12px">일정 데이터 없음</span>`;return;}
     const weeks=snap.data().weeks||[];
-    const todayStr=new Date().toISOString().slice(0,10);
+    // 오늘 날짜를 M/D 형식으로 변환 (캘린더 저장 형식)
+    const now=new Date();
+    const todayLabel=`${now.getMonth()+1}/${now.getDate()}`;
     let todayData=null;
-    for(const week of weeks){for(const day of (week.days||[])){if(day.date===todayStr){todayData=day;break;}}if(todayData)break;}
+    for(const week of weeks){
+      for(const day of (week.days||[])){
+        if(day.date&&day.date.startsWith(todayLabel)){todayData=day;break;}
+      }
+      if(todayData)break;
+    }
     if(!todayData){box.innerHTML=`<span style="color:var(--t3);font-size:12px">오늘 일정 없음</span>`;return;}
     const absent=todayData.absentInfo||[];
-    const yeoncha=absent.filter(a=>a.type==="연차").map(a=>a.name);
-    const myday=absent.filter(a=>a.type==="마이데이"||a.type==="4일제").map(a=>a.name);
-    const workers=todayData.workers||[];
+    const isMyday=a=>a.type==="마이데이"||a.type==="4일제";
+    const yeoncha=absent.filter(a=>!isMyday(a)&&a.type==="연차").map(a=>a.name);
+    const myday=absent.filter(isMyday).map(a=>a.name);
+    const earlyPerson=todayData.early||"";
     box.innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span style="font-size:11px;font-weight:700;color:#7C3AED;background:#EDE9FE;padding:3px 8px;border-radius:6px">👷 근무</span>
-        <span style="font-size:12px;color:var(--t1)">${workers.length?workers.join(", "):"정보 없음"}</span>
-      </div>
+      ${earlyPerson?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:11px;font-weight:700;color:#059669;background:#ECFDF5;padding:3px 8px;border-radius:6px">🌅 조기퇴근</span><span style="font-size:12px;color:var(--t1)">${earlyPerson}</span></div>`:""}
       ${yeoncha.length?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:11px;font-weight:700;color:#1D4ED8;background:#EFF6FF;padding:3px 8px;border-radius:6px">🖤 연차</span><span style="font-size:12px;color:var(--t1)">${yeoncha.join(", ")}</span></div>`:""}
       ${myday.length?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:11px;font-weight:700;color:#DB2777;background:#FDF2F8;padding:3px 8px;border-radius:6px">🌸 마이데이</span><span style="font-size:12px;color:var(--t1)">${myday.join(", ")}</span></div>`:""}
+      ${!earlyPerson&&!yeoncha.length&&!myday.length?`<span style="color:var(--t3);font-size:12px">오늘은 특이사항 없어요 😊</span>`:""}
     </div>`;
   }catch(e){box.innerHTML=`<span style="color:#EF4444;font-size:12px">불러오기 실패: ${e.message}</span>`;}
 }
