@@ -873,6 +873,36 @@ async function loadTodaySchedule(){
     </div>`;
   }catch(e){box.innerHTML=`<span style="color:#EF4444;font-size:12px">불러오기 실패: ${e.message}</span>`;}
 }
+async function loadFirebaseNotices(){
+  const box=document.getElementById("homeNotices");
+  if(!box)return;
+  try{
+    const snap=await _fbDb.collection("notices").orderBy("createdAt","desc").limit(5).get();
+    if(snap.empty){box.innerHTML=`<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px">등록된 공지가 없습니다</div>`;return;}
+    box.innerHTML=snap.docs.map(doc=>{
+      const n=doc.data();
+      const date=n.createdAt?.toDate?n.createdAt.toDate().toISOString().slice(0,10):n.createdAt?.slice?.(0,10)||"";
+      return`<div class="notice-item2" style="cursor:pointer" onclick="openQuickModal('calendar.html','팀 캘린더','ti-calendar')">
+        <div class="notice-dot${n.isPinned?" new":""}"></div>
+        <div class="notice-nm2">${n.isPinned?`<i class="ti ti-pin" style="font-size:11px;color:#F97316;margin-right:3px"></i>`:""}${esc(n.title||"")}</div>
+        <div class="notice-date">${date}</div>
+      </div>`;
+    }).join("");
+  }catch(e){
+    // Firebase 공지 실패시 로컬 공지로 폴백
+    renderLocalNotices();
+  }
+}
+function renderLocalNotices(){
+  const box=document.getElementById("homeNotices");
+  if(!box)return;
+  box.innerHTML=notices.slice(0,4).map(n=>`
+    <div class="notice-item2" onclick="openNotice('${n.id}')">
+      <div class="notice-dot${n.isNew?" new":""}"></div>
+      <div class="notice-nm2">${n.isPinned?`<i class="ti ti-pin" style="font-size:11px;color:#F97316;margin-right:3px"></i>`:""}${esc(n.title)}${n.isNew?`<span class="badge-n">N</span>`:""}</div>
+      <div class="notice-date">${n.date||""}</div>
+    </div>`).join("")||`<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px">등록된 공지가 없습니다</div>`;
+}
 /* ─── 상수 ─── */
 const PARTS=["B2B 상위기업","B2C","상품 안내","LMS 기능","ADMIN/뉴어드민","운영지원"];
 const B2B_COS=[],B2C_PRODUCTS=[],LMS_CATS=[],ADMIN_SUBS=[],OPS_SUBS=[];
@@ -1565,6 +1595,7 @@ function renderHome(){
   if(dateEl)dateEl.textContent=`${now.getMonth()+1}월 ${now.getDate()}일 ${["일","월","화","수","목","금","토"][now.getDay()]}요일`;
   // Firebase 캘린더 연동
   if(window.loadTodaySchedule)window.loadTodaySchedule();
+  if(window.loadFirebaseNotices)window.loadFirebaseNotices();else renderLocalNotices();
 
   /* 퀵메뉴 */
   const jiraLinks=[
@@ -1628,12 +1659,7 @@ function renderHome(){
       </div>
     </div>`;}).join(""):`<div style="padding:28px;text-align:center;color:var(--t3);font-size:12px">등록된 문서가 없습니다</div>`;
 
-  document.getElementById("homeNotices").innerHTML=notices.slice(0,4).map(n=>`
-    <div class="notice-item2" onclick="openNotice('${n.id}')">
-      <div class="notice-dot${n.isNew?" new":""}"></div>
-      <div class="notice-nm2">${n.isPinned?`<i class="ti ti-pin" style="font-size:11px;color:#F97316;margin-right:3px"></i>`:""}${esc(n.title)}${n.isNew?`<span class="badge-n">N</span>`:""}</div>
-      <div class="notice-date">${n.date||""}</div>
-    </div>`).join("")||`<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px">등록된 공지가 없습니다</div>`;
+  renderLocalNotices();
   if(notices.some(n=>n.isNew)){document.getElementById("noticeBadge").style.display="";}else{document.getElementById("noticeBadge").style.display="none";}
   const top5=[...entries].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
   document.getElementById("homeTop5").innerHTML=top5.length?top5.map((e,i)=>`
