@@ -557,6 +557,7 @@ body.is-admin .admin-only.block{display:block!important}
           </div>
         </div>
         <div class="home-cats" id="homeCats"></div>
+        <div class="home-grid">
           <div style="display:flex;flex-direction:column;gap:12px">
             <div class="home-card" id="homeNoticeCard">
               <div class="hcard-hd">
@@ -675,6 +676,21 @@ body.is-admin .admin-only.block{display:block!important}
     </div>
   </div>
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDetailPanel()"></div>
+
+<!-- Firebase Notice Modal -->
+<div id="fbNoticeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:80vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2);display:flex;flex-direction:column">
+    <div style="padding:16px 20px;background:linear-gradient(135deg,#1E1B4B,#4C1D95);display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <i class="ti ti-bell" style="font-size:18px;color:#A78BFA"></i>
+      <span id="fbNoticeTitle" style="font-size:15px;font-weight:700;color:#fff;flex:1"></span>
+      <button onclick="document.getElementById('fbNoticeModal').style.display='none'" style="background:rgba(255,255,255,.15);border:none;border-radius:7px;width:30px;height:30px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="padding:20px;overflow-y:auto">
+      <div id="fbNoticeDate" style="font-size:12px;color:var(--t3);margin-bottom:12px"></div>
+      <div id="fbNoticeBody" style="font-size:14px;color:var(--t1);line-height:1.8;white-space:pre-wrap"></div>
+    </div>
+  </div>
+</div>
 
 <!-- Bulk Upload Modal -->
 <div id="bulkUploadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:20px">
@@ -879,19 +895,40 @@ async function loadFirebaseNotices(){
   try{
     const snap=await _fbDb.collection("notices").orderBy("createdAt","desc").limit(5).get();
     if(snap.empty){box.innerHTML=`<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px">등록된 공지가 없습니다</div>`;return;}
-    box.innerHTML=snap.docs.map(doc=>{
-      const n=doc.data();
+    window._fbNotices=snap.docs.map(doc=>({id:doc.id,...doc.data()}));
+    box.innerHTML=window._fbNotices.map((n,i)=>{
       const date=n.createdAt?.toDate?n.createdAt.toDate().toISOString().slice(0,10):n.createdAt?.slice?.(0,10)||"";
-      return`<div class="notice-item2" style="cursor:pointer" onclick="openQuickModal('calendar.html','팀 캘린더','ti-calendar')">
-        <div class="notice-dot${n.isPinned?" new":""}"></div>
-        <div class="notice-nm2">${n.isPinned?`<i class="ti ti-pin" style="font-size:11px;color:#F97316;margin-right:3px"></i>`:""}${esc(n.title||"")}</div>
+      return`<div class="notice-item2" style="cursor:pointer" onclick="openFbNotice(${i})">
+        <div class="notice-dot"></div>
+        <div class="notice-nm2">${esc(n.title||"")}</div>
         <div class="notice-date">${date}</div>
       </div>`;
     }).join("");
-  }catch(e){
-    // Firebase 공지 실패시 로컬 공지로 폴백
-    renderLocalNotices();
-  }
+  }catch(e){renderLocalNotices();}
+}
+async function loadFirebaseNoticesView(){
+  const box=document.getElementById("noticeListFromFb");
+  if(!box)return;
+  try{
+    const snap=await _fbDb.collection("notices").orderBy("createdAt","desc").get();
+    if(snap.empty){box.innerHTML=`<div class="empty-state"><i class="ti ti-bell-off"></i><p>등록된 공지가 없습니다</p></div>`;return;}
+    window._fbNotices=snap.docs.map(doc=>({id:doc.id,...doc.data()}));
+    box.innerHTML=window._fbNotices.map((n,i)=>{
+      const date=n.createdAt?.toDate?n.createdAt.toDate().toISOString().slice(0,10):n.createdAt?.slice?.(0,10)||"";
+      return`<div class="r-card" onclick="openFbNotice(${i})">
+        <div class="r-card-top"><span class="r-card-title">${esc(n.title||"")}</span></div>
+        <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${date}</span></div>
+      </div>`;
+    }).join("");
+  }catch(e){box.innerHTML=`<span style="color:#EF4444;font-size:12px">불러오기 실패</span>`;}
+}
+function openFbNotice(idx){
+  const n=(window._fbNotices||[])[idx];if(!n)return;
+  const date=n.createdAt?.toDate?n.createdAt.toDate().toISOString().slice(0,10):n.createdAt?.slice?.(0,10)||"";
+  document.getElementById("fbNoticeTitle").textContent=n.title||"";
+  document.getElementById("fbNoticeDate").textContent=date;
+  document.getElementById("fbNoticeBody").textContent=n.content||n.body||n.text||"내용 없음";
+  document.getElementById("fbNoticeModal").style.display="flex";
 }
 function renderLocalNotices(){
   const box=document.getElementById("homeNotices");
@@ -1000,7 +1037,7 @@ function setView(v){
   if(v==="home"){showView("viewHome");setSbView("home");renderHome();}
   else if(v==="bookmarks"){showView("viewList");setSbView("");filterByIds(bookmarks,"즐겨찾기",`총 ${bookmarks.length}건`);}
   else if(v==="recent"){showView("viewList");setSbView("");filterByIds(recentViewed,"최근 본 문서",`총 ${recentViewed.filter(id=>entries.find(e=>e.id===id)).length}건`);}
-  else if(v==="notices"){showView("viewList");setSbView("notices");renderNoticeList();}
+  else if(v==="notices"){showView("viewList");setSbView("notices");renderNoticeList();if(window.loadFirebaseNoticesView)loadFirebaseNoticesView();}
   else if(v==="newguide"){showView("viewList");setSbView("");const ng=entries.filter(e=>e.newGuide&&e.status!=="hidden");renderList(ng,"신규 상담사 가이드",`총 ${ng.length}건`);}
   closeDetailPanel();
 }
@@ -1748,7 +1785,13 @@ function filterByIds(ids,title,cnt){
 /* ─── Notices ─── */
 function renderNoticeList(){
   setSbView("notices");
-  document.getElementById("filterChips").innerHTML="";
+  document.getElementById("filterChips").innerHTML=`
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-brand-firebase" style="font-size:14px"></i>팀 공지사항 (캘린더)</div>
+      <div id="noticeListFromFb"><span style="font-size:12px;color:var(--t3)">불러오는 중...</span></div>
+      <div style="height:1px;background:var(--border);margin:14px 0"></div>
+      <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-bell" style="font-size:14px"></i>지식창고 공지사항</div>
+    </div>`;
   const isAdmin=currentUser&&currentUser.role==="admin";
   document.getElementById("listTitle").textContent="공지사항";
   document.getElementById("listCnt").textContent=`총 ${notices.length}건`;
