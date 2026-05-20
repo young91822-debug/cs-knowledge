@@ -2148,13 +2148,9 @@ function renderCompanyView(company="전체", cat=null){
     const catLabel=cat==="__uncat__"?"미분류":cat;
     document.getElementById("coCnt").textContent=`${company} › ${catLabel} · ${target.length}건`;
     document.getElementById("coSummary").innerHTML=`
-      <button class="co-back-btn" onclick="renderCompanyView('${esc(company)}')"><i class="ti ti-arrow-left" style="font-size:14px"></i>카테고리 목록</button>
-      <div class="breadcrumb">
-        <span class="bc-link" onclick="renderCompanyView('전체')">기업 목록</span>
-        <i class="ti ti-chevron-right"></i>
-        <span class="bc-link" onclick="renderCompanyView('${esc(company)}')">${esc(company)}</span>
-        <i class="ti ti-chevron-right"></i>
-        <span style="color:var(--t1);font-weight:600">${esc(catLabel)}</span>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="co-back-btn" onclick="renderCompanyView('전체')"><i class="ti ti-arrow-left" style="font-size:13px"></i>기업 목록</button>
+        <button class="co-back-btn" onclick="renderCompanyView('${esc(company)}')"><i class="ti ti-arrow-left" style="font-size:13px"></i>카테고리 목록</button>
       </div>
       <div class="co-summary-card" style="margin-bottom:12px">
         <div class="co-summary-hd">
