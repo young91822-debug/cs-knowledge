@@ -1167,6 +1167,13 @@ function confirmBulkImport(){
   rows.forEach(r=>{
     const base=cfg.parse(r.map(v=>String(v||"").trim()));
     if(!base.title)return;
+    // B2B 기업+카테고리 자동 등록
+    if(base.company){
+      if(!companyProfiles[base.company])companyProfiles[base.company]={code:"",manager:"",pcUrl:"",moUrl:"",cats:[]};
+      if(base.companyCat&&!companyProfiles[base.company].cats.includes(base.companyCat)){
+        companyProfiles[base.company].cats.push(base.companyCat);
+      }
+    }
     entries=[{...base,id:uid(),status:"active",updatedBy:currentUser?.id||"",updatedAt:today(),createdAt:today(),views:0,history:[],viewers:[],version:"1.0"},...entries];
     added++;
   });
@@ -1851,7 +1858,13 @@ function renderList(f,title,cnt){
     </label>
     <button onclick="deleteSelectedEntries()" style="height:28px;padding:0 12px;background:#EF4444;border:none;border-radius:7px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px;margin-left:auto"><i class="ti ti-trash" style="font-size:13px"></i>선택 삭제</button>
   </div>`:"";
-  document.getElementById("resultsList").innerHTML=bulkBar+f.map(e=>{
+  const filterChipsEl=document.getElementById("filterChips");
+  if(isAdmin&&filterChipsEl){
+    let bar=document.getElementById("bulkDeleteBar");
+    if(!bar){bar=document.createElement("div");bar.id="bulkDeleteBar";filterChipsEl.parentNode.insertBefore(bar,filterChipsEl.nextSibling);}
+    bar.innerHTML=bulkBar;
+  }
+  document.getElementById("resultsList").innerHTML=f.map(e=>{
     const bm=bookmarks.includes(e.id);
     const sub=e.company||e.productType||e.lmsCat||e.adminSub||e.opsSub||"";
     const hasCaution=e.caution&&e.caution.trim();
