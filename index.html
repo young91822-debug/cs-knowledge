@@ -1845,14 +1845,23 @@ function renderList(f,title,cnt){
   document.getElementById("listCnt").textContent=cnt||`총 ${f.length}건`;
   const isAdmin=currentUser&&currentUser.role==="admin";
   if(!f.length){document.getElementById("resultsList").innerHTML=`<div class="empty-state"><i class="ti ti-search-off"></i><p>결과가 없습니다<br><span style="font-size:11px">다른 키워드로 검색해 보세요</span></p></div>`;return;}
-  document.getElementById("resultsList").innerHTML=f.map(e=>{
+  const bulkBar=isAdmin?`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:8px 12px;background:#F8F7FF;border-radius:10px;border:1px solid var(--border)">
+    <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer">
+      <input type="checkbox" id="listSelectAll" onchange="listSelectAll(this.checked)" style="width:15px;height:15px;cursor:pointer">전체 선택
+    </label>
+    <button onclick="deleteSelectedEntries()" style="height:28px;padding:0 12px;background:#EF4444;border:none;border-radius:7px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px;margin-left:auto"><i class="ti ti-trash" style="font-size:13px"></i>선택 삭제</button>
+  </div>`:"";
+  document.getElementById("resultsList").innerHTML=bulkBar+f.map(e=>{
     const bm=bookmarks.includes(e.id);
     const sub=e.company||e.productType||e.lmsCat||e.adminSub||e.opsSub||"";
     const hasCaution=e.caution&&e.caution.trim();
     const hq=showChips?searchQ:"";
     return`<div class="r-card${selId===e.id?" sel":""}" id="ri-${e.id}" onclick="openDetail('${e.id}')">
       <div class="r-card-top">
-        <span class="r-card-title">${highlight(e.title,hq)}</span>
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+          ${isAdmin?`<input type="checkbox" class="entry-chk" value="${e.id}" style="width:15px;height:15px;flex-shrink:0;cursor:pointer" onclick="event.stopPropagation()">`:""}
+          <span class="r-card-title">${highlight(e.title,hq)}</span>
+        </div>
         <div style="display:flex;align-items:center;gap:3px">
           <button onclick="event.stopPropagation();downloadEntry('${e.id}')" style="width:26px;height:26px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s" onmouseover="this.style.borderColor='var(--p)';this.style.color='var(--p)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--t3)'" title="다운로드"><i class="ti ti-download" style="font-size:12px"></i></button>
           <button class="r-star${bm?" on":""}" onclick="toggleBM(event,'${e.id}')">${bm?"★":"☆"}</button>
@@ -2274,6 +2283,17 @@ function filterCoSearch(q){
   document.querySelectorAll("#coResultsList .r-card").forEach(card=>{
     card.style.display=(!q||card.textContent.toLowerCase().includes(q.toLowerCase()))?"":"none";
   });
+}
+function listSelectAll(checked){
+  document.querySelectorAll(".entry-chk").forEach(cb=>cb.checked=checked);
+}
+function deleteSelectedEntries(){
+  if(!requireAdmin())return;
+  const checked=[...document.querySelectorAll(".entry-chk:checked")].map(cb=>cb.value);
+  if(!checked.length){alert("삭제할 항목을 선택해주세요.");return;}
+  if(!confirm(`선택한 ${checked.length}건을 삭제할까요?`))return;
+  entries=entries.filter(e=>!checked.includes(e.id));
+  saveAll();renderResults();
 }
 function onListAdd(){
   if(curView==="notices")openNoticeForm('');
