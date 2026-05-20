@@ -544,9 +544,15 @@ body.is-admin .admin-only.block{display:block!important}
             <h1 id="homeGreeting">안녕하세요! 👋</h1>
             <p>검색창에 문의 내용을 입력하면 바로 처리 가이드를 찾을 수 있어요.</p>
           </div>
-          <div style="text-align:right;flex-shrink:0" id="homeDateDisplay">
-            <div style="font-size:16px;font-weight:700;color:var(--t1);line-height:1.4" id="homeDateLine1"></div>
-            <div style="font-size:16px;font-weight:700;color:#7C3AED;line-height:1.4" id="homeDateLine2"></div>
+          <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
+            <label id="homeImportBtn" style="display:none;align-items:center;gap:6px;height:36px;padding:0 14px;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:10px;color:#6D28D9;font-size:12.5px;font-weight:600;cursor:pointer">
+              <i class="ti ti-database-import" style="font-size:14px"></i>데이터 불러오기
+              <input type="file" accept=".json" style="display:none" onchange="importJSONFromGuide(this)">
+            </label>
+            <div style="text-align:right" id="homeDateDisplay">
+              <div style="font-size:16px;font-weight:700;color:var(--t1);line-height:1.4" id="homeDateLine1"></div>
+              <div style="font-size:16px;font-weight:700;color:#7C3AED;line-height:1.4" id="homeDateLine2"></div>
+            </div>
           </div>
         </div>
         <!-- 오늘 근무 현황 + 퀵메뉴 -->
@@ -710,6 +716,28 @@ body.is-admin .admin-only.block{display:block!important}
         #fbNoticeBody p{margin:6px 0}
         #fbNoticeBody h1,#fbNoticeBody h2,#fbNoticeBody h3{margin:12px 0 6px;color:#1E1B4B}
       </style>
+    </div>
+  </div>
+</div>
+
+<!-- 데이터 불러오기 안내 팝업 -->
+<div id="importGuideModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:420px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div style="padding:20px;background:linear-gradient(135deg,#1E1B4B,#4C1D95);text-align:center">
+      <i class="ti ti-database-import" style="font-size:32px;color:#A78BFA;display:block;margin-bottom:8px"></i>
+      <div style="font-size:16px;font-weight:700;color:#fff">지식창고 데이터 불러오기</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px">관리자에게 받은 JSON 파일을 불러오세요</div>
+    </div>
+    <div style="padding:20px">
+      <div style="background:#F8F7FF;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--t2);line-height:1.7">
+        <i class="ti ti-info-circle" style="color:#7C3AED"></i> 처음 접속하셨나요?<br>
+        관리자에게 <strong>백업 JSON 파일</strong>을 받아서 아래 버튼으로 불러오시면 모든 데이터를 볼 수 있어요.
+      </div>
+      <label style="display:flex;align-items:center;justify-content:center;gap:8px;height:44px;background:#7C3AED;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px">
+        <i class="ti ti-upload" style="font-size:16px"></i>JSON 파일 불러오기
+        <input type="file" accept=".json" style="display:none" onchange="importJSONFromGuide(this)">
+      </label>
+      <button onclick="document.getElementById('importGuideModal').style.display='none'" style="width:100%;height:40px;background:none;border:1.5px solid var(--border);border-radius:10px;color:var(--t2);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font)">나중에 불러올게요</button>
     </div>
   </div>
 </div>
@@ -1094,7 +1122,7 @@ function applyRoleUI(){
   }
 }
 function restoreSession(){const sid=localStorage.getItem(SESSION);currentUser=users.find(u=>u.id===sid)||null;applyRoleUI();}
-function login(ev){if(ev)ev.preventDefault();const id=document.getElementById("loginId").value.trim();const pw=document.getElementById("loginPw").value;let u=users.find(x=>x.id===id&&x.pw===pw);if(!u&&id==="admin"&&pw==="admin123"){u={id:"admin",pw:"admin123",role:"admin",name:"관리자",createdAt:today()};users=[u,...users.filter(x=>x.id!=="admin")];saveAll();}if(!u){document.getElementById("loginMsg").textContent="아이디 또는 비밀번호를 확인해주세요.";return;}currentUser={id:u.id,role:u.role,name:u.name};localStorage.setItem(SESSION,u.id);document.getElementById("loginPw").value="";applyRoleUI();}
+function login(ev){if(ev)ev.preventDefault();const id=document.getElementById("loginId").value.trim();const pw=document.getElementById("loginPw").value;let u=users.find(x=>x.id===id&&x.pw===pw);if(!u&&id==="admin"&&pw==="admin123"){u={id:"admin",pw:"admin123",role:"admin",name:"관리자",createdAt:today()};users=[u,...users.filter(x=>x.id!=="admin")];saveAll();}if(!u){document.getElementById("loginMsg").textContent="아이디 또는 비밀번호를 확인해주세요.";return;}currentUser={id:u.id,role:u.role,name:u.name};localStorage.setItem(SESSION,u.id);document.getElementById("loginPw").value="";applyRoleUI();checkShowImportGuide();}
 function logout(){closeAdmin();currentUser=null;localStorage.removeItem(SESSION);applyRoleUI();}
 function requireAdmin(){if(currentUser&&currentUser.role==="admin")return true;alert("관리자만 사용할 수 있는 기능입니다.");return false;}
 
@@ -1765,6 +1793,8 @@ function logMissingSearch(q){const key=q.toLowerCase();const found=missingSearch
 function renderHome(){
   document.getElementById("homeGreeting").textContent=getGreeting();
   // 오늘 날짜 표시
+  const importBtn=document.getElementById("homeImportBtn");
+  if(importBtn)importBtn.style.display=(currentUser&&currentUser.role!=="admin"&&entries.length===0)?"flex":"none";
   const now=new Date();
   const days=["일","월","화","수","목","금","토"];
   const d1=document.getElementById("homeDateLine1");
@@ -2610,13 +2640,7 @@ function importExcelData(){
   window._excelRows=null;
 }
 function exportJSON(){
-  const data={
-    version:"1.0",
-    exportedAt:new Date().toISOString(),
-    entries,users,historyLog,knowledgeRequests,
-    missingSearches,customCategories,companyProfiles,
-    productProfiles,notices
-  };
+  const data={version:"1.0",exportedAt:new Date().toISOString(),entries,users,historyLog,knowledgeRequests,missingSearches,customCategories,companyProfiles,productProfiles,notices};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
@@ -2624,6 +2648,35 @@ function exportJSON(){
   a.download=`cs지식창고_백업_${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
+}
+function importJSONFromGuide(input){
+  const file=input.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.entries)entries=data.entries;
+      if(data.users)users=data.users;
+      if(data.historyLog)historyLog=data.historyLog;
+      if(data.knowledgeRequests)knowledgeRequests=data.knowledgeRequests;
+      if(data.missingSearches)missingSearches=data.missingSearches;
+      if(data.customCategories)customCategories=data.customCategories;
+      if(data.companyProfiles)companyProfiles=data.companyProfiles;
+      if(data.productProfiles)productProfiles=data.productProfiles;
+      if(data.notices)notices=data.notices;
+      saveAll();applyCustomCategories();initFilters();
+      document.getElementById("importGuideModal").style.display="none";
+      alert("✅ 데이터를 성공적으로 불러왔어요!");
+      renderHome();
+    }catch(err){alert("파일을 읽는 중 오류가 발생했어요.\n올바른 백업 파일인지 확인해주세요.");}
+  };
+  r.readAsText(file);input.value="";
+}
+function checkShowImportGuide(){
+  // 데이터가 없으면 팝업 표시 (관리자 제외)
+  if(currentUser&&currentUser.role!=="admin"&&entries.length===0){
+    setTimeout(()=>{document.getElementById("importGuideModal").style.display="flex";},500);
+  }
 }
 function importJSON(input){
   const file=input.files[0];if(!file)return;
