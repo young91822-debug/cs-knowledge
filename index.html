@@ -1794,7 +1794,7 @@ function renderHome(){
   document.getElementById("homeGreeting").textContent=getGreeting();
   // 오늘 날짜 표시
   const importBtn=document.getElementById("homeImportBtn");
-  if(importBtn)importBtn.style.display=(currentUser&&currentUser.role!=="admin"&&entries.length===0)?"flex":"none";
+  if(importBtn)importBtn.style.display=(currentUser&&currentUser.role!=="admin")?"flex":"none";
   const now=new Date();
   const days=["일","월","화","수","목","금","토"];
   const d1=document.getElementById("homeDateLine1");
