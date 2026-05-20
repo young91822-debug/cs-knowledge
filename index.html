@@ -1170,8 +1170,10 @@ function confirmBulkImport(){
     // B2B 기업+카테고리 자동 등록
     if(base.company){
       if(!companyProfiles[base.company])companyProfiles[base.company]={code:"",manager:"",pcUrl:"",moUrl:"",cats:[]};
-      if(base.companyCat&&!companyProfiles[base.company].cats.includes(base.companyCat)){
-        companyProfiles[base.company].cats.push(base.companyCat);
+      if(base.companyCat&&base.companyCat.trim()){
+        if(!companyProfiles[base.company].cats.includes(base.companyCat)){
+          companyProfiles[base.company].cats.push(base.companyCat);
+        }
       }
     }
     entries=[{...base,id:uid(),status:"active",updatedBy:currentUser?.id||"",updatedAt:today(),createdAt:today(),views:0,history:[],viewers:[],version:"1.0"},...entries];
@@ -2090,7 +2092,10 @@ function renderCompanyView(company="전체", cat=null){
   } else if(cat===null){
     const target=all.filter(e=>e.company===company);
     const p=companyProfiles[company]||{};
-    const cats=p.cats||[];
+    // 프로필의 cats + 실제 데이터의 companyCat 합치기
+    const profileCats=p.cats||[];
+    const dataCats=[...new Set(target.map(e=>e.companyCat).filter(Boolean))];
+    const cats=[...new Set([...profileCats,...dataCats])];
     const codeHtml=p.code?`<span class="co-code">코드: ${esc(p.code)}</span>`:"";
     const managerHtml=p.manager?`<span class="co-code"><i class="ti ti-user" style="font-size:11px;margin-right:2px"></i>${esc(p.manager)}</span>`:"";
     const urlHtml=(p.pcUrl||p.moUrl)?`<div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
