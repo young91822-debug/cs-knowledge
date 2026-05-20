@@ -601,6 +601,7 @@ body.is-admin .admin-only.block{display:block!important}
           <input class="hd-search" id="listSearch" type="text" placeholder="목록에서 검색..." oninput="filterListSearch(this.value)">
           <button class="hd-btn-add admin-only inline" id="listAddBtn" onclick="onListAdd()"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
           <button class="hd-btn-bulk admin-only inline" onclick="openBulkUpload('list')"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
+          <button class="hd-btn-home" onclick="downloadAllEntries('list')"><i class="ti ti-download" style="font-size:13px"></i>전체 다운로드</button>
           <button class="hd-btn-home" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div class="filter-chips" id="filterChips"></div>
@@ -615,6 +616,7 @@ body.is-admin .admin-only.block{display:block!important}
           <input class="hd-search" type="text" placeholder="기업명 검색..." id="coSearch" oninput="filterCoSearch(this.value)">
           <button class="hd-btn-add admin-only inline" onclick="openCompanyProfileForm('')"><i class="ti ti-plus" style="font-size:12px"></i>기업 추가</button>
           <button class="hd-btn-bulk admin-only inline" onclick="openBulkUpload('b2b')"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
+          <button class="hd-btn-home" onclick="downloadAllEntries('b2b')"><i class="ti ti-download" style="font-size:13px"></i>전체 다운로드</button>
           <button class="hd-btn-home" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div class="co-chips-bar" id="coChipsBar"></div>
@@ -630,6 +632,7 @@ body.is-admin .admin-only.block{display:block!important}
           <input class="hd-search" type="text" placeholder="목록에서 검색..." oninput="filterErrSearch(this.value)">
           <button class="hd-btn-add admin-only inline" onclick="openErrorForm('')"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
           <button class="hd-btn-bulk admin-only inline" onclick="openBulkUpload('error')"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
+          <button class="hd-btn-home" onclick="downloadAllEntries('error')"><i class="ti ti-download" style="font-size:13px"></i>전체 다운로드</button>
           <button class="hd-btn-home" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div class="r-list" id="errList"></div>
@@ -643,6 +646,7 @@ body.is-admin .admin-only.block{display:block!important}
           <input class="hd-search" type="text" placeholder="목록에서 검색..." oninput="filterPrSearch(this.value)">
           <button class="hd-btn-add admin-only inline" onclick="openAddProductForm()"><i class="ti ti-plus" style="font-size:12px"></i>상품 추가</button>
           <button class="hd-btn-bulk admin-only inline" onclick="openBulkUpload('product')"><i class="ti ti-table-import" style="font-size:13px"></i>일괄 업로드</button>
+          <button class="hd-btn-home" onclick="downloadAllEntries('product')"><i class="ti ti-download" style="font-size:13px"></i>전체 다운로드</button>
           <button class="hd-btn-home" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
         <div id="prSummary"></div>
@@ -1278,6 +1282,38 @@ function openJiraModal(){
 }
 function openQuickModal(file,title,icon){
   window.open(`https://young91822-debug.github.io/cs-knowledge/${file}`,"_blank");
+}
+function downloadAllEntries(type){
+  if(!window.XLSX){alert("라이브러리 로딩 중입니다.");return;}
+  const wb=XLSX.utils.book_new();
+  const headers=["분류","제목","고객문의유형","필수확인질문","답변내용","이관기준","주의사항","기업명","카테고리","상품명","구분","상태","작성자","작성일"];
+  const toRow=e=>[e.part||"",e.title||"",e.customerQ||"",e.checkQ||"",e.steps||"",e.escalation||"",e.caution||"",e.company||"",e.companyCat||"",e.productName||"",e.productSection||"",e.status||"",e.updatedBy||"",e.updatedAt||""];
+
+  if(type==="b2b"){
+    // 기업별로 시트 분리
+    const companies=[...new Set(entries.filter(e=>e.part==="B2B 상위기업").map(e=>e.company).filter(Boolean))];
+    if(!companies.length){alert("B2B 데이터가 없습니다.");return;}
+    companies.forEach(co=>{
+      const rows=entries.filter(e=>e.company===co);
+      const ws=XLSX.utils.aoa_to_sheet([headers,...rows.map(toRow)]);
+      ws["!cols"]=headers.map(()=>({wch:20}));
+      XLSX.utils.book_append_sheet(wb,ws,co.slice(0,30));
+    });
+    // 전체 시트도 추가
+    const all=entries.filter(e=>e.part==="B2B 상위기업");
+    const wsAll=XLSX.utils.aoa_to_sheet([headers,...all.map(toRow)]);
+    XLSX.utils.book_append_sheet(wb,wsAll,"전체");
+    XLSX.writeFile(wb,`지식창고_B2B_전체_${today()}.xlsx`);
+  } else {
+    const partMap={list:"전체",error:"오류 해결방법",product:"상품 안내"};
+    const part=partMap[type];
+    const rows=part==="전체"?entries:entries.filter(e=>e.part===part);
+    if(!rows.length){alert("데이터가 없습니다.");return;}
+    const ws=XLSX.utils.aoa_to_sheet([headers,...rows.map(toRow)]);
+    ws["!cols"]=headers.map(()=>({wch:20}));
+    XLSX.utils.book_append_sheet(wb,ws,part);
+    XLSX.writeFile(wb,`지식창고_${part}_${today()}.xlsx`);
+  }
 }
 function downloadEntry(id){
   const e=entries.find(x=>x.id===id);if(!e)return;
