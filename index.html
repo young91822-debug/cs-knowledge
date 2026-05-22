@@ -2143,13 +2143,13 @@ function openDetail(id){
     </div>
     <div class="d-title">${esc(e.title)}</div>`;
   if(!isB2B)html+=sec("query","ti-message-circle","문의 유형",e.customerQ,true);
-  if(!isB2B&&e.cause)html+=sec("check","ti-alert-circle","발생 원인",e.cause);
-  html+=sec("check","ti-checklist","필수 확인 질문",e.checkQ);
+  if(!isB2B&&e.cause)html+=sec("check","ti-alert-circle","발생 원인",e.cause,true);
+  html+=sec("check","ti-checklist","필수 확인 질문",e.checkQ,true);
   const answerLabel=isB2B?"답변 내용":(e.part==="상품 안내"?"답변":"해결 방법");
   html+=sec("answer","ti-arrow-right-circle",answerLabel,e.steps,true);
-  if(!isB2B&&e.exceptions)html+=sec("escalate","ti-git-branch","예외 케이스",e.exceptions);
-  if(e.escalation)html+=sec("escalate","ti-send",isB2B?"운영자 이관 기준":"이관 기준",e.escalation);
-  if(!isB2B&&e.done)html+=sec("answer","ti-circle-check","처리 완료 기준",e.done);
+  if(!isB2B&&e.exceptions)html+=sec("escalate","ti-git-branch","예외 케이스",e.exceptions,true);
+  if(e.escalation)html+=sec("escalate","ti-send",isB2B?"운영자 이관 기준":"이관 기준",e.escalation,true);
+  if(!isB2B&&e.done)html+=sec("answer","ti-circle-check","처리 완료 기준",e.done,true);
   if(!isB2B&&e.script&&e.script.trim()){
     html+=`<div class="ds script full"><div class="ds-hd"><i class="ti ti-message-quote" style="font-size:12px"></i> 상담사 전달 멘트<button class="copy-btn" onclick="copyScript('${id}')">복사</button></div><div class="ds-body" id="sb-${id}">${esc(e.script)}</div></div>`;
   }
