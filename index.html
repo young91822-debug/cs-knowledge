@@ -2429,7 +2429,20 @@ function onListAdd(){
   if(curView==="notices")openNoticeForm('');
   else openAdd();
 }
-function openAdd(){if(!requireAdmin())return;const company=curView==="companies"&&selectedCompany!=="전체"?selectedCompany:"";showForm({part:"B2B 상위기업",company,version:"1.0",updatedBy:currentUser?currentUser.id:""},false);}
+function openAdd(){
+  if(!requireAdmin())return;
+  let part="B2B 상위기업";
+  const pre={version:"1.0",updatedBy:currentUser?currentUser.id:""};
+  if(curView==="companies"){ part="B2B 상위기업"; if(selectedCompany&&selectedCompany!=="전체")pre.company=selectedCompany; }
+  else if(curView==="products"){ part="상품 안내"; }
+  else if(["B2C","LMS 기능","ADMIN/뉴어드민","운영지원","상품 안내","B2B 상위기업"].includes(filterPart)){
+    part=filterPart;
+    if(part==="운영지원"&&filterSub&&filterSub!=="전체")pre.opsSub=filterSub;
+  }
+  else if(filterMultiple&&filterMultiple.length){ part=filterMultiple[0]; }
+  pre.part=part;
+  showForm(pre,false);
+}
 function openEdit(id){if(!requireAdmin())return;const e=entries.find(x=>x.id===id);if(e)showForm(e,true);}
 function showForm(d,isEdit){
   const p=d.part||"B2B 상위기업";
