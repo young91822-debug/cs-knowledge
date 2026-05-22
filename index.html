@@ -46,6 +46,13 @@ html,body{background:var(--sb);font-family:var(--font);font-size:13px;color:var(
 .sb-item.on{background:rgba(139,92,246,.2);color:#fff;border-left-color:#A78BFA;font-weight:500;box-shadow:inset 0 0 0 1px rgba(167,139,250,.15)}
 .sb-item i{font-size:16px;flex-shrink:0;opacity:.85}
 .sb-item .sb-badge-new{margin-left:auto;background:#EF4444;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:6px}
+.sb-item .sb-chev{margin-left:auto;font-size:14px;opacity:.6;transition:transform .15s}
+.sb-ops-sub{display:none;margin:0 0 4px 0}
+.sb.collapsed .sb-ops-sub{display:none!important}
+.sb-sub-item{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 32px;color:var(--sb-t);opacity:.72;cursor:pointer;font-size:12px;transition:all .12s;user-select:none;border-left:2.5px solid transparent}
+.sb-sub-item:hover{background:var(--sb-h);color:#fff;opacity:1}
+.sb-sub-item.on{color:#fff;opacity:1;border-left-color:#A78BFA;background:rgba(139,92,246,.12)}
+.sb-sub-item i{font-size:14px;flex-shrink:0;opacity:.8}
 .sb-divider{height:1px;background:rgba(255,255,255,.07);margin:6px 12px}
 .sb-bottom{padding:10px 12px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0}
 .sb-user{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.06);border-radius:8px;margin-bottom:8px}
@@ -499,6 +506,15 @@ body.is-admin .admin-only.block{display:block!important}
         <div class="sb-item" data-view="b2b" onclick="filterPart2('B2B 상위기업')"><i class="ti ti-building-skyscraper"></i><span>B2B</span></div>
         <div class="sb-item" data-view="product" onclick="filterPart2('상품 안내')"><i class="ti ti-package"></i><span>상품 안내</span></div>
         <div class="sb-item" data-view="error" onclick="openErrorView()"><i class="ti ti-bug"></i><span>오류 해결방법</span></div>
+        <div class="sb-item" data-view="ops" onclick="toggleOpsMenu()"><i class="ti ti-clipboard-check"></i><span>업무 요청</span><i class="ti ti-chevron-down sb-chev" id="opsChevron" style="transform:rotate(-90deg)"></i></div>
+        <div class="sb-ops-sub" id="opsSubMenu">
+          <div class="sb-sub-item" data-sub="에듀매니저" onclick="filterOpsSub('에듀매니저')"><i class="ti ti-user-cog"></i><span>에듀매니저</span></div>
+          <div class="sb-sub-item" data-sub="랩스(LABS)" onclick="filterOpsSub('랩스(LABS)')"><i class="ti ti-flask"></i><span>랩스 (LABS)</span></div>
+          <div class="sb-sub-item" data-sub="CTI" onclick="filterOpsSub('CTI')"><i class="ti ti-headset"></i><span>CTI</span></div>
+          <div class="sb-sub-item" data-sub="원격 지원" onclick="filterOpsSub('원격 지원')"><i class="ti ti-device-desktop"></i><span>원격 지원</span></div>
+          <div class="sb-sub-item" data-sub="앱 설치 지원" onclick="filterOpsSub('앱 설치 지원')"><i class="ti ti-device-mobile"></i><span>앱 설치 지원</span></div>
+          <div class="sb-sub-item" data-sub="업무 요청·이관" onclick="filterOpsSub('업무 요청·이관')"><i class="ti ti-send"></i><span>업무 요청·이관</span></div>
+        </div>
         <div class="sb-divider"></div>
         <div class="sb-item" data-view="notices" onclick="setView('notices')"><i class="ti ti-bell"></i><span>공지사항</span><span class="sb-badge-new" id="noticeBadge" style="display:none">N</span></div>
         <div class="sb-item" data-view="myspace" onclick="openMySpace()"><i class="ti ti-user-circle"></i><span>마이스페이스</span></div>
@@ -816,6 +832,13 @@ body.is-admin .admin-only.block{display:block!important}
     <div class="sb-item" onclick="filterPart2('B2B 상위기업');toggleMobMenu()"><i class="ti ti-building-skyscraper"></i><span>B2B</span></div>
     <div class="sb-item" onclick="filterPart2('상품 안내');toggleMobMenu()"><i class="ti ti-package"></i><span>상품 안내</span></div>
     <div class="sb-item" onclick="openErrorView();toggleMobMenu()"><i class="ti ti-bug"></i><span>오류 해결방법</span></div>
+    <div class="sb-item" onclick="filterPart2('운영지원');toggleMobMenu()"><i class="ti ti-clipboard-check"></i><span>업무 요청</span></div>
+    <div class="sb-sub-item" onclick="filterOpsSub('에듀매니저');toggleMobMenu()"><i class="ti ti-user-cog"></i><span>에듀매니저</span></div>
+    <div class="sb-sub-item" onclick="filterOpsSub('랩스(LABS)');toggleMobMenu()"><i class="ti ti-flask"></i><span>랩스 (LABS)</span></div>
+    <div class="sb-sub-item" onclick="filterOpsSub('CTI');toggleMobMenu()"><i class="ti ti-headset"></i><span>CTI</span></div>
+    <div class="sb-sub-item" onclick="filterOpsSub('원격 지원');toggleMobMenu()"><i class="ti ti-device-desktop"></i><span>원격 지원</span></div>
+    <div class="sb-sub-item" onclick="filterOpsSub('앱 설치 지원');toggleMobMenu()"><i class="ti ti-device-mobile"></i><span>앱 설치 지원</span></div>
+    <div class="sb-sub-item" onclick="filterOpsSub('업무 요청·이관');toggleMobMenu()"><i class="ti ti-send"></i><span>업무 요청·이관</span></div>
     <div class="sb-divider"></div>
     <div class="sb-item" onclick="setView('notices');toggleMobMenu()"><i class="ti ti-bell"></i><span>공지사항</span></div>
     <div class="sb-item" onclick="openMySpace();toggleMobMenu()"><i class="ti ti-user-circle"></i><span>마이스페이스</span></div>
@@ -1039,7 +1062,7 @@ function renderLocalNotices(){
 }
 /* ─── 상수 ─── */
 const PARTS=["B2B 상위기업","B2C","상품 안내","LMS 기능","ADMIN/뉴어드민","운영지원"];
-const B2B_COS=[],B2C_PRODUCTS=[],LMS_CATS=[],ADMIN_SUBS=[],OPS_SUBS=[];
+const B2B_COS=[],B2C_PRODUCTS=[],LMS_CATS=[],ADMIN_SUBS=[],OPS_SUBS=["에듀매니저","랩스(LABS)","CTI","원격 지원","앱 설치 지원","업무 요청·이관"];
 let notices=[];
 
 /* ─── State ─── */
@@ -1407,6 +1430,22 @@ function filterPart2(p){
   curView="list";showView("viewList");
   const vmap={"B2C":"b2c","상품 안내":"product","LMS 기능":"error","ADMIN/뉴어드민":"error","운영지원":"ops"};
   setSbView(vmap[p]||"");
+  renderResults();closeDetailPanel();
+}
+function toggleOpsMenu(){
+  const sub=document.getElementById("opsSubMenu");
+  const chev=document.getElementById("opsChevron");
+  const willOpen=sub.style.display==="none"||sub.style.display==="";
+  sub.style.display=willOpen?"block":"none";
+  if(chev)chev.style.transform=willOpen?"rotate(0deg)":"rotate(-90deg)";
+  if(willOpen)filterPart2("운영지원");
+}
+function filterOpsSub(sub){
+  filterMultiple=[];filterPart="운영지원";filterCo="전체";filterSub=sub;searchQ="";showChips=false;
+  const si=document.getElementById("mainSearch");if(si)si.value="";
+  curView="list";showView("viewList");setSbView("ops");
+  document.querySelectorAll(".sb-sub-item").forEach(el=>el.classList.toggle("on",el.dataset.sub===sub));
+  const om=document.getElementById("opsSubMenu");if(om&&om.style.display==="none"){om.style.display="block";const c=document.getElementById("opsChevron");if(c)c.style.transform="rotate(0deg)";}
   renderResults();closeDetailPanel();
 }
 /* ─── Supabase Storage 파일 업로드 ─── */
