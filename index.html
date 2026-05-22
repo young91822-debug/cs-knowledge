@@ -506,7 +506,7 @@ body.is-admin .admin-only.block{display:block!important}
         <div class="sb-item" data-view="b2b" onclick="filterPart2('B2B 상위기업')"><i class="ti ti-building-skyscraper"></i><span>B2B</span></div>
         <div class="sb-item" data-view="product" onclick="filterPart2('상품 안내')"><i class="ti ti-package"></i><span>상품 안내</span></div>
         <div class="sb-item" data-view="error" onclick="openErrorView()"><i class="ti ti-bug"></i><span>오류 해결방법</span></div>
-        <div class="sb-item" data-view="ops" onclick="toggleOpsMenu()"><i class="ti ti-clipboard-check"></i><span>업무 요청</span><i class="ti ti-chevron-down sb-chev" id="opsChevron" style="transform:rotate(-90deg)"></i></div>
+        <div class="sb-item" data-view="ops" onclick="toggleOpsMenu()"><i class="ti ti-clipboard-check"></i><span>운영지원</span><i class="ti ti-chevron-down sb-chev" id="opsChevron" style="transform:rotate(-90deg)"></i></div>
         <div class="sb-ops-sub" id="opsSubMenu">
           <div class="sb-sub-item" data-sub="에듀매니저" onclick="filterOpsSub('에듀매니저')"><i class="ti ti-user-cog"></i><span>에듀매니저</span></div>
           <div class="sb-sub-item" data-sub="랩스(LABS)" onclick="filterOpsSub('랩스(LABS)')"><i class="ti ti-flask"></i><span>랩스 (LABS)</span></div>
@@ -832,7 +832,7 @@ body.is-admin .admin-only.block{display:block!important}
     <div class="sb-item" onclick="filterPart2('B2B 상위기업');toggleMobMenu()"><i class="ti ti-building-skyscraper"></i><span>B2B</span></div>
     <div class="sb-item" onclick="filterPart2('상품 안내');toggleMobMenu()"><i class="ti ti-package"></i><span>상품 안내</span></div>
     <div class="sb-item" onclick="openErrorView();toggleMobMenu()"><i class="ti ti-bug"></i><span>오류 해결방법</span></div>
-    <div class="sb-item" onclick="filterPart2('운영지원');toggleMobMenu()"><i class="ti ti-clipboard-check"></i><span>업무 요청</span></div>
+    <div class="sb-item" onclick="filterPart2('운영지원');toggleMobMenu()"><i class="ti ti-clipboard-check"></i><span>운영지원</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('에듀매니저');toggleMobMenu()"><i class="ti ti-user-cog"></i><span>에듀매니저</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('랩스(LABS)');toggleMobMenu()"><i class="ti ti-flask"></i><span>랩스 (LABS)</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('CTI');toggleMobMenu()"><i class="ti ti-headset"></i><span>CTI</span></div>
@@ -1953,7 +1953,7 @@ function renderFilterChips(){
     {label:"B2B",part:"B2B 상위기업",multi:[]},
     {label:"상품 안내",part:"상품 안내",multi:[]},
     {label:"오류 해결방법",part:"",multi:["LMS 기능","ADMIN/뉴어드민"]},
-    {label:"업무 요청",part:"운영지원",multi:[]},
+    {label:"운영지원",part:"운영지원",multi:[]},
   ];
   document.getElementById("filterChips").innerHTML=chips.map(c=>{
     const isAll=c.part==="전체"&&!c.multi.length;
