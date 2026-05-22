@@ -1979,10 +1979,12 @@ function renderList(f,title,cnt){
     <button onclick="deleteSelectedEntries()" style="height:28px;padding:0 12px;background:#EF4444;border:none;border-radius:7px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px;margin-left:auto"><i class="ti ti-trash" style="font-size:13px"></i>선택 삭제</button>
   </div>`:"";
   const filterChipsEl=document.getElementById("filterChips");
-  if(isAdmin&&filterChipsEl){
+  if(filterChipsEl){
     let bar=document.getElementById("bulkDeleteBar");
-    if(!bar){bar=document.createElement("div");bar.id="bulkDeleteBar";filterChipsEl.parentNode.insertBefore(bar,filterChipsEl.nextSibling);}
-    bar.innerHTML=bulkBar;
+    if(isAdmin){
+      if(!bar){bar=document.createElement("div");bar.id="bulkDeleteBar";filterChipsEl.parentNode.insertBefore(bar,filterChipsEl.nextSibling);}
+      bar.innerHTML=bulkBar;
+    }else if(bar){bar.remove();}
   }
   document.getElementById("resultsList").innerHTML=f.map(e=>{
     const bm=bookmarks.includes(e.id);
