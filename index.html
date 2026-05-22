@@ -2016,6 +2016,16 @@ function renderList(f,title,cnt){
       </div>
     </div>`;
   }).join("");
+  const PDFBASE="https://young91822-debug.github.io/cs-knowledge";
+  let pdfBar="";
+  const mkBtn=(label,url)=>`<a href="${url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:9px;color:#6D28D9;font-size:12.5px;font-weight:600;text-decoration:none;font-family:var(--font)"><i class="ti ti-file-type-pdf" style="font-size:15px"></i>${label}</a>`;
+  if(filterSub==="CTI")pdfBar=mkBtn("CTI 매뉴얼 원본",`${PDFBASE}/cti_manual.pdf`)+mkBtn("CTI 상담유형 카테고리",`${PDFBASE}/cti_category.pdf`);
+  else if(filterSub==="LMS")pdfBar=mkBtn("LMS 매뉴얼 원본",`${PDFBASE}/lms_manual.pdf`);
+  if(pdfBar){
+    const wrap=`<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;padding:12px 14px;background:#fff;border:1px solid var(--border);border-radius:11px"><span style="font-size:12px;font-weight:600;color:var(--t2);margin-right:4px"><i class="ti ti-download" style="font-size:13px"></i> 원본 매뉴얼 다운로드</span>${pdfBar}</div>`;
+    const rl=document.getElementById("resultsList");
+    rl.innerHTML=wrap+rl.innerHTML;
+  }
 }
 function filterByIds(ids,title,cnt){
   const f=getSorted(entries.filter(e=>ids.includes(e.id)));
