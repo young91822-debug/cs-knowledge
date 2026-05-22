@@ -2141,7 +2141,7 @@ function openDetail(id){
     html+=`<div class="ds script full"><div class="ds-hd"><i class="ti ti-message-quote" style="font-size:12px"></i> 상담사 전달 멘트<button class="copy-btn" onclick="copyScript('${id}')">복사</button></div><div class="ds-body" id="sb-${id}">${esc(e.script)}</div></div>`;
   }
   if(!isB2B&&e.relatedManuals&&e.relatedManuals.trim()){
-    html+=`<div class="ds related full"><div class="ds-hd"><i class="ti ti-link" style="font-size:12px"></i> 관련 매뉴얼/FAQ</div><div class="ds-body">${e.relatedManuals.split("\n").filter(Boolean).map(m=>`<div class="related-link"><i class="ti ti-file-text"></i>${esc(m)}</div>`).join("")}</div></div>`;
+    html+=`<div class="ds related full"><div class="ds-hd"><i class="ti ti-link" style="font-size:12px"></i> 관련 매뉴얼/FAQ</div><div class="ds-body">${e.relatedManuals.split("\n").filter(Boolean).map(m=>{const u=m.match(/https?:\/\/\S+/);return u?`<a class="related-link" href="${u[0]}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;color:#7C3AED;text-decoration:none"><i class="ti ti-download"></i>${esc(m.replace(u[0],"").trim()||"PDF 다운로드")}</a>`:`<div class="related-link"><i class="ti ti-file-text"></i>${esc(m)}</div>`;}).join("")}</div></div>`;
   }
   if(e.caution&&e.caution.trim())html+=`<div class="ds caution full"><div class="ds-hd"><i class="ti ti-alert-triangle" style="font-size:12px"></i> 주의사항</div><div class="ds-body">${esc(e.caution)}</div></div>`;
   if(e.images&&e.images.length){
@@ -2647,15 +2647,15 @@ function logMissingSearch2(q){const key=q.toLowerCase();const found=missingSearc
 function downloadExcelTemplate(){
   if(!window.XLSX){alert("라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.");return;}
   const wb=XLSX.utils.book_new();
-  const headers=[["분류","제목","고객문의유형","필수확인질문","답변/해결방법","이관기준","주의사항","기업명(B2B)","카테고리(B2B)","상품명(상품안내)","하위분류(운영지원/CTI·LMS 등)"]];
+  const headers=[["분류","제목","고객문의유형","필수확인질문","답변/해결방법","이관기준","주의사항","기업명(B2B)","카테고리(B2B)","상품명(상품안내)","하위분류(운영지원/CTI·LMS 등)","관련매뉴얼/링크"]];
   const sample=[
-    ["B2B 상위기업","회원가입은 어떻게 하나요?","회원가입을 하고 싶어요","1. 본인명의 휴대폰 확인","사이트 우측 상단 회원가입 클릭","해당없음","","LH중앙공동주택관리지원센터","회원가입","",""],
-    ["B2C","수료증은 언제 출력 가능한가요?","수료증 출력하고 싶어요","수강 완료 여부 확인","마이페이지 > 수료증 > 출력","해당없음","","","","",""],
-    ["상품 안내","Business Review란?","비즈니스 리뷰가 뭔가요?","","휴넷CEO 비즈니스 인사이트 서비스","","","","","휴넷CEO",""],
-    ["운영지원","[CTI] 로그인 방법","CTI에 로그인하고 싶어요","","1. cti.hunet.co.kr 접속  2. 아이디=사번  3. 초기 비밀번호=사번","해당없음","초기 비밀번호는 사번과 동일","","","","CTI"],
+    ["B2B 상위기업","회원가입은 어떻게 하나요?","회원가입을 하고 싶어요","1. 본인명의 휴대폰 확인","사이트 우측 상단 회원가입 클릭","해당없음","","LH중앙공동주택관리지원센터","회원가입","","",""],
+    ["B2C","수료증은 언제 출력 가능한가요?","수료증 출력하고 싶어요","수강 완료 여부 확인","마이페이지 > 수료증 > 출력","해당없음","","","","","",""],
+    ["상품 안내","Business Review란?","비즈니스 리뷰가 뭔가요?","","휴넷CEO 비즈니스 인사이트 서비스","","","","","휴넷CEO","",""],
+    ["운영지원","[CTI] 로그인 방법","CTI에 로그인하고 싶어요","","1. cti.hunet.co.kr 접속  2. 아이디=사번  3. 초기 비밀번호=사번","해당없음","초기 비밀번호는 사번과 동일","","","","CTI","https://young91822-debug.github.io/cs-knowledge/cti_manual.pdf"],
   ];
   const ws=XLSX.utils.aoa_to_sheet([...headers,...sample]);
-  ws["!cols"]=[{wch:15},{wch:30},{wch:25},{wch:20},{wch:30},{wch:15},{wch:15},{wch:20},{wch:15},{wch:15},{wch:22}];
+  ws["!cols"]=[{wch:15},{wch:30},{wch:25},{wch:20},{wch:30},{wch:15},{wch:15},{wch:20},{wch:15},{wch:15},{wch:22},{wch:40}];
   XLSX.utils.book_append_sheet(wb,ws,"지식창고양식");
   XLSX.writeFile(wb,"cs지식창고_업로드양식.xlsx");
 }
@@ -2698,6 +2698,7 @@ function importExcelData(){
       caution:String(r[6]||"").trim(),company:String(r[7]||"").trim(),companyCat:String(r[8]||"").trim(),
       productName:String(r[9]||"").trim(),productSection:"FAQ",
       opsSub:part==="운영지원"?sub:"", lmsCat:part==="LMS 기능"?sub:"", adminSub:part==="ADMIN/뉴어드민"?sub:"",
+      relatedManuals:String(r[11]||"").trim(),
       status:"active",updatedBy:currentUser?.id||"",updatedAt:today(),createdAt:today(),views:0,history:[],viewers:[]};
     if(entry.title)entries=[entry,...entries];
   });
