@@ -544,6 +544,7 @@ body.is-admin .admin-only.block{display:block!important}
       </div>
       <button class="tb-btn primary" onclick="doSearch()"><i class="ti ti-search" style="font-size:13px"></i>검색</button>
       <div class="topbar-acts">
+        <label class="tb-btn primary" id="topImportBtn" style="display:none;cursor:pointer"><i class="ti ti-database-import" style="font-size:13px"></i>데이터 불러오기<input type="file" accept=".json" style="display:none" onchange="importJSONFromGuide(this)"></label>
         <button class="tb-btn" onclick="openRequestModal()"><i class="ti ti-message-plus" style="font-size:13px"></i>지식 요청</button>
         <button class="tb-icon" title="즐겨찾기" onclick="setView('bookmarks')"><i class="ti ti-bookmark"></i></button>
         <button class="tb-icon" title="최근 문서" onclick="setView('recent')"><i class="ti ti-clock"></i></button>
@@ -561,10 +562,6 @@ body.is-admin .admin-only.block{display:block!important}
             <p>검색창에 문의 내용을 입력하면 바로 처리 가이드를 찾을 수 있어요.</p>
           </div>
           <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
-            <label id="homeImportBtn" style="display:none;align-items:center;gap:6px;height:36px;padding:0 14px;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:10px;color:#6D28D9;font-size:12.5px;font-weight:600;cursor:pointer">
-              <i class="ti ti-database-import" style="font-size:14px"></i>데이터 불러오기
-              <input type="file" accept=".json" style="display:none" onchange="importJSONFromGuide(this)">
-            </label>
             <div style="text-align:right" id="homeDateDisplay">
               <div style="font-size:16px;font-weight:700;color:var(--t1);line-height:1.4" id="homeDateLine1"></div>
               <div style="font-size:16px;font-weight:700;color:#7C3AED;line-height:1.4" id="homeDateLine2"></div>
@@ -1151,6 +1148,8 @@ function applyRoleUI(){
     if(mu)mu.textContent=currentUser.id;
     if(mr)mr.textContent=isAdmin?"관리자":"상담원";
   }else{av.textContent="?";un.textContent="로그인 전";ur.textContent="";}
+  const tib=document.getElementById("topImportBtn");
+  if(tib)tib.style.display=(currentUser&&!isAdmin)?"flex":"none";
   if(currentUser){
     renderHome();
   }
@@ -1843,7 +1842,7 @@ function logMissingSearch(q){const key=q.toLowerCase();const found=missingSearch
 function renderHome(){
   document.getElementById("homeGreeting").textContent=getGreeting();
   // 오늘 날짜 표시
-  const importBtn=document.getElementById("homeImportBtn");
+  const importBtn=document.getElementById("topImportBtn");
   if(importBtn)importBtn.style.display=(currentUser&&currentUser.role!=="admin")?"flex":"none";
   const now=new Date();
   const days=["일","월","화","수","목","금","토"];
