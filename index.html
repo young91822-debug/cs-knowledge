@@ -884,6 +884,7 @@ body.is-admin .admin-only.block{display:block!important}
         <input id="adminKnowledgeQ" placeholder="제목, 기업명, 문의 표현 검색" oninput="renderAdminKnowledge()">
         <select id="adminPartFilter" onchange="renderAdminKnowledge()"></select>
         <span class="spacer"></span>
+        <button class="admin-secondary" onclick="cleanupBadImport()" style="border-color:#FCA5A5;color:#DC2626"><i class="ti ti-eraser" style="font-size:13px"></i>잘못 들어온 항목 정리</button>
         <button class="admin-primary" onclick="openAdd()"><i class="ti ti-plus" style="font-size:13px"></i>새 항목 추가</button>
       </div>
       <p class="admin-note">관리자 페이지에서 수정·삭제하면 즉시 반영됩니다.</p>
@@ -2836,6 +2837,19 @@ function deleteNotice(id){
   saveAll();renderAdminNotices();
 }
 function initAdminFilters(){const sel=document.getElementById("adminPartFilter");if(!sel||sel.dataset.ready)return;sel.innerHTML='<option value="전체">전체 분류</option>'+PARTS.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');sel.dataset.ready="1";}
+function cleanupBadImport(){
+  if(!requireAdmin())return;
+  const bad=entries.filter(e=>{
+    const t=(e.title||"").trim();
+    return t==="운영지원"||t==="B2C"||t==="B2B 상위기업"||t==="상품 안내"||t==="오류 해결방법"||t==="LMS 기능"||t==="ADMIN/뉴어드민";
+  });
+  if(!bad.length){alert("정리할 항목이 없습니다. (제목이 분류명으로 잘못 들어온 항목이 없어요)");return;}
+  if(!confirm(`제목이 분류명으로 잘못 들어온 항목 ${bad.length}건을 삭제할까요?\n(엑셀이 칸이 밀려 들어간 항목들입니다)`))return;
+  const ids=new Set(bad.map(e=>e.id));
+  entries=entries.filter(e=>!ids.has(e.id));
+  saveAll();renderAdminKnowledge();
+  alert(`${bad.length}건을 정리했습니다. 이제 새 HTML이 반영된 상태에서 엑셀을 다시 올려주세요.`);
+}
 function renderAdminKnowledge(){const box=document.getElementById("adminKnowledgeList");if(!box)return;const q=(document.getElementById("adminKnowledgeQ")?.value||"").trim().toLowerCase();const part=document.getElementById("adminPartFilter")?.value||"전체";const list=entries.filter(e=>{if(part!=="전체"&&e.part!==part)return false;if(!q)return true;return["title","company","customerQ","steps","caution"].some(k=>(e[k]||"").toLowerCase().includes(q));});let rows=list.map(e=>{const sub=e.company||e.productType||e.lmsCat||e.adminSub||e.opsSub||"-";return`<tr><td class="title-cell" title="${esc(e.title)}">${esc(e.title)}</td><td>${esc(e.part||"")}</td><td>${esc(sub)}</td><td>${esc(e.updatedAt||"")}</td><td>${esc(e.updatedBy||"")}</td><td><span class="${statusClass(e.status)}">${statusLabel(e.status)}</span></td><td>${(e.views||0).toLocaleString()}</td><td><div class="table-actions"><button class="table-btn" onclick="openDetail('${e.id}');closeAdmin()">보기</button><button class="table-btn" onclick="openEdit('${e.id}')">수정</button><button class="table-btn del" onclick="doDelete('${e.id}')">삭제</button></div></td></tr>`;}).join("");if(!list.length)rows=`<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:28px">관리할 항목이 없습니다</td></tr>`;box.innerHTML=`<table class="admin-table"><thead><tr><th>제목</th><th>분류</th><th>세부</th><th>수정일</th><th>수정자</th><th>상태</th><th>조회</th><th style="text-align:right">관리</th></tr></thead><tbody>${rows}</tbody></table>`;}
 function renderAdminUsers(){const box=document.getElementById("adminUserList");if(!box)return;box.innerHTML=`<table class="admin-table"><thead><tr><th>아이디</th><th>이름</th><th>권한</th><th>생성일</th><th style="text-align:right">관리</th></tr></thead><tbody>${users.map(u=>`<tr><td class="title-cell">${esc(u.id)}</td><td>${esc(u.name||u.id)}</td><td>${u.role==="admin"?"관리자":"상담원"}</td><td>${esc(u.createdAt||"")}</td><td><div class="table-actions"><button class="table-btn del" onclick="deleteUser('${u.id}')">삭제</button></div></td></tr>`).join("")}</tbody></table>`;}
 function saveUser(){if(!requireAdmin())return;const id=document.getElementById("newUserId").value.trim();const name=document.getElementById("newUserName").value.trim();const pw=document.getElementById("newUserPw").value;const role=document.getElementById("newUserRole").value;if(!id||!pw){alert("아이디와 비밀번호를 입력해주세요.");return;}if(users.some(u=>u.id===id)){alert("이미 존재하는 아이디입니다.");return;}users.push({id,pw,role,name:name||id,createdAt:today()});saveAll();document.getElementById("newUserId").value="";document.getElementById("newUserName").value="";document.getElementById("newUserPw").value="";renderAdminUsers();}
