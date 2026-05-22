@@ -1085,7 +1085,17 @@ function loadData(){
     }
   }catch(e){console.error("Load error:",e);}
   if(!Array.isArray(users)||!users.length){
-    users=[{id:"admin",pw:"admin123",role:"admin",name:"관리자",createdAt:today()},{id:"counselor",pw:"cs123",role:"counselor",name:"상담원",createdAt:today()}];
+    users=[
+      {id:"admin",pw:"admin123",role:"admin",name:"관리자",createdAt:today()},
+      {id:"counselor",pw:"cs123",role:"counselor",name:"상담원",createdAt:today()},
+      {id:"201978",pw:"201978",role:"counselor",name:"양하영",createdAt:today()},
+      {id:"2022057",pw:"2022057",role:"counselor",name:"최태준",createdAt:today()},
+      {id:"201990",pw:"201990",role:"counselor",name:"박빛나",createdAt:today()},
+      {id:"2026012",pw:"2026012",role:"counselor",name:"김다영",createdAt:today()},
+      {id:"402514",pw:"402514",role:"counselor",name:"윤지현",createdAt:today()},
+      {id:"402531",pw:"402531",role:"counselor",name:"허형석",createdAt:today()},
+      {id:"402510",pw:"402510",role:"counselor",name:"김세영",createdAt:today()},
+    ];
   }
   try{bookmarks=JSON.parse(localStorage.getItem(BK)||"[]")}catch{bookmarks=[];}
   try{recentViewed=JSON.parse(localStorage.getItem(RK)||"[]")}catch{recentViewed=[];}
