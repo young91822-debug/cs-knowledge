@@ -511,6 +511,7 @@ body.is-admin .admin-only.block{display:block!important}
           <div class="sb-sub-item" data-sub="에듀매니저" onclick="filterOpsSub('에듀매니저')"><i class="ti ti-user-cog"></i><span>에듀매니저</span></div>
           <div class="sb-sub-item" data-sub="랩스(LABS)" onclick="filterOpsSub('랩스(LABS)')"><i class="ti ti-flask"></i><span>랩스 (LABS)</span></div>
           <div class="sb-sub-item" data-sub="CTI" onclick="filterOpsSub('CTI')"><i class="ti ti-headset"></i><span>CTI</span></div>
+          <div class="sb-sub-item" data-sub="LMS" onclick="filterOpsSub('LMS')"><i class="ti ti-school"></i><span>LMS</span></div>
           <div class="sb-sub-item" data-sub="원격 지원" onclick="filterOpsSub('원격 지원')"><i class="ti ti-device-desktop"></i><span>원격 지원</span></div>
           <div class="sb-sub-item" data-sub="앱 설치 지원" onclick="filterOpsSub('앱 설치 지원')"><i class="ti ti-device-mobile"></i><span>앱 설치 지원</span></div>
           <div class="sb-sub-item" data-sub="업무 요청·이관" onclick="filterOpsSub('업무 요청·이관')"><i class="ti ti-send"></i><span>업무 요청·이관</span></div>
@@ -833,6 +834,7 @@ body.is-admin .admin-only.block{display:block!important}
     <div class="sb-sub-item" onclick="filterOpsSub('에듀매니저');toggleMobMenu()"><i class="ti ti-user-cog"></i><span>에듀매니저</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('랩스(LABS)');toggleMobMenu()"><i class="ti ti-flask"></i><span>랩스 (LABS)</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('CTI');toggleMobMenu()"><i class="ti ti-headset"></i><span>CTI</span></div>
+    <div class="sb-sub-item" onclick="filterOpsSub('LMS');toggleMobMenu()"><i class="ti ti-school"></i><span>LMS</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('원격 지원');toggleMobMenu()"><i class="ti ti-device-desktop"></i><span>원격 지원</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('앱 설치 지원');toggleMobMenu()"><i class="ti ti-device-mobile"></i><span>앱 설치 지원</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('업무 요청·이관');toggleMobMenu()"><i class="ti ti-send"></i><span>업무 요청·이관</span></div>
@@ -1059,7 +1061,7 @@ function renderLocalNotices(){
 }
 /* ─── 상수 ─── */
 const PARTS=["B2B 상위기업","B2C","상품 안내","LMS 기능","ADMIN/뉴어드민","운영지원"];
-const B2B_COS=[],B2C_PRODUCTS=[],LMS_CATS=[],ADMIN_SUBS=[],OPS_SUBS=["에듀매니저","랩스(LABS)","CTI","원격 지원","앱 설치 지원","업무 요청·이관"];
+const B2B_COS=[],B2C_PRODUCTS=[],LMS_CATS=[],ADMIN_SUBS=[],OPS_SUBS=["에듀매니저","랩스(LABS)","CTI","LMS","원격 지원","앱 설치 지원","업무 요청·이관"];
 let notices=[];
 
 /* ─── State ─── */
@@ -2645,15 +2647,15 @@ function logMissingSearch2(q){const key=q.toLowerCase();const found=missingSearc
 function downloadExcelTemplate(){
   if(!window.XLSX){alert("라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.");return;}
   const wb=XLSX.utils.book_new();
-  const headers=[["분류","제목","고객문의유형","필수확인질문","답변/해결방법","이관기준","주의사항","기업명(B2B)","카테고리(B2B)","상품명(상품안내)"]];
+  const headers=[["분류","제목","고객문의유형","필수확인질문","답변/해결방법","이관기준","주의사항","기업명(B2B)","카테고리(B2B)","상품명(상품안내)","하위분류(운영지원/CTI·LMS 등)"]];
   const sample=[
-    ["B2B 상위기업","회원가입은 어떻게 하나요?","회원가입을 하고 싶어요","1. 본인명의 휴대폰 확인","사이트 우측 상단 회원가입 클릭","해당없음","","LH중앙공동주택관리지원센터","회원가입",""],
-    ["B2C","수료증은 언제 출력 가능한가요?","수료증 출력하고 싶어요","수강 완료 여부 확인","마이페이지 > 수료증 > 출력","해당없음","","","",""],
-    ["상품 안내","Business Review란?","비즈니스 리뷰가 뭔가요?","","휴넷CEO 비즈니스 인사이트 서비스","","","","","휴넷CEO"],
-    ["오류 해결방법","결제창이 뜨지 않아요","결제 버튼 눌러도 반응 없어요","팝업 차단 여부 확인","브라우저 팝업 차단 해제 후 재시도","해당없음","Chrome 권장","","",""],
+    ["B2B 상위기업","회원가입은 어떻게 하나요?","회원가입을 하고 싶어요","1. 본인명의 휴대폰 확인","사이트 우측 상단 회원가입 클릭","해당없음","","LH중앙공동주택관리지원센터","회원가입","",""],
+    ["B2C","수료증은 언제 출력 가능한가요?","수료증 출력하고 싶어요","수강 완료 여부 확인","마이페이지 > 수료증 > 출력","해당없음","","","","",""],
+    ["상품 안내","Business Review란?","비즈니스 리뷰가 뭔가요?","","휴넷CEO 비즈니스 인사이트 서비스","","","","","휴넷CEO",""],
+    ["운영지원","[CTI] 로그인 방법","CTI에 로그인하고 싶어요","","1. cti.hunet.co.kr 접속  2. 아이디=사번  3. 초기 비밀번호=사번","해당없음","초기 비밀번호는 사번과 동일","","","","CTI"],
   ];
   const ws=XLSX.utils.aoa_to_sheet([...headers,...sample]);
-  ws["!cols"]=[{wch:15},{wch:30},{wch:25},{wch:20},{wch:30},{wch:15},{wch:15},{wch:20},{wch:15},{wch:15}];
+  ws["!cols"]=[{wch:15},{wch:30},{wch:25},{wch:20},{wch:30},{wch:15},{wch:15},{wch:20},{wch:15},{wch:15},{wch:22}];
   XLSX.utils.book_append_sheet(wb,ws,"지식창고양식");
   XLSX.writeFile(wb,"cs지식창고_업로드양식.xlsx");
 }
@@ -2673,8 +2675,8 @@ function handleExcelUpload(input){
         <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
           <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:8px">미리보기 (${dataRows.length}건 발견)</div>
           <table style="width:100%;font-size:11.5px;border-collapse:collapse">
-            <thead><tr style="background:#F8F7FF">${["분류","제목","고객문의","답변/해결방법","기업명","상품명"].map(h=>`<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);color:var(--t2)">${h}</th>`).join("")}</tr></thead>
-            <tbody>${dataRows.slice(0,5).map(r=>`<tr>${[r[0],r[1],r[2],r[4],r[7],r[9]].map(v=>`<td style="padding:6px 8px;border-bottom:1px solid #F3F5F9;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${String(v||"").slice(0,30)}</td>`).join("")}</tr>`).join("")}</tbody>
+            <thead><tr style="background:#F8F7FF">${["분류","제목","고객문의","답변/해결방법","하위분류","주의사항"].map(h=>`<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);color:var(--t2)">${h}</th>`).join("")}</tr></thead>
+            <tbody>${dataRows.slice(0,5).map(r=>`<tr>${[r[0],r[1],r[2],r[4],r[10],r[6]].map(v=>`<td style="padding:6px 8px;border-bottom:1px solid #F3F5F9;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${String(v||"").slice(0,30)}</td>`).join("")}</tr>`).join("")}</tbody>
           </table>
           ${dataRows.length>5?`<div style="font-size:11px;color:var(--t3);padding:8px 0">... 외 ${dataRows.length-5}건</div>`:""}
         </div>
@@ -2690,10 +2692,12 @@ function importExcelData(){
   const PARTS=["B2B 상위기업","B2C","상품 안내","오류 해결방법","LMS 기능","ADMIN/뉴어드민","운영지원"];
   rows.forEach(r=>{
     const part=PARTS.includes(String(r[0]).trim())?String(r[0]).trim():"B2C";
+    const sub=String(r[10]||"").trim();
     const entry={id:uid(),part,title:String(r[1]||"").trim(),customerQ:String(r[2]||"").trim(),
       checkQ:String(r[3]||"").trim(),steps:String(r[4]||"").trim(),escalation:String(r[5]||"").trim(),
       caution:String(r[6]||"").trim(),company:String(r[7]||"").trim(),companyCat:String(r[8]||"").trim(),
       productName:String(r[9]||"").trim(),productSection:"FAQ",
+      opsSub:part==="운영지원"?sub:"", lmsCat:part==="LMS 기능"?sub:"", adminSub:part==="ADMIN/뉴어드민"?sub:"",
       status:"active",updatedBy:currentUser?.id||"",updatedAt:today(),createdAt:today(),views:0,history:[],viewers:[]};
     if(entry.title)entries=[entry,...entries];
   });
