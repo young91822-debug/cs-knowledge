@@ -976,7 +976,7 @@ async function loadTodaySchedule(){
       if(!data)return`<span style="color:var(--t3);font-size:12px">일정 없음</span>`;
       const absent=data.absentInfo||[];
       const isMyday=a=>a.type==="마이데이"||a.type==="4일제";
-      const yeoncha=absent.filter(a=>!isMyday(a)&&a.type==="연차").map(a=>a.name);
+      const yeoncha=absent.filter(a=>!isMyday(a)).map(a=>a.name);
       const myday=absent.filter(isMyday).map(a=>a.name);
       const early=data.early||"";
       const chat=data.chat||"";
