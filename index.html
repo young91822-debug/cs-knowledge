@@ -1158,7 +1158,14 @@ function applyRoleUI(){
   }
 }
 function restoreSession(){const sid=localStorage.getItem(SESSION);currentUser=users.find(u=>u.id===sid)||null;applyRoleUI();}
-function login(ev){if(ev)ev.preventDefault();const id=document.getElementById("loginId").value.trim();const pw=document.getElementById("loginPw").value;let u=users.find(x=>x.id===id&&x.pw===pw);if(!u&&id==="admin"&&pw==="admin123"){u={id:"admin",pw:"admin123",role:"admin",name:"관리자",createdAt:today()};users=[u,...users.filter(x=>x.id!=="admin")];saveAll();}if(!u){document.getElementById("loginMsg").textContent="아이디 또는 비밀번호를 확인해주세요.";return;}currentUser={id:u.id,role:u.role,name:u.name};localStorage.setItem(SESSION,u.id);document.getElementById("loginPw").value="";applyRoleUI();checkShowImportGuide();}
+const ACCESS_LOG_URL="https://script.google.com/macros/s/AKfycbztwxmlmI_OozaiPccuKJAX6_G-moR_cUaSo9lkRCUTp4YqNMfo4D3ItDwcxhRPPwhWBw/exec";
+function sendAccessLog(u){
+  try{
+    fetch(ACCESS_LOG_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({id:u.id||"",name:u.name||"",role:u.role||""})});
+  }catch(e){}
+}
+function login(ev){if(ev)ev.preventDefault();const id=document.getElementById("loginId").value.trim();const pw=document.getElementById("loginPw").value;let u=users.find(x=>x.id===id&&x.pw===pw);if(!u&&id==="admin"&&pw==="admin123"){u={id:"admin",pw:"admin123",role:"admin",name:"관리자",createdAt:today()};users=[u,...users.filter(x=>x.id!=="admin")];saveAll();}if(!u){document.getElementById("loginMsg").textContent="아이디 또는 비밀번호를 확인해주세요.";return;}currentUser={id:u.id,role:u.role,name:u.name};localStorage.setItem(SESSION,u.id);document.getElementById("loginPw").value="";sendAccessLog(currentUser);applyRoleUI();checkShowImportGuide();}
 function logout(){closeAdmin();currentUser=null;localStorage.removeItem(SESSION);applyRoleUI();}
 function requireAdmin(){if(currentUser&&currentUser.role==="admin")return true;alert("관리자만 사용할 수 있는 기능입니다.");return false;}
 
