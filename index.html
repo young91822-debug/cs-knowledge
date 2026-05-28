@@ -681,23 +681,17 @@ body.is-admin .admin-only.block{display:block!important}
           <span class="list-title">마이스페이스</span>
           <button class="hd-btn-home" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
-        <div style="margin-bottom:18px">
+        <div style="margin-bottom:24px">
           <div style="font-size:12px;font-weight:700;color:#D97706;margin-bottom:10px;display:flex;align-items:center;gap:5px"><i class="ti ti-notes" style="font-size:14px"></i>나의 메모 <span id="memoStatus" style="font-weight:400;color:var(--t3);font-size:11px"></span></div>
-          <textarea id="myMemo" placeholder="여기에 자유롭게 메모하세요. 저장하면 어느 PC에서 로그인해도 보여요." style="width:100%;min-height:140px;box-sizing:border-box;padding:12px 14px;border:1px solid var(--border);border-radius:11px;font-family:var(--font);font-size:13px;line-height:1.6;color:var(--t1);resize:vertical;background:#FFFDF7"></textarea>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-            <button onclick="saveMyMemo()" id="memoSaveBtn" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 16px;background:var(--p);color:#fff;border:none;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font)"><i class="ti ti-device-floppy" style="font-size:14px"></i>저장</button>
-            <span id="memoSavedMsg" style="font-size:11.5px;color:#059669;display:none">✓ 저장되었습니다</span>
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <textarea id="myMemo" placeholder="메모를 입력하고 등록을 누르세요. 등록할 때마다 아래에 쌓여요." style="flex:1;min-height:60px;box-sizing:border-box;padding:12px 14px;border:1px solid var(--border);border-radius:11px;font-family:var(--font);font-size:13px;line-height:1.6;color:var(--t1);resize:vertical;background:#FFFDF7" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))addMemo()"></textarea>
+            <button onclick="addMemo()" id="memoSaveBtn" style="display:inline-flex;align-items:center;gap:6px;height:60px;padding:0 18px;background:var(--p);color:#fff;border:none;border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);flex-shrink:0"><i class="ti ti-plus" style="font-size:15px"></i>등록</button>
           </div>
+          <div id="myMemoList" style="margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-          <div>
-            <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:10px;display:flex;align-items:center;gap:5px"><i class="ti ti-star" style="font-size:14px"></i>즐겨찾기 <span id="bmCnt" style="font-weight:400;color:var(--t3)"></span></div>
-            <div id="myBmList" class="r-list"></div>
-          </div>
-          <div>
-            <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:5px"><i class="ti ti-history" style="font-size:14px"></i>최근 본 문서 <span id="rvCnt" style="font-weight:400;color:var(--t3)"></span></div>
-            <div id="myRvList" class="r-list"></div>
-          </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:10px;display:flex;align-items:center;gap:5px"><i class="ti ti-star" style="font-size:14px"></i>즐겨찾기 <span id="bmCnt" style="font-weight:400;color:var(--t3)"></span></div>
+          <div id="myBmList" class="r-list"></div>
         </div>
       </div>
 
@@ -1276,39 +1270,53 @@ function confirmBulkImport(){
 function openMySpace(){
   curView="myspace";showView("viewMySpace");setSbView("myspace");
   const bmItems=bookmarks.map(id=>entries.find(e=>e.id===id)).filter(Boolean);
-  const rvItems=recentViewed.map(id=>entries.find(e=>e.id===id)).filter(Boolean);
   document.getElementById("bmCnt").textContent=`${bmItems.length}건`;
-  document.getElementById("rvCnt").textContent=`${rvItems.length}건`;
-  const cardHtml=(list)=>list.length?list.map(e=>`
+  document.getElementById("myBmList").innerHTML=bmItems.length?bmItems.map(e=>`
     <div class="r-card" onclick="openDetail('${e.id}')">
       <div class="r-card-top"><span class="r-card-title">${esc(e.title)}</span><button class="r-star on" onclick="toggleBM(event,'${e.id}')">★</button></div>
       <div class="r-card-tags"><span class="r-tag">${esc(e.part)}</span>${e.company?`<span class="r-tag co">${esc(e.company)}</span>`:""}</div>
       <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${e.updatedAt||""}</span><span><i class="ti ti-eye"></i>${e.views||0}회</span></div>
-    </div>`).join(""):`<div class="empty-state" style="padding:32px 0"><i class="ti ti-star-off"></i><p style="font-size:12px">없습니다</p></div>`;
-  document.getElementById("myBmList").innerHTML=cardHtml(bmItems);
-  document.getElementById("myRvList").innerHTML=cardHtml(rvItems);
-  loadMyMemo();
+    </div>`).join(""):`<div class="empty-state" style="padding:32px 0"><i class="ti ti-star-off"></i><p style="font-size:12px">즐겨찾기한 문서가 없습니다</p></div>`;
+  loadMemos();
 }
-function loadMyMemo(){
-  const ta=document.getElementById("myMemo");const st=document.getElementById("memoStatus");
-  if(!ta||!currentUser)return;
-  st.textContent="불러오는 중...";ta.value="";
-  fetch(`${ACCESS_LOG_URL}?action=getMemo&id=${encodeURIComponent(currentUser.id)}`)
+function loadMemos(){
+  const st=document.getElementById("memoStatus");const box=document.getElementById("myMemoList");
+  if(!box||!currentUser)return;
+  st.textContent="불러오는 중...";
+  fetch(`${ACCESS_LOG_URL}?action=getMemos&id=${encodeURIComponent(currentUser.id)}`)
     .then(r=>r.json())
-    .then(d=>{if(d&&d.ok){ta.value=d.memo||"";st.textContent=ta.value?"":"(아직 메모 없음)";}else{st.textContent="";}})
-    .catch(()=>{st.textContent="(불러오기 실패 - 네트워크 확인)";});
+    .then(d=>{st.textContent="";renderMemos((d&&d.ok&&Array.isArray(d.memos))?d.memos:[]);})
+    .catch(()=>{st.textContent="(불러오기 실패 - 네트워크 확인)";renderMemos([]);});
 }
-function saveMyMemo(){
-  const ta=document.getElementById("myMemo");const btn=document.getElementById("memoSaveBtn");const msg=document.getElementById("memoSavedMsg");
+function renderMemos(list){
+  const box=document.getElementById("myMemoList");if(!box)return;
+  if(!list.length){box.innerHTML=`<div style="padding:18px;text-align:center;color:var(--t3);font-size:12px;background:#FAFAFE;border:1px dashed var(--border);border-radius:11px">아직 메모가 없어요. 위에 입력하고 등록을 눌러보세요.</div>`;return;}
+  box.innerHTML=list.map(m=>`
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;background:#FFFDF7;border:1px solid var(--border);border-radius:11px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;color:var(--t1);line-height:1.6;white-space:pre-wrap;word-break:break-word">${esc(m.memo)}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:6px"><i class="ti ti-clock" style="font-size:11px"></i> ${esc(m.time||"")}</div>
+      </div>
+      <button onclick="deleteMemo('${esc(m.memoId)}')" title="삭제" style="width:26px;height:26px;flex-shrink:0;background:none;border:1px solid var(--border);border-radius:7px;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center" onmouseover="this.style.borderColor='#FECACA';this.style.color='#DC2626'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--t3)'"><i class="ti ti-x" style="font-size:13px"></i></button>
+    </div>`).join("");
+}
+function addMemo(){
+  const ta=document.getElementById("myMemo");const btn=document.getElementById("memoSaveBtn");const st=document.getElementById("memoStatus");
   if(!ta||!currentUser)return;
-  btn.disabled=true;btn.style.opacity="0.6";
+  const text=ta.value.trim();if(!text){ta.focus();return;}
+  const memoId=Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  btn.disabled=true;btn.style.opacity="0.6";st.textContent="등록 중...";
   fetch(ACCESS_LOG_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify({action:"saveMemo",id:currentUser.id,name:currentUser.name,memo:ta.value})})
-    .finally(()=>{
-      btn.disabled=false;btn.style.opacity="1";
-      msg.style.display="inline";setTimeout(()=>{msg.style.display="none";},2500);
-      document.getElementById("memoStatus").textContent="";
-    });
+    body:JSON.stringify({action:"addMemo",id:currentUser.id,name:currentUser.name,memo:text,memoId})})
+    .finally(()=>{ta.value="";setTimeout(()=>{btn.disabled=false;btn.style.opacity="1";loadMemos();},900);});
+}
+function deleteMemo(memoId){
+  if(!currentUser)return;
+  if(!confirm("이 메모를 삭제할까요?"))return;
+  document.getElementById("memoStatus").textContent="삭제 중...";
+  fetch(ACCESS_LOG_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify({action:"deleteMemo",id:currentUser.id,memoId})})
+    .finally(()=>{setTimeout(loadMemos,900);});
 }
 function openSlackModal(){
   const links=[
