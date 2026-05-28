@@ -1351,7 +1351,7 @@ function openJiraModal(){
   document.getElementById("jiraModal").style.display="flex";
 }
 function openQuickModal(file,title,icon){
-  window.open(`https://young91822-debug.github.io/cs-knowledge/${file}`,"_blank");
+  window.open(`https://hunet-cs.github.io/cs-knowledge/${file}`,"_blank");
 }
 function downloadAllEntries(type){
   if(!window.XLSX){alert("라이브러리 로딩 중입니다.");return;}
@@ -2024,7 +2024,7 @@ function renderList(f,title,cnt){
       </div>
     </div>`;
   }).join("");
-  const PDFBASE="https://young91822-debug.github.io/cs-knowledge";
+  const PDFBASE="https://hunet-cs.github.io/cs-knowledge";
   let pdfBar="";
   const mkBtn=(label,url)=>`<a href="${url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:9px;color:#6D28D9;font-size:12.5px;font-weight:600;text-decoration:none;font-family:var(--font)"><i class="ti ti-file-type-pdf" style="font-size:15px"></i>${label}</a>`;
   if(filterSub==="CTI")pdfBar=mkBtn("CTI 매뉴얼 원본",`${PDFBASE}/cti_manual.pdf`)+mkBtn("CTI 상담유형 카테고리",`${PDFBASE}/cti_category.pdf`);
@@ -2671,7 +2671,7 @@ function downloadExcelTemplate(){
     ["B2B 상위기업","회원가입은 어떻게 하나요?","회원가입을 하고 싶어요","1. 본인명의 휴대폰 확인","사이트 우측 상단 회원가입 클릭","해당없음","","LH중앙공동주택관리지원센터","회원가입","","",""],
     ["B2C","수료증은 언제 출력 가능한가요?","수료증 출력하고 싶어요","수강 완료 여부 확인","마이페이지 > 수료증 > 출력","해당없음","","","","","",""],
     ["상품 안내","Business Review란?","비즈니스 리뷰가 뭔가요?","","휴넷CEO 비즈니스 인사이트 서비스","","","","","휴넷CEO","",""],
-    ["운영지원","[CTI] 로그인 방법","CTI에 로그인하고 싶어요","","1. cti.hunet.co.kr 접속  2. 아이디=사번  3. 초기 비밀번호=사번","해당없음","초기 비밀번호는 사번과 동일","","","","CTI","https://young91822-debug.github.io/cs-knowledge/cti_manual.pdf"],
+    ["운영지원","[CTI] 로그인 방법","CTI에 로그인하고 싶어요","","1. cti.hunet.co.kr 접속  2. 아이디=사번  3. 초기 비밀번호=사번","해당없음","초기 비밀번호는 사번과 동일","","","","CTI","https://hunet-cs.github.io/cs-knowledge/cti_manual.pdf"],
   ];
   const ws=XLSX.utils.aoa_to_sheet([...headers,...sample]);
   ws["!cols"]=[{wch:15},{wch:30},{wch:25},{wch:20},{wch:30},{wch:15},{wch:15},{wch:20},{wch:15},{wch:15},{wch:22},{wch:40}];
