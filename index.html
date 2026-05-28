@@ -681,6 +681,14 @@ body.is-admin .admin-only.block{display:block!important}
           <span class="list-title">마이스페이스</span>
           <button class="hd-btn-home" onclick="goHome()"><i class="ti ti-home-2" style="font-size:13px"></i>홈</button>
         </div>
+        <div style="margin-bottom:18px">
+          <div style="font-size:12px;font-weight:700;color:#D97706;margin-bottom:10px;display:flex;align-items:center;gap:5px"><i class="ti ti-notes" style="font-size:14px"></i>나의 메모 <span id="memoStatus" style="font-weight:400;color:var(--t3);font-size:11px"></span></div>
+          <textarea id="myMemo" placeholder="여기에 자유롭게 메모하세요. 저장하면 어느 PC에서 로그인해도 보여요." style="width:100%;min-height:140px;box-sizing:border-box;padding:12px 14px;border:1px solid var(--border);border-radius:11px;font-family:var(--font);font-size:13px;line-height:1.6;color:var(--t1);resize:vertical;background:#FFFDF7"></textarea>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+            <button onclick="saveMyMemo()" id="memoSaveBtn" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 16px;background:var(--p);color:#fff;border:none;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font)"><i class="ti ti-device-floppy" style="font-size:14px"></i>저장</button>
+            <span id="memoSavedMsg" style="font-size:11.5px;color:#059669;display:none">✓ 저장되었습니다</span>
+          </div>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div>
             <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:10px;display:flex;align-items:center;gap:5px"><i class="ti ti-star" style="font-size:14px"></i>즐겨찾기 <span id="bmCnt" style="font-weight:400;color:var(--t3)"></span></div>
@@ -1279,6 +1287,28 @@ function openMySpace(){
     </div>`).join(""):`<div class="empty-state" style="padding:32px 0"><i class="ti ti-star-off"></i><p style="font-size:12px">없습니다</p></div>`;
   document.getElementById("myBmList").innerHTML=cardHtml(bmItems);
   document.getElementById("myRvList").innerHTML=cardHtml(rvItems);
+  loadMyMemo();
+}
+function loadMyMemo(){
+  const ta=document.getElementById("myMemo");const st=document.getElementById("memoStatus");
+  if(!ta||!currentUser)return;
+  st.textContent="불러오는 중...";ta.value="";
+  fetch(`${ACCESS_LOG_URL}?action=getMemo&id=${encodeURIComponent(currentUser.id)}`)
+    .then(r=>r.json())
+    .then(d=>{if(d&&d.ok){ta.value=d.memo||"";st.textContent=ta.value?"":"(아직 메모 없음)";}else{st.textContent="";}})
+    .catch(()=>{st.textContent="(불러오기 실패 - 네트워크 확인)";});
+}
+function saveMyMemo(){
+  const ta=document.getElementById("myMemo");const btn=document.getElementById("memoSaveBtn");const msg=document.getElementById("memoSavedMsg");
+  if(!ta||!currentUser)return;
+  btn.disabled=true;btn.style.opacity="0.6";
+  fetch(ACCESS_LOG_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify({action:"saveMemo",id:currentUser.id,name:currentUser.name,memo:ta.value})})
+    .finally(()=>{
+      btn.disabled=false;btn.style.opacity="1";
+      msg.style.display="inline";setTimeout(()=>{msg.style.display="none";},2500);
+      document.getElementById("memoStatus").textContent="";
+    });
 }
 function openSlackModal(){
   const links=[
