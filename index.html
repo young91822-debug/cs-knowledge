@@ -512,6 +512,8 @@ body.is-admin .admin-only.block{display:block!important}
           <div class="sb-sub-item" data-sub="랩스(LABS)" onclick="filterOpsSub('랩스(LABS)')"><i class="ti ti-flask"></i><span>랩스 (LABS)</span></div>
           <div class="sb-sub-item" data-sub="CTI" onclick="filterOpsSub('CTI')"><i class="ti ti-headset"></i><span>CTI</span></div>
           <div class="sb-sub-item" data-sub="LMS" onclick="filterOpsSub('LMS')"><i class="ti ti-school"></i><span>LMS</span></div>
+          <div class="sb-sub-item" data-sub="ADMIN" onclick="filterOpsSub('ADMIN')"><i class="ti ti-settings"></i><span>ADMIN</span></div>
+          <div class="sb-sub-item" data-sub="NEWADMIN" onclick="filterOpsSub('NEWADMIN')"><i class="ti ti-settings-2"></i><span>NEWADMIN</span></div>
           <div class="sb-sub-item" data-sub="원격 지원" onclick="filterOpsSub('원격 지원')"><i class="ti ti-device-desktop"></i><span>원격 지원</span></div>
           <div class="sb-sub-item" data-sub="앱 설치 지원" onclick="filterOpsSub('앱 설치 지원')"><i class="ti ti-device-mobile"></i><span>앱 설치 지원</span></div>
           <div class="sb-sub-item" data-sub="업무 요청·이관" onclick="filterOpsSub('업무 요청·이관')"><i class="ti ti-send"></i><span>업무 요청·이관</span></div>
@@ -835,6 +837,8 @@ body.is-admin .admin-only.block{display:block!important}
     <div class="sb-sub-item" onclick="filterOpsSub('랩스(LABS)');toggleMobMenu()"><i class="ti ti-flask"></i><span>랩스 (LABS)</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('CTI');toggleMobMenu()"><i class="ti ti-headset"></i><span>CTI</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('LMS');toggleMobMenu()"><i class="ti ti-school"></i><span>LMS</span></div>
+    <div class="sb-sub-item" onclick="filterOpsSub('ADMIN');toggleMobMenu()"><i class="ti ti-settings"></i><span>ADMIN</span></div>
+    <div class="sb-sub-item" onclick="filterOpsSub('NEWADMIN');toggleMobMenu()"><i class="ti ti-settings-2"></i><span>NEWADMIN</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('원격 지원');toggleMobMenu()"><i class="ti ti-device-desktop"></i><span>원격 지원</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('앱 설치 지원');toggleMobMenu()"><i class="ti ti-device-mobile"></i><span>앱 설치 지원</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('업무 요청·이관');toggleMobMenu()"><i class="ti ti-send"></i><span>업무 요청·이관</span></div>
@@ -1061,7 +1065,7 @@ function renderLocalNotices(){
 }
 /* ─── 상수 ─── */
 const PARTS=["B2B 상위기업","B2C","상품 안내","LMS 기능","ADMIN/뉴어드민","운영지원"];
-const B2B_COS=[],B2C_PRODUCTS=[],LMS_CATS=[],ADMIN_SUBS=[],OPS_SUBS=["에듀매니저","랩스(LABS)","CTI","LMS","원격 지원","앱 설치 지원","업무 요청·이관"];
+const B2B_COS=[],B2C_PRODUCTS=[],LMS_CATS=[],ADMIN_SUBS=[],OPS_SUBS=["에듀매니저","랩스(LABS)","CTI","LMS","ADMIN","NEWADMIN","원격 지원","앱 설치 지원","업무 요청·이관"];
 let notices=[];
 
 /* ─── State ─── */
