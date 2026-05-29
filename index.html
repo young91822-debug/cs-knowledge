@@ -266,7 +266,7 @@ html,body{background:var(--sb);font-family:var(--font);font-size:13px;color:var(
 .drawer-body::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px}
 #drawerContent{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start;padding:22px 24px 28px}
 .drawer-body .d-meta-row{grid-column:1/-1}
-.drawer-body .d-title{grid-column:1/-1;font-size:19px;font-weight:700;letter-spacing:-.4px}
+.drawer-body .d-title{grid-column:1/-1;font-size:17px;font-weight:700;letter-spacing:-.3px;margin-bottom:14px}
 .drawer-body .ds.full{grid-column:1/-1}
 .drawer-body .ds{grid-column:span 1}
 .d-meta-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;align-items:center}
@@ -280,11 +280,12 @@ html,body{background:var(--sb);font-family:var(--font);font-size:13px;color:var(
 /* ─── Detail Sections ─── */
 .ds{margin-bottom:10px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border)}
 .ds-hd{padding:7px 12px;display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
-.ds-body{padding:11px 13px;font-size:12.5px;line-height:1.8;color:var(--t2);white-space:pre-wrap;word-break:break-all;background:#fff}
+.ds-body{padding:14px 16px;font-size:14px;line-height:1.85;color:var(--t1);white-space:pre-wrap;word-break:break-all;background:#fff}
 .ds.query .ds-hd{background:#EFF6FF;color:#1E40AF}
 .ds.check .ds-hd{background:#FFFBEB;color:#92400E}
+.ds.answer{border-color:#A7F3D0;border-left:4px solid #059669}
 .ds.answer .ds-hd{background:#ECFDF5;color:#065F46}
-.ds.answer .ds-body{background:#FAFFFE}
+.ds.answer .ds-body{background:#FAFFFE;font-size:14.5px;font-weight:500;color:var(--t1)}
 .ds.escalate .ds-hd{background:#F5F3FF;color:#5B21B6}
 .ds.caution .ds-hd{background:#FEF2F2;color:#991B1B}
 .ds.caution .ds-body{background:#FFF7F7}
@@ -506,7 +507,7 @@ body.is-admin .admin-only.block{display:block!important}
         <div class="sb-item" data-view="b2c" onclick="filterPart2('B2C')"><i class="ti ti-users"></i><span>B2C</span></div>
         <div class="sb-item" data-view="b2b" onclick="filterPart2('B2B 상위기업')"><i class="ti ti-building-skyscraper"></i><span>B2B</span></div>
         <div class="sb-item" data-view="product" onclick="filterPart2('상품 안내')"><i class="ti ti-package"></i><span>상품 안내</span></div>
-        <div class="sb-item" data-view="error" onclick="openErrorView()"><i class="ti ti-bug"></i><span>오류 해결방법</span></div>
+        <div class="sb-item" data-view="error" onclick="openErrorView()"><i class="ti ti-bug"></i><span>오류 처리방법</span></div>
         <div class="sb-item" data-view="ops" onclick="toggleOpsMenu()"><i class="ti ti-clipboard-check"></i><span>운영지원</span><i class="ti ti-chevron-down sb-chev" id="opsChevron" style="transform:rotate(-90deg)"></i></div>
         <div class="sb-ops-sub" id="opsSubMenu">
           <div class="sb-sub-item" data-sub="에듀매니저" onclick="filterOpsSub('에듀매니저')"><i class="ti ti-user-cog"></i><span>에듀매니저</span></div>
@@ -650,7 +651,7 @@ body.is-admin .admin-only.block{display:block!important}
       <!-- ERRORS VIEW -->
       <div id="viewErrors" class="list-view" style="display:none">
         <div class="list-hd">
-          <span class="list-title">오류 해결방법</span>
+          <span class="list-title">오류 처리방법</span>
           <span class="list-cnt" id="errCnt"></span>
           <input class="hd-search" type="text" placeholder="목록에서 검색..." oninput="filterErrSearch(this.value)">
           <button class="hd-btn-add admin-only inline" onclick="openErrorForm('')"><i class="ti ti-plus" style="font-size:12px"></i>항목 추가</button>
@@ -834,7 +835,7 @@ body.is-admin .admin-only.block{display:block!important}
     <div class="sb-item" onclick="filterPart2('B2C');toggleMobMenu()"><i class="ti ti-users"></i><span>B2C</span></div>
     <div class="sb-item" onclick="filterPart2('B2B 상위기업');toggleMobMenu()"><i class="ti ti-building-skyscraper"></i><span>B2B</span></div>
     <div class="sb-item" onclick="filterPart2('상품 안내');toggleMobMenu()"><i class="ti ti-package"></i><span>상품 안내</span></div>
-    <div class="sb-item" onclick="openErrorView();toggleMobMenu()"><i class="ti ti-bug"></i><span>오류 해결방법</span></div>
+    <div class="sb-item" onclick="openErrorView();toggleMobMenu()"><i class="ti ti-bug"></i><span>오류 처리방법</span></div>
     <div class="sb-item" onclick="filterPart2('운영지원');toggleMobMenu()"><i class="ti ti-clipboard-check"></i><span>운영지원</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('에듀매니저');toggleMobMenu()"><i class="ti ti-user-cog"></i><span>에듀매니저</span></div>
     <div class="sb-sub-item" onclick="filterOpsSub('랩스(LABS)');toggleMobMenu()"><i class="ti ti-flask"></i><span>랩스 (LABS)</span></div>
@@ -1143,6 +1144,10 @@ function loadData(){
   applyCustomCategories();
   entries=entries.map(e=>({...e,status:e.status||"active",history:e.history||[]}));
   if(!Array.isArray(entries))entries=[];
+  // 마이그레이션: '오류 해결방법' → '오류 처리방법'
+  let _migrated=false;
+  entries=entries.map(e=>{if(e.part==="오류 해결방법"){_migrated=true;return{...e,part:"오류 처리방법"};}return e;});
+  if(_migrated)saveAll();
   initFilters();
 }
 
@@ -1201,10 +1206,10 @@ function setView(v){
 let _bulkType="";
 const BULK_CONFIG={
   b2b:{title:"B2B 일괄 업로드",headers:["기업명*","카테고리","문의제목*","고객문의유형*","필수확인질문","답변내용*","이관기준","주의사항"],sample:[["LH중앙공동주택관리지원센터","회원가입","회원가입은 어떻게 하나요?","회원가입 하고 싶어요","1. 본인명의 휴대폰 확인","사이트 우측 상단 회원가입 클릭","해당없음",""],["지방공기업평가원","수강관리","수강기간은 얼마나 되나요?","수강기간이 얼마인지 궁금해요","","수강신청일로부터 30일","",""]],parse:(row)=>({part:"B2B 상위기업",company:row[0],companyCat:row[1],title:row[2],customerQ:row[3],checkQ:row[4],steps:row[5],escalation:row[6],caution:row[7]})},
-  b2c:{title:"B2C 일괄 업로드",headers:["제목*","고객문의유형*","원인","필수확인질문","해결방법*","예외케이스","이관기준","주의사항"],sample:[["수료증은 어디서 출력하나요?","수료증 출력하고 싶어요","수강 미완료","수강 완료 여부 확인","마이페이지 > 수료증 > 출력","","해당없음",""],["로그인이 안돼요","비밀번호를 잊어버렸어요","","가입 이메일 확인","비밀번호 찾기 클릭","SNS가입은 소셜로그인","해당없음",""]],parse:(row)=>({part:"B2C",title:row[0],customerQ:row[1],cause:row[2],checkQ:row[3],steps:row[4],exceptions:row[5],escalation:row[6],caution:row[7]})},
+  b2c:{title:"B2C 일괄 업로드",headers:["제목*","고객문의유형*","원인","필수확인질문","처리방법*","예외케이스","이관기준","주의사항"],sample:[["수료증은 어디서 출력하나요?","수료증 출력하고 싶어요","수강 미완료","수강 완료 여부 확인","마이페이지 > 수료증 > 출력","","해당없음",""],["로그인이 안돼요","비밀번호를 잊어버렸어요","","가입 이메일 확인","비밀번호 찾기 클릭","SNS가입은 소셜로그인","해당없음",""]],parse:(row)=>({part:"B2C",title:row[0],customerQ:row[1],cause:row[2],checkQ:row[3],steps:row[4],exceptions:row[5],escalation:row[6],caution:row[7]})},
   product:{title:"상품 안내 일괄 업로드",headers:["상품명*","구분(FAQ/제안서)*","제목*","답변내용*","주의사항"],sample:[["휴넷CEO","FAQ","Business Review란?","휴넷CEO 비즈니스 인사이트 서비스입니다",""],["리더십저니","FAQ","수강기간은 얼마나 되나요?","수강신청일로부터 30일입니다",""]],parse:(row)=>({part:"상품 안내",productName:row[0],productSection:row[1]||"FAQ",title:row[2],steps:row[3],caution:row[4]})},
-  error:{title:"오류 해결방법 일괄 업로드",headers:["오류제목*","오류내용(고객표현)*","해결방법*","주의사항"],sample:[["결제창이 뜨지 않아요","결제 버튼 눌러도 반응없어요","1. 팝업 차단 해제\n2. 다른 브라우저 시도","Chrome 권장"],["수료증 출력이 안돼요","수료증 버튼 눌러도 아무것도 안 나와요","1. 팝업 차단 해제\n2. 수강완료 확인",""]],parse:(row)=>({part:"오류 해결방법",title:row[0],customerQ:row[1],steps:row[2],caution:row[3]})},
-  list:{title:"일괄 업로드",headers:["분류","제목","고객문의유형","필수확인질문","답변/해결방법","이관기준","주의사항","기업명(B2B)","카테고리(B2B)","상품명(상품안내)","하위분류(운영지원/CTI·LMS 등)","관련매뉴얼/링크"],sample:[["운영지원","[CTI] 로그인 방법","CTI 로그인 방법","","1. cti.hunet.co.kr 접속  2. 아이디=사번  3. 초기 비밀번호=사번","해당없음","초기 비밀번호는 사번과 동일","","","","CTI",""]],parse:(row)=>{const P=["B2B 상위기업","B2C","상품 안내","오류 해결방법","LMS 기능","ADMIN/뉴어드민","운영지원"];const part=P.includes((row[0]||"").trim())?(row[0]||"").trim():"B2C";const sub=(row[10]||"").trim();return{part,title:row[1],customerQ:row[2],checkQ:row[3],steps:row[4],escalation:row[5],caution:row[6],company:row[7],companyCat:row[8],productName:row[9],opsSub:part==="운영지원"?sub:"",lmsCat:part==="LMS 기능"?sub:"",adminSub:part==="ADMIN/뉴어드민"?sub:"",relatedManuals:row[11]||""};}}
+  error:{title:"오류 처리방법 일괄 업로드",headers:["오류제목*","오류내용(고객표현)*","처리방법*","주의사항"],sample:[["결제창이 뜨지 않아요","결제 버튼 눌러도 반응없어요","1. 팝업 차단 해제\n2. 다른 브라우저 시도","Chrome 권장"],["수료증 출력이 안돼요","수료증 버튼 눌러도 아무것도 안 나와요","1. 팝업 차단 해제\n2. 수강완료 확인",""]],parse:(row)=>({part:"오류 처리방법",title:row[0],customerQ:row[1],steps:row[2],caution:row[3]})},
+  list:{title:"일괄 업로드",headers:["분류","제목","고객문의유형","필수확인질문","답변/처리방법","이관기준","주의사항","기업명(B2B)","카테고리(B2B)","상품명(상품안내)","하위분류(운영지원/CTI·LMS 등)","관련매뉴얼/링크"],sample:[["운영지원","[CTI] 로그인 방법","CTI 로그인 방법","","1. cti.hunet.co.kr 접속  2. 아이디=사번  3. 초기 비밀번호=사번","해당없음","초기 비밀번호는 사번과 동일","","","","CTI",""]],parse:(row)=>{const P=["B2B 상위기업","B2C","상품 안내","오류 처리방법","LMS 기능","ADMIN/뉴어드민","운영지원"];const part=P.includes((row[0]||"").trim())?(row[0]||"").trim():"B2C";const sub=(row[10]||"").trim();return{part,title:row[1],customerQ:row[2],checkQ:row[3],steps:row[4],escalation:row[5],caution:row[6],company:row[7],companyCat:row[8],productName:row[9],opsSub:part==="운영지원"?sub:"",lmsCat:part==="LMS 기능"?sub:"",adminSub:part==="ADMIN/뉴어드민"?sub:"",relatedManuals:row[11]||""};}}
 };
 function openBulkUpload(type){
   if(!requireAdmin())return;
@@ -1428,7 +1433,7 @@ function downloadAllEntries(type){
     XLSX.utils.book_append_sheet(wb,wsAll,"전체");
     XLSX.writeFile(wb,`지식창고_B2B_전체_${today()}.xlsx`);
   } else {
-    const partMap={list:"전체",error:"오류 해결방법",product:"상품 안내"};
+    const partMap={list:"전체",error:"오류 처리방법",product:"상품 안내"};
     const part=partMap[type];
     const rows=part==="전체"?entries:entries.filter(e=>e.part===part);
     if(!rows.length){alert("데이터가 없습니다.");return;}
@@ -1450,7 +1455,7 @@ function downloadEntry(id){
     "",
     e.customerQ?`[문의 유형]\n${e.customerQ}`:"",
     e.checkQ?`\n[필수 확인 질문]\n${e.checkQ}`:"",
-    e.steps?`\n[답변/해결 방법]\n${e.steps}`:"",
+    e.steps?`\n[답변/처리 방법]\n${e.steps}`:"",
     e.escalation?`\n[이관 기준]\n${e.escalation}`:"",
     e.caution?`\n[주의사항]\n${e.caution}`:"",
     e.script?`\n[상담사 멘트]\n${e.script}`:"",
@@ -1731,7 +1736,7 @@ function openErrorView(){
 }
 function renderErrorList(){
   const isAdmin=currentUser&&currentUser.role==="admin";
-  const list=entries.filter(e=>e.part==="오류 해결방법").sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
+  const list=entries.filter(e=>e.part==="오류 처리방법").sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
   document.getElementById("errCnt").textContent=`총 ${list.length}건`;
   document.getElementById("errList").innerHTML=list.length?list.map(e=>`
     <div class="r-card${selId===e.id?" sel":""}" id="ri-${e.id}" onclick="openErrorDetail('${e.id}')">
@@ -1739,7 +1744,7 @@ function renderErrorList(){
       <div class="r-card-prev">${esc((e.steps||"").split("\n")[0])}</div>
       ${e.caution?`<div class="r-card-tags"><span class="r-tag caution"><i class="ti ti-alert-triangle" style="font-size:10px"></i>주의</span></div>`:""}
       <div class="r-card-foot"><span><i class="ti ti-calendar"></i>${e.updatedAt||""}</span></div>
-    </div>`).join(""):`<div class="empty-state"><i class="ti ti-bug-off"></i><p>등록된 오류 해결방법이 없습니다</p></div>`;
+    </div>`).join(""):`<div class="empty-state"><i class="ti ti-bug-off"></i><p>등록된 오류 처리방법이 없습니다</p></div>`;
 }
 function openErrorDetail(id){
   selId=id;
@@ -1748,10 +1753,10 @@ function openErrorDetail(id){
   const isAdmin=currentUser&&currentUser.role==="admin";
   document.getElementById("drawerActs").innerHTML=`<div style="margin-left:auto;display:flex;gap:6px">${isAdmin?`<button class="d-act" onclick="openErrorForm('${id}')"><i class="ti ti-edit" style="font-size:12px"></i>수정</button>`:""} ${isAdmin?`<button class="d-act del" onclick="deleteError('${id}')"><i class="ti ti-trash" style="font-size:12px"></i></button>`:""}</div>`;
   document.getElementById("drawerContent").innerHTML=`
-    <div class="d-meta-row"><span class="d-tag part">오류 해결방법</span><span class="d-date">${e.updatedAt||""}</span></div>
+    <div class="d-meta-row"><span class="d-tag part">오류 처리방법</span><span class="d-date">${e.updatedAt||""}</span></div>
     <div class="d-title">${esc(e.title)}</div>
     <div class="ds query full"><div class="ds-hd"><i class="ti ti-bug" style="font-size:12px"></i> 오류 내용</div><div class="ds-body">${esc(e.customerQ||"")}</div></div>
-    <div class="ds answer full"><div class="ds-hd"><i class="ti ti-arrow-right-circle" style="font-size:12px"></i> 해결 방법</div><div class="ds-body">${esc(e.steps||"")}</div></div>
+    <div class="ds answer full"><div class="ds-hd"><i class="ti ti-arrow-right-circle" style="font-size:12px"></i> 처리 방법</div><div class="ds-body">${esc(e.steps||"")}</div></div>
     ${e.caution?`<div class="ds caution full"><div class="ds-hd"><i class="ti ti-alert-triangle" style="font-size:12px"></i> 주의사항</div><div class="ds-body">${esc(e.caution)}</div></div>`:""}`;
   openDetailPanel();
 }
@@ -1764,7 +1769,7 @@ function openErrorForm(id){
     <div class="modal-body">
       <div class="mrow"><label class="mlbl">오류 제목 *</label><input id="er_title" value="${esc(e?.title||"")}" placeholder="예: 결제창이 뜨지 않아요"></div>
       <div class="mrow"><label class="mlbl">오류 내용 *</label><textarea id="er_q" style="min-height:70px" placeholder="예: 결제 버튼을 눌러도 아무 반응이 없어요">${esc(e?.customerQ||"")}</textarea></div>
-      <div class="mrow"><label class="mlbl">해결 방법 *</label><textarea id="er_steps" style="min-height:100px" placeholder="예:&#10;1. 브라우저 팝업 차단 해제&#10;2. 다른 브라우저 시도">${esc(e?.steps||"")}</textarea></div>
+      <div class="mrow"><label class="mlbl">처리 방법 *</label><textarea id="er_steps" style="min-height:100px" placeholder="예:&#10;1. 브라우저 팝업 차단 해제&#10;2. 다른 브라우저 시도">${esc(e?.steps||"")}</textarea></div>
       <div class="mrow warn"><label class="mlbl">주의사항</label><textarea id="er_caution">${esc(e?.caution||"")}</textarea></div>
     </div>
     <div class="modal-foot">
@@ -1776,9 +1781,9 @@ function openErrorForm(id){
 function saveError(eid){
   const g=id=>(document.getElementById(id)||{value:""}).value.trim();
   const title=g("er_title"),q=g("er_q"),steps=g("er_steps");
-  if(!title||!q||!steps){alert("제목, 오류 내용, 해결 방법은 필수입니다.");return;}
+  if(!title||!q||!steps){alert("제목, 오류 내용, 처리 방법은 필수입니다.");return;}
   const ex=eid?entries.find(e=>e.id===eid):null;
-  const entry={...(ex||{}),id:ex?ex.id:uid(),part:"오류 해결방법",title,customerQ:q,steps,caution:g("er_caution"),status:"active",updatedBy:currentUser?.id||"",updatedAt:today(),createdAt:ex?.createdAt||today(),views:ex?.views||0,history:ex?.history||[]};
+  const entry={...(ex||{}),id:ex?ex.id:uid(),part:"오류 처리방법",title,customerQ:q,steps,caution:g("er_caution"),status:"active",updatedBy:currentUser?.id||"",updatedAt:today(),createdAt:ex?.createdAt||today(),views:ex?.views||0,history:ex?.history||[]};
   if(ex)entries=entries.map(e=>e.id===entry.id?entry:e);else entries=[entry,...entries];
   saveAll();closeModal();renderErrorList();closeDetailPanel();
 }
@@ -1953,7 +1958,7 @@ function renderHome(){
     {label:"B2C",icon:"ti-users",cls:"cat-green",cnt:()=>entries.filter(e=>e.part==="B2C").length,action:"filterPart2('B2C')"},
     {label:"B2B",icon:"ti-building-skyscraper",cls:"cat-blue",cnt:()=>entries.filter(e=>e.part==="B2B 상위기업").length,action:"filterPart2('B2B 상위기업')"},
     {label:"상품 안내",icon:"ti-package",cls:"cat-amber",cnt:()=>entries.filter(e=>e.part==="상품 안내").length,action:"filterPart2('상품 안내')"},
-    {label:"오류 해결방법",icon:"ti-bug",cls:"cat-purple",cnt:()=>entries.filter(e=>e.part==="오류 해결방법").length,action:"openErrorView()"},
+    {label:"오류 처리방법",icon:"ti-bug",cls:"cat-purple",cnt:()=>entries.filter(e=>e.part==="오류 처리방법").length,action:"openErrorView()"},
     {label:"공지사항",icon:"ti-bell",cls:"cat-red",cnt:()=>notices.length,action:"setView('notices')"},
   ];
   document.getElementById("homeCats").innerHTML=cats.map(c=>`
@@ -1968,8 +1973,8 @@ function renderHome(){
   const weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-7);
   const weekStr=weekAgo.toISOString().slice(0,10);
   const recent=[...entries].filter(e=>e.status!=="hidden").sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||"")).slice(0,8);
-  const partColors={"B2B 상위기업":"#EDE9FE","B2C":"#ECFDF5","상품 안내":"#FEF3C7","오류 해결방법":"#F5F3FF","운영지원":"#FEF2F2"};
-  const partIcons={"B2B 상위기업":"ti-building","B2C":"ti-help-circle","상품 안내":"ti-package","오류 해결방법":"ti-bug","운영지원":"ti-headset"};
+  const partColors={"B2B 상위기업":"#EDE9FE","B2C":"#ECFDF5","상품 안내":"#FEF3C7","오류 처리방법":"#F5F3FF","운영지원":"#FEF2F2"};
+  const partIcons={"B2B 상위기업":"ti-building","B2C":"ti-help-circle","상품 안내":"ti-package","오류 처리방법":"ti-bug","운영지원":"ti-headset"};
   document.getElementById("homeRecent").innerHTML=recent.length?recent.map(e=>{
     const isToday=e.updatedAt===today2;
     const isNew=e.updatedAt>=weekStr;
@@ -2001,7 +2006,7 @@ function renderResults(){
   const f=getSorted(getFiltered());
   let title="검색 결과";
   if(searchQ)title=`"${searchQ}" 검색 결과`;
-  else if(filterMultiple.length)title="오류 해결방법";
+  else if(filterMultiple.length)title="오류 처리방법";
   else if(filterPart!=="전체")title=filterPart;
   renderList(f,title,`총 ${f.length}건`);
   if(showChips)renderFilterChips();
@@ -2013,7 +2018,7 @@ function renderFilterChips(){
     {label:"B2C",part:"B2C",multi:[]},
     {label:"B2B",part:"B2B 상위기업",multi:[]},
     {label:"상품 안내",part:"상품 안내",multi:[]},
-    {label:"오류 해결방법",part:"",multi:["LMS 기능","ADMIN/뉴어드민"]},
+    {label:"오류 처리방법",part:"",multi:["LMS 기능","ADMIN/뉴어드민"]},
     {label:"운영지원",part:"운영지원",multi:[]},
   ];
   document.getElementById("filterChips").innerHTML=chips.map(c=>{
@@ -2179,7 +2184,7 @@ function openDetail(id){
   const isB2B=e.part==="B2B 상위기업";
   const sub=e.company||e.productType||e.lmsCat||e.adminSub||e.opsSub||"";
   const editAction=e.part==="상품 안내"?`openProductEntryForm('${id}','${esc(e.productName||"")}','${esc(e.productSection||"")}')`
-    :e.part==="오류 해결방법"?`openErrorForm('${id}')`
+    :e.part==="오류 처리방법"?`openErrorForm('${id}')`
     :`openEdit('${id}')`;
   document.getElementById("drawerActs").innerHTML=`
     <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.9);max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.title)}</span>
@@ -2204,7 +2209,7 @@ function openDetail(id){
   if(!isB2B)html+=sec("query","ti-message-circle","문의 유형",e.customerQ,true);
   if(!isB2B&&e.cause)html+=sec("check","ti-alert-circle","발생 원인",e.cause,true);
   html+=sec("check","ti-checklist","필수 확인 질문",e.checkQ,true);
-  const answerLabel=isB2B?"답변 내용":(e.part==="상품 안내"?"답변":"해결 방법");
+  const answerLabel=isB2B?"답변 내용":(e.part==="상품 안내"?"답변":"처리 방법");
   html+=sec("answer","ti-arrow-right-circle",answerLabel,e.steps,true);
   if(!isB2B&&e.exceptions)html+=sec("escalate","ti-git-branch","예외 케이스",e.exceptions,true);
   if(e.escalation)html+=sec("escalate","ti-send",isB2B?"운영자 이관 기준":"이관 기준",e.escalation,true);
@@ -2581,7 +2586,7 @@ function showForm(d,isEdit){
         <div class="mrow" style="display:${isB2B?"none":"block"}"><label class="mlbl">고객 문의 유형 *</label><textarea id="mq" placeholder="고객이 실제 말하는 표현">${esc(d.customerQ||"")}</textarea></div>
         <div class="mrow" style="display:${isB2B?"none":"block"}"><label class="mlbl">원인</label><textarea id="mca" placeholder="발생 원인">${esc(d.cause||"")}</textarea></div>
         <div class="mrow"><label class="mlbl">필수 확인 질문</label><textarea id="mck" placeholder="예: 1. 수강 만료일 확인">${esc(d.checkQ||"")}</textarea></div>
-        <div class="mrow"><label class="mlbl">${isB2B?"답변 내용":"해결 방법"} *</label><textarea id="mst" style="min-height:90px" placeholder="단계형으로 작성">${esc(d.steps||"")}</textarea></div>
+        <div class="mrow"><label class="mlbl">${isB2B?"답변 내용":"처리 방법"} *</label><textarea id="mst" style="min-height:90px" placeholder="단계형으로 작성">${esc(d.steps||"")}</textarea></div>
         <div class="mrow" style="display:${isB2B?"none":"block"}"><label class="mlbl">예외 케이스</label><textarea id="mex">${esc(d.exceptions||"")}</textarea></div>
         <div class="mrow"><label class="mlbl">${isB2B?"운영자 이관 기준":"이관 기준"}</label><textarea id="mes">${esc(d.escalation||"")}</textarea></div>
         <div class="mrow" style="display:${isB2B?"none":"block"}"><label class="mlbl">처리 완료 기준</label><textarea id="mdn">${esc(d.done||"")}</textarea></div>
@@ -2621,7 +2626,7 @@ function doSave(eid){
   const part=g("mp"),title=g("mt"),steps=g("mst");
   const isB2BSave=part==="B2B 상위기업";
   const customerQ=isB2BSave?title:g("mq");
-  if(!title||!steps||(!isB2BSave&&!customerQ)){alert(isB2BSave?"문의 유형과 답변 내용은 필수입니다.":"제목, 고객 문의 유형, 해결 방법은 필수입니다.");return;}
+  if(!title||!steps||(!isB2BSave&&!customerQ)){alert(isB2BSave?"문의 유형과 답변 내용은 필수입니다.":"제목, 고객 문의 유형, 처리 방법은 필수입니다.");return;}
   if(part==="B2B 상위기업"&&!g("mc")){alert("기업명을 선택해주세요.");return;}
   if(part==="B2C"&&!g("mbc")){alert("상품 유형을 선택해주세요.");return;}
   if(part==="LMS 기능"&&!g("mlc")){alert("기능 카테고리를 선택해주세요.");return;}
@@ -2719,7 +2724,7 @@ function logMissingSearch2(q){const key=q.toLowerCase();const found=missingSearc
 function downloadExcelTemplate(){
   if(!window.XLSX){alert("라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.");return;}
   const wb=XLSX.utils.book_new();
-  const headers=[["분류","제목","고객문의유형","필수확인질문","답변/해결방법","이관기준","주의사항","기업명(B2B)","카테고리(B2B)","상품명(상품안내)","하위분류(운영지원/CTI·LMS 등)","관련매뉴얼/링크"]];
+  const headers=[["분류","제목","고객문의유형","필수확인질문","답변/처리방법","이관기준","주의사항","기업명(B2B)","카테고리(B2B)","상품명(상품안내)","하위분류(운영지원/CTI·LMS 등)","관련매뉴얼/링크"]];
   const sample=[
     ["B2B 상위기업","회원가입은 어떻게 하나요?","회원가입을 하고 싶어요","1. 본인명의 휴대폰 확인","사이트 우측 상단 회원가입 클릭","해당없음","","LH중앙공동주택관리지원센터","회원가입","","",""],
     ["B2C","수료증은 언제 출력 가능한가요?","수료증 출력하고 싶어요","수강 완료 여부 확인","마이페이지 > 수료증 > 출력","해당없음","","","","","",""],
@@ -2747,7 +2752,7 @@ function handleExcelUpload(input){
         <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
           <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:8px">미리보기 (${dataRows.length}건 발견)</div>
           <table style="width:100%;font-size:11.5px;border-collapse:collapse">
-            <thead><tr style="background:#F8F7FF">${["분류","제목","고객문의","답변/해결방법","하위분류","주의사항"].map(h=>`<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);color:var(--t2)">${h}</th>`).join("")}</tr></thead>
+            <thead><tr style="background:#F8F7FF">${["분류","제목","고객문의","답변/처리방법","하위분류","주의사항"].map(h=>`<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);color:var(--t2)">${h}</th>`).join("")}</tr></thead>
             <tbody>${dataRows.slice(0,5).map(r=>`<tr>${[r[0],r[1],r[2],r[4],r[10],r[6]].map(v=>`<td style="padding:6px 8px;border-bottom:1px solid #F3F5F9;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${String(v||"").slice(0,30)}</td>`).join("")}</tr>`).join("")}</tbody>
           </table>
           ${dataRows.length>5?`<div style="font-size:11px;color:var(--t3);padding:8px 0">... 외 ${dataRows.length-5}건</div>`:""}
@@ -2761,7 +2766,7 @@ function importExcelData(){
   const rows=window._excelRows;
   if(!rows||!rows.length){alert("업로드된 데이터가 없습니다.");return;}
   if(!confirm(`${rows.length}건을 추가할까요?`))return;
-  const PARTS=["B2B 상위기업","B2C","상품 안내","오류 해결방법","LMS 기능","ADMIN/뉴어드민","운영지원"];
+  const PARTS=["B2B 상위기업","B2C","상품 안내","오류 처리방법","LMS 기능","ADMIN/뉴어드민","운영지원"];
   rows.forEach(r=>{
     const part=PARTS.includes(String(r[0]).trim())?String(r[0]).trim():"B2C";
     const sub=String(r[10]||"").trim();
@@ -2912,7 +2917,7 @@ function cleanupBadImport(){
   if(!requireAdmin())return;
   const bad=entries.filter(e=>{
     const t=(e.title||"").trim();
-    return t==="운영지원"||t==="B2C"||t==="B2B 상위기업"||t==="상품 안내"||t==="오류 해결방법"||t==="LMS 기능"||t==="ADMIN/뉴어드민";
+    return t==="운영지원"||t==="B2C"||t==="B2B 상위기업"||t==="상품 안내"||t==="오류 처리방법"||t==="LMS 기능"||t==="ADMIN/뉴어드민";
   });
   if(!bad.length){alert("정리할 항목이 없습니다. (제목이 분류명으로 잘못 들어온 항목이 없어요)");return;}
   if(!confirm(`제목이 분류명으로 잘못 들어온 항목 ${bad.length}건을 삭제할까요?\n(엑셀이 칸이 밀려 들어간 항목들입니다)`))return;
