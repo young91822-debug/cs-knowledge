@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>지식창고</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📚%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
@@ -947,22 +948,30 @@ body.is-admin .admin-only.block{display:block!important}
 
 <script>
 const _fbConfig={apiKey:"AIzaSyB5zJiUqCQXjH-3C_t_eKckBnOGy3m7iC0",authDomain:"happycenter-cab96.firebaseapp.com",projectId:"happycenter-cab96",storageBucket:"happycenter-cab96.firebasestorage.app",messagingSenderId:"128259907179",appId:"1:128259907179:web:da0113a6c0e4b7fa9c9b2e"};
-if(!firebase.apps.length)firebase.initializeApp(_fbConfig);
-const _fbDb=firebase.firestore();
-const _fbAuth=firebase.auth();
+let _fbDb=null,_fbAuth=null;
+try{
+  if(typeof firebase!=="undefined"){
+    if(!firebase.apps.length)firebase.initializeApp(_fbConfig);
+    _fbDb=firebase.firestore();
+    _fbAuth=firebase.auth();
+  }else{
+    console.warn("Firebase SDK 차단됨 - 공지/캘린더 기능만 비활성화됩니다. 다른 기능은 정상 동작.");
+  }
+}catch(e){console.warn("Firebase 초기화 실패:",e);}
 
 async function fbAutoLogin(){
   try{
+    if(!_fbAuth)return false;
     if(_fbAuth.currentUser)return true;
     await _fbAuth.signInWithEmailAndPassword("cs-readonly@hunet.com","695400");
     return true;
-  }catch(e){console.error("Firebase 로그인 실패:",e);return false;}
+  }catch(e){console.warn("Firebase 로그인 실패(무시):",e);return false;}
 }
 async function loadTodaySchedule(){
   const box=document.getElementById("todayScheduleWidget");
   if(!box)return;
   const ok=await fbAutoLogin();
-  if(!ok){box.innerHTML=`<span style="color:#EF4444;font-size:12px">Firebase 로그인 실패</span>`;return;}
+  if(!ok){box.innerHTML=`<span style="color:var(--t3);font-size:12px">📡 내부망에서는 캘린더 위젯이 표시되지 않습니다</span>`;return;}
   try{
     const snap=await _fbDb.collection("appData").doc("schedule").get();
     if(!snap.exists){box.innerHTML=`<span style="color:var(--t3);font-size:12px">일정 데이터 없음</span>`;return;}
@@ -1014,6 +1023,7 @@ async function loadTodaySchedule(){
 async function loadFirebaseNotices(){
   const box=document.getElementById("homeNotices");
   if(!box)return;
+  if(!_fbDb){renderLocalNotices();return;}
   await fbAutoLogin();
   try{
     const snap=await _fbDb.collection("notices").orderBy("createdAt","desc").limit(5).get();
@@ -1032,6 +1042,7 @@ async function loadFirebaseNotices(){
 async function loadFirebaseNoticesView(){
   const box=document.getElementById("noticeListFromFb");
   if(!box)return;
+  if(!_fbDb){box.innerHTML=`<div style="padding:14px;text-align:center;color:var(--t3);font-size:12px">📡 내부망에서는 팀 공지가 표시되지 않습니다</div>`;return;}
   await fbAutoLogin();
   try{
     const snap=await _fbDb.collection("notices").orderBy("createdAt","desc").get();
