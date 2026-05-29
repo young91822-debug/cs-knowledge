@@ -2544,7 +2544,7 @@ function showForm(d,isEdit){
         <div id="mb2b" style="display:${isB2B?"block":"none"}">
           <div class="mrow two">
             <div><label class="mlbl">기업명 *</label><select id="mc" onchange="onCoChange(this.value)">${coO}</select></div>
-            <div><label class="mlbl">카테고리</label><select id="mcc"><option value="">선택 (선택사항)</option>${(companyProfiles[d.company]?.cats||[]).map(c=>`<option value="${esc(c)}" ${c===d.companyCat?"selected":""}>${esc(c)}</option>`).join("")}</select></div>
+            <div><label class="mlbl">카테고리 <a onclick="addCatInline()" style="color:var(--p);font-size:10.5px;font-weight:500;cursor:pointer;margin-left:4px">+ 새 카테고리</a></label><select id="mcc"><option value="">선택 (선택사항)</option>${(companyProfiles[d.company]?.cats||[]).map(c=>`<option value="${esc(c)}" ${c===d.companyCat?"selected":""}>${esc(c)}</option>`).join("")}</select></div>
           </div>
         </div>
         <div id="mb2c" style="display:${isB2C?"block":"none"}">
@@ -2618,6 +2618,21 @@ function onCoChange(co){
   const sel=document.getElementById("mcc");if(!sel)return;
   const cats=(companyProfiles[co]?.cats)||[];
   sel.innerHTML=`<option value="">선택 (선택사항)</option>`+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+}
+function addCatInline(){
+  const co=(document.getElementById("mc")||{value:""}).value;
+  if(!co){alert("먼저 기업명을 선택해주세요.");return;}
+  const name=prompt(`'${co}' 에 추가할 새 카테고리 이름을 입력하세요\n(예: 회원가입, 수강관리, 수료증)`);
+  if(!name||!name.trim())return;
+  const trimmed=name.trim();
+  if(!companyProfiles[co])companyProfiles[co]={code:"",manager:"",pcUrl:"",moUrl:"",cats:[]};
+  if(!companyProfiles[co].cats)companyProfiles[co].cats=[];
+  if(companyProfiles[co].cats.includes(trimmed)){alert("이미 존재하는 카테고리입니다.");return;}
+  companyProfiles[co].cats.push(trimmed);
+  saveAll();
+  // 셀렉트 다시 그리기 + 방금 추가한 항목 선택
+  const sel=document.getElementById("mcc");
+  sel.innerHTML=`<option value="">선택 (선택사항)</option>`+companyProfiles[co].cats.map(c=>`<option value="${esc(c)}" ${c===trimmed?"selected":""}>${esc(c)}</option>`).join("");
 }
 function onMP(p){["mb2b","mb2c","mlms","madm","mops"].forEach(k=>{const el=document.getElementById(k);if(el)el.style.display="none";});const map={"B2B 상위기업":"mb2b","B2C":"mb2c","LMS 기능":"mlms","ADMIN/뉴어드민":"madm","운영지원":"mops"};const el=document.getElementById(map[p]);if(el)el.style.display="block";}
 function closeModal(){document.getElementById("modalOv").style.display="none";document.getElementById("modalOv").innerHTML="";}
